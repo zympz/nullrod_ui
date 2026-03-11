@@ -28,6 +28,7 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   const [colorMode, setColorMode] = useState<FilterColorMode>('contains')
   const [draft, setDraft] = useState<SearchParams>(() => ({ ...params }))
   const [legalityFormat, setLegalityFormat] = useState<Format | ''>('')
+  const [keywordsText, setKeywordsText] = useState(params.keywords?.join(', ') ?? '')
 
   const activeColors = colorMode === 'identity' ? draft.color_identity : draft.color
 
@@ -73,6 +74,7 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
     setDraft(empty)
     setColorMode('contains')
     setLegalityFormat('')
+    setKeywordsText('')
     onChange(empty)
   }
 
@@ -165,8 +167,9 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
             className={styles.input}
             type="text"
             placeholder="Flying, Trample…"
-            defaultValue={draft.keywords?.join(', ') ?? ''}
-            onBlur={(e) => {
+            value={keywordsText}
+            onChange={(e) => {
+              setKeywordsText(e.target.value)
               const kws = e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
               setDraft((d) => ({ ...d, keywords: kws.length ? kws : undefined }))
             }}

@@ -11,7 +11,7 @@ export default function App() {
       <Nav />
       <main className={styles.main}>
         <Routes>
-          <Route path="/" element={<Navigate to="/decks" replace />} />
+          <Route path="/" element={<Navigate to="/cards" replace />} />
           <Route path="/decks" element={<DecksPage />} />
           <Route path="/combos" element={<CombosPage />} />
           <Route path="/cards" element={<CardsPage />} />

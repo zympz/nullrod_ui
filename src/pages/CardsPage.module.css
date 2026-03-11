@@ -25,6 +25,18 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .searchInput {
+    min-width: 0;
+  }
+
+  .searchBtn,
+  .filterToggle {
+    flex-shrink: 0;
+  }
 }
 
 .searchInput {

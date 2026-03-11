@@ -42,6 +42,11 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
   }, [card.oracle_id, card.canonical_scryfall_id])
 
   useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
     }
@@ -141,7 +146,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
               <div className={styles.legalities}>
                 {FORMAT_ORDER.map((fmt) => {
                   const status = card.legalities[fmt]
-                  if (!status) return null
+                  if (!status || status === 'not_legal') return null
                   return (
                     <div key={fmt} className={`${styles.legalityRow} ${styles[`leg_${status}`]}`}>
                       <span className={styles.format}>{fmt}</span>

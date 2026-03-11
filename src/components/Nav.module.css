@@ -16,6 +16,13 @@
   gap: 32px;
 }
 
+@media (max-width: 640px) {
+  .inner {
+    padding: 0 16px;
+    gap: 16px;
+  }
+}
+
 .brand {
   text-decoration: none;
   flex-shrink: 0;
