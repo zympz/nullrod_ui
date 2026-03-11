@@ -127,6 +127,18 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
               </div>
             )}
 
+            {/* Games */}
+            {card.games.length > 0 && (
+              <div className={styles.section}>
+                <div className={styles.sectionLabel}>Games</div>
+                <div className={styles.keywords}>
+                  {card.games.map((g) => (
+                    <span key={g} className={styles.keyword}>{g}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Legalities */}
             <div className={styles.section}>
               <div className={styles.sectionLabel}>Legality</div>
@@ -142,18 +154,6 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
                 })}
               </div>
             </div>
-
-            {/* Games */}
-            {card.games.length > 0 && (
-              <div className={styles.section}>
-                <div className={styles.sectionLabel}>Games</div>
-                <div className={styles.keywords}>
-                  {card.games.map((g) => (
-                    <span key={g} className={styles.keyword}>{g}</span>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Rulings */}
             {rulings && rulings.rulings.length > 0 && (
