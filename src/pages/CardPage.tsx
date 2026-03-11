@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import type { OracleCard, ArtworkResponse, RulingsResponse, CardFace } from '../types/card'
 import { getCardById, getArtwork, getRulings } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
@@ -12,6 +12,7 @@ const FORMAT_ORDER = [
 
 export function CardPage() {
   const { oracleId } = useParams<{ oracleId: string }>()
+  const navigate = useNavigate()
   const [card, setCard] = useState<OracleCard | null>(null)
   const [artwork, setArtwork] = useState<ArtworkResponse | null>(null)
   const [rulings, setRulings] = useState<RulingsResponse | null>(null)
@@ -36,7 +37,7 @@ export function CardPage() {
   if (error) {
     return (
       <div className={styles.page}>
-        <Link to="/cards" className={styles.back}>&larr; Back to search</Link>
+        <button className={styles.back} onClick={() => navigate(-1)} type="button">&larr; Back to search</button>
         <div className={styles.error}>{error}</div>
       </div>
     )
@@ -45,7 +46,7 @@ export function CardPage() {
   if (!card) {
     return (
       <div className={styles.page}>
-        <Link to="/cards" className={styles.back}>&larr; Back to search</Link>
+        <button className={styles.back} onClick={() => navigate(-1)} type="button">&larr; Back to search</button>
         <div className={styles.loading}>Loading card&hellip;</div>
       </div>
     )
@@ -56,7 +57,7 @@ export function CardPage() {
 
   return (
     <div className={styles.page}>
-      <Link to="/cards" className={styles.back}>&larr; Back to search</Link>
+      <button className={styles.back} onClick={() => navigate(-1)} type="button">&larr; Back to search</button>
 
       <div className={styles.card}>
         <div className={styles.layout}>

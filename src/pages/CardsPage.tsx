@@ -62,8 +62,6 @@ export function CardsPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
   const [searched, setSearched] = useState(false)
-  const didAutoSearch = useRef(false)
-
   const runSearch = useCallback(async (p: SearchParams) => {
     setLoading(true)
     setError(null)
@@ -81,16 +79,27 @@ export function CardsPage() {
     }
   }, [])
 
-  // Auto-search on mount if URL has search params
+  // Sync state from URL params (handles initial load, back/forward, manual URL edits)
+  const prevSearch = useRef(searchParams.toString())
   useEffect(() => {
-    if (didAutoSearch.current) return
-    didAutoSearch.current = true
-    if (hasSearchCriteria(initialParams)) {
-      runSearch(initialParams)
-      if (!initialParams.name) setShowFilters(true)
+    const current = searchParams.toString()
+    const isInitial = prevSearch.current === current && !searched
+    const isExternal = prevSearch.current !== current
+    prevSearch.current = current
+
+    if (isInitial || isExternal) {
+      const p = urlToParams(searchParams)
+      setParams(p)
+      setQuery(p.name ?? '')
+      if (hasSearchCriteria(p)) {
+        runSearch(p)
+        if (!p.name && (p.color?.length || p.color_identity?.length || p.type || p.cmc_min != null || p.cmc_max != null || p.keywords?.length || p.oracle_text || p.format)) {
+          setShowFilters(true)
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [searchParams])
 
   function updateUrl(p: SearchParams) {
     setSearchParams(paramsToUrl(p), { replace: true })
