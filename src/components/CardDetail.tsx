@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { OracleCard, ArtworkResponse, RulingsResponse, CardFace } from '../types/card'
 import { getArtwork, getAllPrintings, getRulings } from '../api/client'
-import { ManaCost, OracleText } from './ManaSymbol'
+import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
 import styles from './CardDetail.module.css'
 
 const FORMAT_ORDER = [
@@ -107,6 +107,17 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
             </div>
 
             <div className={styles.typeLine}>{card.type_line}</div>
+
+            {card.color_identity.length > 0 && (
+              <div className={styles.colorIdentity}>
+                <span className={styles.colorIdentityLabel}>Identity</span>
+                <div className={styles.colorIdentityPips}>
+                  {card.color_identity.map((c) => (
+                    <ManaSymbol key={c} symbol={c} size={18} />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {card.reserved && (
               <div className={styles.reserved}>Reserved List</div>
