@@ -47,8 +47,16 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   }
 
   function switchColorMode(mode: FilterColorMode) {
+    const selected = activeColors ?? []
+    const { field, apiMode } = colorModeToApi(mode)
     setColorMode(mode)
-    setDraft((d) => ({ ...d, color: undefined, color_mode: undefined, color_identity: undefined, color_identity_mode: undefined }))
+    setDraft((d) => ({
+      ...d,
+      color: field === 'color' ? (selected.length ? selected : undefined) : undefined,
+      color_mode: field === 'color' && selected.length ? apiMode : undefined,
+      color_identity: field === 'color_identity' ? (selected.length ? selected : undefined) : undefined,
+      color_identity_mode: field === 'color_identity' && selected.length ? apiMode : undefined,
+    }))
   }
 
   function clearLegality() {
