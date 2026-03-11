@@ -35,10 +35,8 @@ export function CardTile({ card, onClick }: CardTileProps) {
         )}
       </div>
       <div className={styles.info}>
-        <div className={styles.nameRow}>
-          <span className={styles.name}>{card.name}</span>
-          {card.mana_cost && <ManaCost cost={card.mana_cost} size={14} />}
-        </div>
+        {card.mana_cost && <ManaCost cost={card.mana_cost} size={14} />}
+        <div className={styles.name}>{card.name}</div>
         <div className={styles.type}>{card.type_line}</div>
       </div>
     </button>
