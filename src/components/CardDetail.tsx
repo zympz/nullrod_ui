@@ -144,10 +144,13 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
             )}
 
             {card.keywords.length > 0 && (
-              <div className={styles.keywords}>
-                {card.keywords.map((kw) => (
-                  <span key={kw} className={styles.keyword}>{kw}</span>
-                ))}
+              <div className={styles.section}>
+                <div className={styles.sectionLabel}>Keywords</div>
+                <div className={styles.keywords}>
+                  {card.keywords.map((kw) => (
+                    <span key={kw} className={styles.keyword}>{kw}</span>
+                  ))}
+                </div>
               </div>
             )}
 
