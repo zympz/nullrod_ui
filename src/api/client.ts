@@ -2,7 +2,6 @@ import type {
   OracleCard,
   SearchParams,
   SearchResponse,
-  ArtworkResponse,
   RulingsResponse,
   CardSymbol,
 } from '../types/card'
@@ -62,13 +61,6 @@ export function getCardById(oracleId: string): Promise<OracleCard> {
   return request<OracleCard>(`/cards/${oracleId}`)
 }
 
-export function getArtwork(scryfallId: string): Promise<ArtworkResponse> {
-  return request<ArtworkResponse>(`/artwork/${scryfallId}`)
-}
-
-export function getAllPrintings(scryfallId: string): Promise<ArtworkResponse[]> {
-  return request<ArtworkResponse[]>(`/artwork/${scryfallId}/printings`)
-}
 
 export function getRulings(oracleId: string): Promise<RulingsResponse> {
   return request<RulingsResponse>(`/rulings/${oracleId}`)

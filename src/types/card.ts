@@ -55,6 +55,12 @@ export interface OracleCard {
   games: string[]
   card_faces: CardFace[] | null
   canonical_scryfall_id: string
+  image_urls: ImageUrls
+}
+
+export interface ImageUrls {
+  normal?: string
+  art_crop?: string
 }
 
 export interface SearchResponse {
@@ -64,20 +70,6 @@ export interface SearchResponse {
   page_size: number
 }
 
-export interface ArtworkUrls {
-  small?: string
-  normal?: string
-  large?: string
-  png?: string
-  art_crop?: string
-  border_crop?: string
-}
-
-export interface ArtworkResponse {
-  scryfall_id: string
-  oracle_id: string
-  urls: ArtworkUrls
-}
 
 export interface Ruling {
   oracle_id: string

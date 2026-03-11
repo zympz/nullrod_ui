@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import type { OracleCard, ArtworkResponse, RulingsResponse, CardFace } from '../types/card'
-import { getCardById, getArtwork, getRulings } from '../api/client'
+import type { OracleCard, RulingsResponse, CardFace } from '../types/card'
+import { getCardById, getRulings } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
 import styles from './CardPage.module.css'
 
@@ -14,21 +14,18 @@ export function CardPage() {
   const { oracleId } = useParams<{ oracleId: string }>()
   const navigate = useNavigate()
   const [card, setCard] = useState<OracleCard | null>(null)
-  const [artwork, setArtwork] = useState<ArtworkResponse | null>(null)
   const [rulings, setRulings] = useState<RulingsResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!oracleId) return
     setCard(null)
-    setArtwork(null)
     setRulings(null)
     setError(null)
 
     getCardById(oracleId)
       .then((c) => {
         setCard(c)
-        getArtwork(c.canonical_scryfall_id).then(setArtwork).catch(() => {})
         getRulings(c.oracle_id).then(setRulings).catch(() => {})
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load card'))
@@ -52,7 +49,7 @@ export function CardPage() {
     )
   }
 
-  const imgUrl = artwork?.urls.normal ?? artwork?.urls.art_crop
+  const imgUrl = card.image_urls.normal ?? card.image_urls.art_crop
   const faces = card.card_faces
 
   return (

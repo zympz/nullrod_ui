@@ -22,10 +22,11 @@ npm run build
 ## Routes
 
 ```
-/         → /decks (redirect)
-/decks    — Deck list and builder (coming soon)
-/combos   — Combo browser and creator (coming soon, Commander Spellbook import planned)
-/cards    — Card search and browser (live)
+/              → /cards (redirect)
+/decks         — Deck list and builder (coming soon)
+/combos        — Combo browser and creator (coming soon, Commander Spellbook import planned)
+/cards         — Card search and browser (live, URL params synced for shareable searches)
+/cards/:id     — Full card detail page by oracle UUID (live)
 ```
 
 ## Project Structure
@@ -34,11 +35,12 @@ npm run build
 src/
   api/client.ts               # Typed fetch wrapper for api.nullrod.com
   types/
-    card.ts                   # OracleCard, SearchParams, ArtworkResponse, etc.
+    card.ts                   # OracleCard, ImageUrls, SearchParams, etc.
     deck.ts                   # Deck, DeckEntry, DeckSummary, DeckFormat (stubbed)
     combo.ts                  # Combo, ComboCard, SpellbookCombo (stubbed)
   pages/
-    CardsPage.tsx             # Card search (live)
+    CardsPage.tsx             # Card search with URL-synced params (live)
+    CardPage.tsx              # Full card detail page (live)
     DecksPage.tsx             # Deck builder stub (coming soon)
     CombosPage.tsx            # Combo browser stub (coming soon)
   components/
@@ -47,7 +49,7 @@ src/
     ColorPips.tsx             # Color identity dots
     SearchFilters.tsx         # Filter panel (color, type, CMC, keywords, legality)
     CardGrid.tsx              # Responsive grid + pagination
-    CardTile.tsx              # Card tile with lazy artwork
+    CardTile.tsx              # Card tile with art from image_urls
     CardDetail.tsx            # Modal: art, oracle text, legalities, rulings
   App.tsx                     # Router + layout shell
   index.css                   # Global dark theme CSS variables
@@ -66,11 +68,9 @@ Rate limits: 60 req/min (search), 300 req/min (all others).
 | `GET /cards/search` | Fuzzy search with filters (q, color, type, cmc, keywords, legality, page) |
 | `GET /cards?name=` | Exact name lookup (case-insensitive), returns array |
 | `GET /cards/{oracle_id}` | Get card by oracle UUID |
-| `GET /artwork/{scryfall_id}` | Signed CloudFront URLs for a printing (small/normal/large/png/art_crop/border_crop) |
-| `GET /artwork/{scryfall_id}/printings` | All printings for the oracle card |
 | `GET /rulings/{oracle_id}` | Official rulings for a card |
 
-`canonical_scryfall_id` on `OracleCard` is the key for artwork lookups.
+Card objects include `image_urls` with `normal` and `art_crop` signed CloudFront URLs.
 More endpoints coming — update `src/api/client.ts` and `src/types/` as they're added.
 
 ## Deploy
@@ -115,4 +115,4 @@ AWS credentials must have access to S3 and CloudFront. The deploy IAM role is `n
 - Add new types to the appropriate file under `src/types/`
 - Use CSS Modules (`.module.css`) for all component styles
 - Keep components focused — no god components
-- Artwork may be empty (`urls: {}`) while backfill runs — handle gracefully
+- Image URLs may be empty while backfill runs — handle gracefully

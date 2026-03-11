@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import type { OracleCard, ArtworkResponse, RulingsResponse, CardFace } from '../types/card'
-import { getArtwork, getRulings } from '../api/client'
+import type { OracleCard, RulingsResponse, CardFace } from '../types/card'
+import { getRulings } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
 import styles from './CardDetail.module.css'
 
@@ -17,22 +17,13 @@ interface CardDetailProps {
 }
 
 export function CardDetail({ card, onClose }: CardDetailProps) {
-  const [artwork, setArtwork] = useState<ArtworkResponse | null>(null)
   const [rulings, setRulings] = useState<RulingsResponse | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setArtwork(null)
     setRulings(null)
-
-    getArtwork(card.canonical_scryfall_id)
-      .then(setArtwork)
-      .catch(() => {})
-
-    getRulings(card.oracle_id)
-      .then(setRulings)
-      .catch(() => {})
-  }, [card.oracle_id, card.canonical_scryfall_id])
+    getRulings(card.oracle_id).then(setRulings).catch(() => {})
+  }, [card.oracle_id])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -51,7 +42,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
     if (e.target === overlayRef.current) onClose()
   }
 
-  const imgUrl = artwork?.urls.normal ?? artwork?.urls.art_crop
+  const imgUrl = card.image_urls.normal ?? card.image_urls.art_crop
 
   const faces = card.card_faces
 
