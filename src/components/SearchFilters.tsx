@@ -5,6 +5,8 @@ import styles from './SearchFilters.module.css'
 
 const COLORS: Color[] = ['W', 'U', 'B', 'R', 'G']
 
+type ColorMode = 'color' | 'color_identity'
+
 const FORMATS: Format[] = [
   'standard', 'pioneer', 'modern', 'legacy', 'vintage',
   'commander', 'pauper', 'explorer', 'historic', 'timeless',
@@ -18,11 +20,21 @@ interface SearchFiltersProps {
 export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   const [legalityFormat, setLegalityFormat] = useState<Format>('modern')
   const [legalityStatus, setLegalityStatus] = useState<'legal' | 'not_legal' | 'restricted' | 'banned'>('legal')
+  const [colorMode, setColorMode] = useState<ColorMode>('color')
 
   function toggleColor(c: Color) {
-    const current = params.color ?? []
+    const current = (colorMode === 'color' ? params.color : params.color_identity) ?? []
     const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
-    onChange({ ...params, color: next.length ? next : undefined, page: 1 })
+    if (colorMode === 'color') {
+      onChange({ ...params, color: next.length ? next : undefined, color_identity: undefined, page: 1 })
+    } else {
+      onChange({ ...params, color_identity: next.length ? next : undefined, color: undefined, page: 1 })
+    }
+  }
+
+  function switchColorMode(mode: ColorMode) {
+    setColorMode(mode)
+    onChange({ ...params, color: undefined, color_identity: undefined, page: 1 })
   }
 
   function setType(v: string) {
@@ -60,7 +72,7 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
           {COLORS.map((value) => (
             <button
               key={value}
-              className={`${styles.colorBtn} ${(params.color ?? []).includes(value) ? styles.active : ''}`}
+              className={`${styles.colorBtn} ${((colorMode === 'color' ? params.color : params.color_identity) ?? []).includes(value) ? styles.active : ''}`}
               onClick={() => toggleColor(value)}
               type="button"
               title={value}
@@ -68,6 +80,18 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
               <ManaSymbol symbol={value} size={28} />
             </button>
           ))}
+        </div>
+        <div className={styles.modeToggle}>
+          <button
+            className={`${styles.modeBtn} ${colorMode === 'color' ? styles.modeBtnActive : ''}`}
+            onClick={() => switchColorMode('color')}
+            type="button"
+          >Contains</button>
+          <button
+            className={`${styles.modeBtn} ${colorMode === 'color_identity' ? styles.modeBtnActive : ''}`}
+            onClick={() => switchColorMode('color_identity')}
+            type="button"
+          >Identity</button>
         </div>
       </div>
 
