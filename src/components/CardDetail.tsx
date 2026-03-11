@@ -50,7 +50,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
     if (e.target === overlayRef.current) onClose()
   }
 
-  const imgUrl = artwork?.urls.normal ?? artwork?.urls.large ?? artwork?.urls.small
+  const imgUrl = artwork?.urls.normal ?? artwork?.urls.art_crop
 
   const faces = card.card_faces
 
