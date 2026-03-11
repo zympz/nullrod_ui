@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <!-- Rod metallic gradient -->
+    <linearGradient id="rod" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b0a8c8"/>
+      <stop offset="40%" stop-color="#8880a0"/>
+      <stop offset="70%" stop-color="#6b6388"/>
+      <stop offset="100%" stop-color="#4a4460"/>
+    </linearGradient>
+    <!-- Glow for the null circle -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7c6dfa" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7c6dfa" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Rod highlight -->
+    <linearGradient id="rod-hi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d0c8e8"/>
+      <stop offset="100%" stop-color="#8880a0" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#0f0f13"/>
+  <circle cx="16" cy="16" r="15" fill="url(#glow)"/>
+
+  <!-- Rod — diagonal, broken in the middle -->
+  <!-- Lower-left segment -->
+  <line x1="7" y1="25" x2="13.5" y2="18.5" stroke="url(#rod)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="7.5" y1="24.5" x2="13" y2="18" stroke="url(#rod-hi)" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Upper-right segment (offset to show the break) -->
+  <line x1="18.5" y1="13.5" x2="25" y2="7" stroke="url(#rod)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="19" y1="13" x2="25.5" y2="6.5" stroke="url(#rod-hi)" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Null symbol — circle with slash at the break point -->
+  <circle cx="16" cy="16" r="5.5" fill="none" stroke="#7c6dfa" stroke-width="1.5" opacity="0.9"/>
+  <line x1="12" y1="20" x2="20" y2="12" stroke="#7c6dfa" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Subtle energy sparks at break points -->
+  <circle cx="14" cy="18" r="1" fill="#9d91fc" opacity="0.7"/>
+  <circle cx="18" cy="14" r="1" fill="#9d91fc" opacity="0.7"/>
+  <circle cx="15" cy="19" r="0.5" fill="#7c6dfa" opacity="0.5"/>
+  <circle cx="19" cy="15" r="0.5" fill="#7c6dfa" opacity="0.5"/>
+
+  <!-- Outer ring -->
+  <circle cx="16" cy="16" r="15" fill="none" stroke="#2e2e42" stroke-width="1"/>
+</svg>
