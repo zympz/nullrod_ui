@@ -95,6 +95,7 @@ export interface SearchParams {
   q?: string
   color?: Color[]
   color_identity?: Color[]
+  color_exact?: boolean
   type?: string
   cmc?: number
   cmc_gte?: number

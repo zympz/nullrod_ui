@@ -5,7 +5,7 @@ import styles from './SearchFilters.module.css'
 
 const COLORS: Color[] = ['W', 'U', 'B', 'R', 'G']
 
-type ColorMode = 'color' | 'color_identity'
+type ColorMode = 'color' | 'color_identity' | 'color_exact'
 
 const FORMATS: Format[] = [
   'standard', 'pioneer', 'modern', 'legacy', 'vintage',
@@ -23,18 +23,20 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   const [colorMode, setColorMode] = useState<ColorMode>('color')
 
   function toggleColor(c: Color) {
-    const current = (colorMode === 'color' ? params.color : params.color_identity) ?? []
+    const current = (colorMode === 'color_identity' ? params.color_identity : params.color) ?? []
     const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
-    if (colorMode === 'color') {
-      onChange({ ...params, color: next.length ? next : undefined, color_identity: undefined, page: 1 })
+    if (colorMode === 'color_identity') {
+      onChange({ ...params, color_identity: next.length ? next : undefined, color: undefined, color_exact: undefined, page: 1 })
+    } else if (colorMode === 'color_exact') {
+      onChange({ ...params, color: next.length ? next : undefined, color_exact: next.length ? true : undefined, color_identity: undefined, page: 1 })
     } else {
-      onChange({ ...params, color_identity: next.length ? next : undefined, color: undefined, page: 1 })
+      onChange({ ...params, color: next.length ? next : undefined, color_exact: undefined, color_identity: undefined, page: 1 })
     }
   }
 
   function switchColorMode(mode: ColorMode) {
     setColorMode(mode)
-    onChange({ ...params, color: undefined, color_identity: undefined, page: 1 })
+    onChange({ ...params, color: undefined, color_identity: undefined, color_exact: undefined, page: 1 })
   }
 
   function setType(v: string) {
@@ -92,6 +94,11 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
             onClick={() => switchColorMode('color_identity')}
             type="button"
           >Identity</button>
+          <button
+            className={`${styles.modeBtn} ${colorMode === 'color_exact' ? styles.modeBtnActive : ''}`}
+            onClick={() => switchColorMode('color_exact')}
+            type="button"
+          >Exact</button>
         </div>
       </div>
 
