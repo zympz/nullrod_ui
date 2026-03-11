@@ -1,65 +1,64 @@
-import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import type { OracleCard, ArtworkResponse, RulingsResponse, CardFace } from '../types/card'
-import { getArtwork, getRulings } from '../api/client'
-import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
-import styles from './CardDetail.module.css'
+import { getCardById, getArtwork, getRulings } from '../api/client'
+import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
+import styles from './CardPage.module.css'
 
 const FORMAT_ORDER = [
   'standard', 'pioneer', 'modern', 'legacy', 'vintage',
   'commander', 'pauper', 'explorer', 'historic', 'timeless',
 ] as const
 
-interface CardDetailProps {
-  card: OracleCard
-  onClose: () => void
-}
-
-export function CardDetail({ card, onClose }: CardDetailProps) {
+export function CardPage() {
+  const { oracleId } = useParams<{ oracleId: string }>()
+  const [card, setCard] = useState<OracleCard | null>(null)
   const [artwork, setArtwork] = useState<ArtworkResponse | null>(null)
   const [rulings, setRulings] = useState<RulingsResponse | null>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!oracleId) return
+    setCard(null)
     setArtwork(null)
     setRulings(null)
+    setError(null)
 
-    getArtwork(card.canonical_scryfall_id)
-      .then(setArtwork)
-      .catch(() => {})
+    getCardById(oracleId)
+      .then((c) => {
+        setCard(c)
+        getArtwork(c.canonical_scryfall_id).then(setArtwork).catch(() => {})
+        getRulings(c.oracle_id).then(setRulings).catch(() => {})
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load card'))
+  }, [oracleId])
 
-    getRulings(card.oracle_id)
-      .then(setRulings)
-      .catch(() => {})
-  }, [card.oracle_id, card.canonical_scryfall_id])
+  if (error) {
+    return (
+      <div className={styles.page}>
+        <Link to="/cards" className={styles.back}>&larr; Back to search</Link>
+        <div className={styles.error}>{error}</div>
+      </div>
+    )
+  }
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = '' }
-  }, [])
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  function handleOverlayClick(e: React.MouseEvent) {
-    if (e.target === overlayRef.current) onClose()
+  if (!card) {
+    return (
+      <div className={styles.page}>
+        <Link to="/cards" className={styles.back}>&larr; Back to search</Link>
+        <div className={styles.loading}>Loading card&hellip;</div>
+      </div>
+    )
   }
 
   const imgUrl = artwork?.urls.normal ?? artwork?.urls.art_crop
-
   const faces = card.card_faces
 
-  return createPortal(
-    <div className={styles.overlay} ref={overlayRef} onClick={handleOverlayClick}>
-      <div className={styles.modal}>
-        <button className={styles.close} onClick={onClose} type="button" aria-label="Close">✕</button>
+  return (
+    <div className={styles.page}>
+      <Link to="/cards" className={styles.back}>&larr; Back to search</Link>
 
+      <div className={styles.card}>
         <div className={styles.layout}>
           {/* Art panel */}
           <div className={styles.artPanel}>
@@ -70,14 +69,13 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
                 <div className={styles.artEmpty}>No image</div>
               )}
             </div>
-
           </div>
 
           {/* Info panel */}
           <div className={styles.infoPanel}>
             <div className={styles.header}>
-              <Link to={`/cards/${card.oracle_id}`} className={styles.name} onClick={onClose}>{card.name}</Link>
-              {card.mana_cost && <ManaCost cost={card.mana_cost} size={20} />}
+              <h1 className={styles.name}>{card.name}</h1>
+              {card.mana_cost && <ManaCost cost={card.mana_cost} size={22} />}
             </div>
 
             <div className={styles.typeLine}>{card.type_line}</div>
@@ -87,7 +85,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
                 <span className={styles.colorIdentityLabel}>Identity</span>
                 <div className={styles.colorIdentityPips}>
                   {card.color_identity.map((c) => (
-                    <ManaSymbol key={c} symbol={c} size={18} />
+                    <ManaSymbol key={c} symbol={c} size={20} />
                   ))}
                 </div>
               </div>
@@ -97,7 +95,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
               <div className={styles.reserved}>Reserved List</div>
             )}
 
-            {/* Card faces (DFC / modal) */}
+            {/* Card faces (DFC / modal / adventure) */}
             {faces ? (
               <div className={styles.faces}>
                 {faces.map((face, i) => (
@@ -120,21 +118,20 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
             {card.keywords.length > 0 && (
               <div className={styles.section}>
                 <div className={styles.sectionLabel}>Keywords</div>
-                <div className={styles.keywords}>
+                <div className={styles.pills}>
                   {card.keywords.map((kw) => (
-                    <span key={kw} className={styles.keyword}>{kw}</span>
+                    <span key={kw} className={styles.pill}>{kw}</span>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Games */}
             {card.games.length > 0 && (
               <div className={styles.section}>
                 <div className={styles.sectionLabel}>Games</div>
-                <div className={styles.keywords}>
+                <div className={styles.pills}>
                   {card.games.map((g) => (
-                    <span key={g} className={styles.keyword}>{g}</span>
+                    <span key={g} className={styles.pill}>{g}</span>
                   ))}
                 </div>
               </div>
@@ -173,8 +170,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
           </div>
         </div>
       </div>
-    </div>,
-    document.body,
+    </div>
   )
 }
 
@@ -207,7 +203,7 @@ function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean
       <div className={styles.face}>
         <div className={styles.faceHeader}>
           <span className={styles.faceName}>{face.name}</span>
-          {face.mana_cost && <ManaCost cost={face.mana_cost} size={14} />}
+          {face.mana_cost && <ManaCost cost={face.mana_cost} size={16} />}
         </div>
         <div className={styles.faceType}>{face.type_line}</div>
         {face.oracle_text && (
