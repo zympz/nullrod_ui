@@ -1,0 +1,24 @@
+.pips {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.pip {
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.colorless {
+  border-radius: 50%;
+  display: inline-block;
+  background: #444466;
+  flex-shrink: 0;
+}
+
+.pip_W { background: #c8b87a; }
+.pip_U { background: #4a90d9; }
+.pip_B { background: #8b5cf6; }
+.pip_R { background: #ef4444; }
+.pip_G { background: #22c55e; }
