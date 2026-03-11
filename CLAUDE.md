@@ -73,6 +73,42 @@ Rate limits: 60 req/min (search), 300 req/min (all others).
 `canonical_scryfall_id` on `OracleCard` is the key for artwork lookups.
 More endpoints coming — update `src/api/client.ts` and `src/types/` as they're added.
 
+## Deploy
+
+Production is served from CloudFront at `nullrod.com` and `www.nullrod.com`, backed by S3 bucket `nullrod-ui-920888352055`. Infrastructure is managed by the `NullrodUI` CDK stack in `~/Documents/nullrod_infra`.
+
+**Automated (preferred):** push to `main` — GitHub Actions builds and deploys via OIDC.
+
+**Manual from local machine:**
+
+```bash
+# 1. Build
+npm run build
+
+# 2. Sync assets (long-lived cache — filenames are content-hashed by Vite)
+aws s3 sync dist/assets/ s3://nullrod-ui-920888352055/assets/ \
+  --cache-control "public,max-age=31536000,immutable"
+
+# 3. Upload index.html (no-cache — always fetch fresh)
+aws s3 cp dist/index.html s3://nullrod-ui-920888352055/index.html \
+  --cache-control "no-cache,no-store,must-revalidate" \
+  --content-type "text/html"
+
+# 4. Sync everything else (favicon, manifest, etc.)
+aws s3 sync dist/ s3://nullrod-ui-920888352055/ \
+  --delete \
+  --exclude "assets/*" \
+  --exclude "index.html" \
+  --cache-control "public,max-age=3600"
+
+# 5. Invalidate CloudFront cache
+DIST_ID=$(aws ssm get-parameter --name /nullrod/ui/distribution-id \
+  --query Parameter.Value --output text)
+aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
+```
+
+AWS credentials must have access to S3 and CloudFront. The deploy IAM role is `nullrod-ui-deploy` but requires GitHub OIDC — use your personal CLI credentials for local deploys.
+
 ## Conventions
 
 - Add new API functions to `src/api/client.ts`

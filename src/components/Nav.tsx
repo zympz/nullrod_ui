@@ -12,7 +12,7 @@ export function Nav() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <NavLink to="/" className={styles.brand}>
-          <span className={styles.brandName}>nullrod</span>
+          <span className={styles.brandName}>Null Rod</span>
         </NavLink>
         <nav className={styles.nav}>
           {LINKS.map(({ to, label }) => (
