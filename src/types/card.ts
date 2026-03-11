@@ -91,19 +91,20 @@ export interface RulingsResponse {
   rulings: Ruling[]
 }
 
+export type ColorMode = 'at_least' | 'exactly' | 'at_most'
+
 export interface SearchParams {
-  q?: string
+  name?: string
+  oracle_text?: string
   color?: Color[]
+  color_mode?: ColorMode
   color_identity?: Color[]
-  color_exact?: boolean
-  color_identity_exact?: boolean
-  colorless?: boolean
+  color_identity_mode?: ColorMode
   type?: string
-  cmc?: number
-  cmc_gte?: number
-  cmc_lte?: number
+  cmc_min?: number
+  cmc_max?: number
   keywords?: string[]
-  legality?: string
+  format?: string
   page?: number
   page_size?: number
 }

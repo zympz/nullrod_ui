@@ -38,18 +38,17 @@ async function request<T>(
 
 export function searchCards(params: SearchParams): Promise<SearchResponse> {
   return request<SearchResponse>('/cards/search', {
-    q: params.q,
+    name: params.name,
+    oracle_text: params.oracle_text,
     color: params.color,
+    color_mode: params.color_mode,
     color_identity: params.color_identity,
-    color_exact: params.color_exact,
-    color_identity_exact: params.color_identity_exact,
-    colorless: params.colorless,
+    color_identity_mode: params.color_identity_mode,
     type: params.type,
-    cmc: params.cmc,
-    cmc_gte: params.cmc_gte,
-    cmc_lte: params.cmc_lte,
+    cmc_min: params.cmc_min,
+    cmc_max: params.cmc_max,
     keywords: params.keywords,
-    legality: params.legality,
+    format: params.format,
     page: params.page,
     page_size: params.page_size,
   })

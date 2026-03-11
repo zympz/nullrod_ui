@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import type { Color, Format, SearchParams } from '../types/card'
+import type { Color, ColorMode, Format, SearchParams } from '../types/card'
 import { ManaSymbol } from './ManaSymbol'
 import styles from './SearchFilters.module.css'
 
 const COLORS: Color[] = ['W', 'U', 'B', 'R', 'G']
 
-type ColorMode = 'color' | 'color_identity' | 'color_exact'
+type FilterColorMode = 'contains' | 'identity' | 'exact'
 
 const FORMATS: Format[] = [
   'standard', 'pioneer', 'modern', 'legacy', 'vintage',
@@ -17,48 +17,46 @@ interface SearchFiltersProps {
   onChange: (params: SearchParams) => void
 }
 
+// UI mode → API params
+function colorModeToApi(mode: FilterColorMode): { field: 'color' | 'color_identity'; apiMode: ColorMode } {
+  if (mode === 'identity') return { field: 'color_identity', apiMode: 'at_most' }
+  if (mode === 'exact')    return { field: 'color',          apiMode: 'exactly' }
+  return                          { field: 'color',          apiMode: 'at_least' }
+}
+
 export function SearchFilters({ params, onChange }: SearchFiltersProps) {
-  const [colorMode, setColorMode] = useState<ColorMode>('color')
+  const [colorMode, setColorMode] = useState<FilterColorMode>('contains')
   const [draft, setDraft] = useState<SearchParams>(() => ({ ...params }))
   const [legalityFormat, setLegalityFormat] = useState<Format>('modern')
-  const [legalityStatus, setLegalityStatus] = useState<'legal' | 'not_legal' | 'restricted' | 'banned'>('legal')
+
+  const activeColors = colorMode === 'identity' ? draft.color_identity : draft.color
 
   function clearDraftColors(extra?: Partial<SearchParams>): SearchParams {
-    return { ...draft, color: undefined, color_identity: undefined, color_exact: undefined, color_identity_exact: undefined, colorless: undefined, ...extra }
+    return { ...draft, color: undefined, color_mode: undefined, color_identity: undefined, color_identity_mode: undefined, ...extra }
   }
 
   function toggleColor(c: Color) {
-    if (colorMode === 'color_identity') {
-      const current = draft.color_identity ?? []
-      const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
-      setDraft(clearDraftColors({ color_identity: next.length ? next : undefined, color_identity_exact: true }))
-    } else if (colorMode === 'color_exact') {
-      const current = draft.color ?? []
-      const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
-      setDraft(clearDraftColors({ color: next.length ? next : undefined, color_exact: true }))
+    const { field, apiMode } = colorModeToApi(colorMode)
+    const current = (draft[field] as Color[] | undefined) ?? []
+    const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
+    if (field === 'color_identity') {
+      setDraft(clearDraftColors({ color_identity: next.length ? next : undefined, color_identity_mode: next.length ? apiMode : undefined }))
     } else {
-      const current = draft.color ?? []
-      const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
-      setDraft(clearDraftColors({ color: next.length ? next : undefined }))
+      setDraft(clearDraftColors({ color: next.length ? next : undefined, color_mode: next.length ? apiMode : undefined }))
     }
   }
 
-  function toggleColorless() {
-    const next = !draft.colorless
-    setDraft(clearDraftColors({ colorless: next ? true : undefined, color_exact: true }))
-  }
-
-  function switchColorMode(mode: ColorMode) {
+  function switchColorMode(mode: FilterColorMode) {
     setColorMode(mode)
-    setDraft((d) => ({ ...d, color: undefined, color_identity: undefined, color_exact: undefined, color_identity_exact: undefined, colorless: undefined }))
+    setDraft((d) => ({ ...d, color: undefined, color_mode: undefined, color_identity: undefined, color_identity_mode: undefined }))
   }
 
   function setLegality() {
-    setDraft((d) => ({ ...d, legality: `${legalityFormat}:${legalityStatus}` }))
+    setDraft((d) => ({ ...d, format: legalityFormat }))
   }
 
   function clearLegality() {
-    setDraft((d) => ({ ...d, legality: undefined }))
+    setDraft((d) => ({ ...d, format: undefined }))
   }
 
   function apply() {
@@ -73,36 +71,22 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
         <div className={styles.group}>
           <label className={styles.label}>Color</label>
           <div className={styles.colorRow}>
-            {COLORS.map((value) => {
-              const selected = (colorMode === 'color_identity' ? draft.color_identity : draft.color) ?? []
-              const isActive = selected.includes(value) && !draft.colorless
-              return (
-                <button
-                  key={value}
-                  className={`${styles.colorBtn} ${isActive ? styles.active : ''}`}
-                  onClick={() => toggleColor(value)}
-                  type="button"
-                  title={value}
-                >
-                  <ManaSymbol symbol={value} size={28} />
-                </button>
-              )
-            })}
-            {colorMode === 'color_exact' && (
+            {COLORS.map((value) => (
               <button
-                className={`${styles.colorBtn} ${draft.colorless ? styles.active : ''}`}
-                onClick={toggleColorless}
+                key={value}
+                className={`${styles.colorBtn} ${(activeColors ?? []).includes(value) ? styles.active : ''}`}
+                onClick={() => toggleColor(value)}
                 type="button"
-                title="Colorless"
+                title={value}
               >
-                <ManaSymbol symbol="C" size={28} />
+                <ManaSymbol symbol={value} size={28} />
               </button>
-            )}
+            ))}
           </div>
           <div className={styles.modeToggle}>
-            <button className={`${styles.modeBtn} ${colorMode === 'color' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('color')} type="button">Contains</button>
-            <button className={`${styles.modeBtn} ${colorMode === 'color_identity' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('color_identity')} type="button">Identity</button>
-            <button className={`${styles.modeBtn} ${colorMode === 'color_exact' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('color_exact')} type="button">Exact</button>
+            <button className={`${styles.modeBtn} ${colorMode === 'contains' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('contains')} type="button">Contains</button>
+            <button className={`${styles.modeBtn} ${colorMode === 'identity' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('identity')} type="button">Identity</button>
+            <button className={`${styles.modeBtn} ${colorMode === 'exact' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('exact')} type="button">Exact</button>
           </div>
         </div>
 
@@ -128,8 +112,8 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
               min={0}
               step={1}
               placeholder="Min"
-              value={draft.cmc_gte ?? ''}
-              onChange={(e) => { const n = parseFloat(e.target.value); setDraft((d) => ({ ...d, cmc_gte: isNaN(n) ? undefined : n })) }}
+              value={draft.cmc_min ?? ''}
+              onChange={(e) => { const n = parseFloat(e.target.value); setDraft((d) => ({ ...d, cmc_min: isNaN(n) ? undefined : n })) }}
             />
             <span className={styles.rangeSep}>–</span>
             <input
@@ -139,10 +123,22 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
               max={20}
               step={1}
               placeholder="Max"
-              value={draft.cmc_lte ?? ''}
-              onChange={(e) => { const n = parseFloat(e.target.value); setDraft((d) => ({ ...d, cmc_lte: isNaN(n) ? undefined : n })) }}
+              value={draft.cmc_max ?? ''}
+              onChange={(e) => { const n = parseFloat(e.target.value); setDraft((d) => ({ ...d, cmc_max: isNaN(n) ? undefined : n })) }}
             />
           </div>
+        </div>
+
+        {/* Oracle Text */}
+        <div className={styles.group}>
+          <label className={styles.label}>Oracle Text</label>
+          <input
+            className={styles.input}
+            type="text"
+            placeholder="flying, draw a card…"
+            value={draft.oracle_text ?? ''}
+            onChange={(e) => setDraft((d) => ({ ...d, oracle_text: e.target.value || undefined }))}
+          />
         </div>
 
         {/* Keywords */}
@@ -160,9 +156,9 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
           />
         </div>
 
-        {/* Legality */}
-        <div className={`${styles.group} ${styles.groupWide}`}>
-          <label className={styles.label}>Legality</label>
+        {/* Legality / Format */}
+        <div className={styles.group}>
+          <label className={styles.label}>Format</label>
           <div className={styles.row}>
             <select
               className={styles.select}
@@ -173,23 +169,13 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
                 <option key={f} value={f}>{f}</option>
               ))}
             </select>
-            <select
-              className={styles.select}
-              value={legalityStatus}
-              onChange={(e) => setLegalityStatus(e.target.value as typeof legalityStatus)}
-            >
-              <option value="legal">Legal</option>
-              <option value="not_legal">Not Legal</option>
-              <option value="restricted">Restricted</option>
-              <option value="banned">Banned</option>
-            </select>
             <button className={styles.setBtn} onClick={setLegality} type="button">Set</button>
-            {draft.legality && (
+            {draft.format && (
               <button className={styles.clearBtn} onClick={clearLegality} type="button">✕</button>
             )}
           </div>
-          {draft.legality && (
-            <div className={styles.legalityBadge}>{draft.legality}</div>
+          {draft.format && (
+            <div className={styles.legalityBadge}>{draft.format}</div>
           )}
         </div>
 

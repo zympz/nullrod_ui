@@ -38,13 +38,13 @@ export function CardsPage() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    const next = { ...params, q: query || undefined, page: 1 }
+    const next = { ...params, name: query || undefined, page: 1 }
     setParams(next)
     runSearch(next)
   }
 
   function handleParamsChange(next: SearchParams) {
-    const merged = { ...next, q: query || undefined }
+    const merged = { ...next, name: query || undefined }
     setParams(merged)
     runSearch(merged)
   }
@@ -58,11 +58,13 @@ export function CardsPage() {
 
   const hasFilters = !!(
     params.color?.length ||
+    params.color_identity?.length ||
     params.type ||
-    params.cmc_gte != null ||
-    params.cmc_lte != null ||
+    params.cmc_min != null ||
+    params.cmc_max != null ||
     params.keywords?.length ||
-    params.legality
+    params.oracle_text ||
+    params.format
   )
 
   return (
