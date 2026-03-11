@@ -23,6 +23,7 @@
   overflow: hidden;
   background: var(--surface-2);
   position: relative;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .img {

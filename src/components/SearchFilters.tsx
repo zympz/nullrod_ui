@@ -79,7 +79,7 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   }
 
   return (
-    <div className={styles.filters}>
+    <form className={styles.filters} onSubmit={(e) => { e.preventDefault(); apply() }}>
       <div className={styles.grid}>
 
         {/* Color */}
@@ -204,8 +204,8 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
 
       <div className={styles.applyRow}>
         <button className={styles.clearAllBtn} onClick={clearAll} type="button">Clear</button>
-        <button className={styles.applyBtn} onClick={apply} type="button">Apply Filters</button>
+        <button className={styles.applyBtn} type="submit">Apply Filters</button>
       </div>
-    </div>
+    </form>
   )
 }

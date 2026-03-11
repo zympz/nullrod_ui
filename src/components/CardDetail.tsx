@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { OracleCard, ArtworkResponse, RulingsResponse, CardFace } from '../types/card'
-import { getArtwork, getAllPrintings, getRulings } from '../api/client'
+import { getArtwork, getRulings } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
 import styles from './CardDetail.module.css'
 
@@ -17,23 +17,15 @@ interface CardDetailProps {
 
 export function CardDetail({ card, onClose }: CardDetailProps) {
   const [artwork, setArtwork] = useState<ArtworkResponse | null>(null)
-  const [printings, setPrintings] = useState<ArtworkResponse[]>([])
-  const [selectedPrinting, setSelectedPrinting] = useState<ArtworkResponse | null>(null)
   const [rulings, setRulings] = useState<RulingsResponse | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setArtwork(null)
-    setPrintings([])
-    setSelectedPrinting(null)
     setRulings(null)
 
     getArtwork(card.canonical_scryfall_id)
-      .then((a) => { setArtwork(a); setSelectedPrinting(a) })
-      .catch(() => {})
-
-    getAllPrintings(card.canonical_scryfall_id)
-      .then(setPrintings)
+      .then(setArtwork)
       .catch(() => {})
 
     getRulings(card.oracle_id)
@@ -58,8 +50,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
     if (e.target === overlayRef.current) onClose()
   }
 
-  const currentArt = selectedPrinting ?? artwork
-  const imgUrl = currentArt?.urls.normal ?? currentArt?.urls.large ?? currentArt?.urls.small
+  const imgUrl = artwork?.urls.normal ?? artwork?.urls.large ?? artwork?.urls.small
 
   const faces = card.card_faces
 
@@ -79,24 +70,6 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
               )}
             </div>
 
-            {/* Printing selector */}
-            {printings.length > 1 && (
-              <div className={styles.printings}>
-                <div className={styles.sectionLabel}>Printings ({printings.length})</div>
-                <div className={styles.printingThumbs}>
-                  {printings.filter((p) => p.urls.small).slice(0, 12).map((p) => (
-                    <button
-                      key={p.scryfall_id}
-                      className={`${styles.thumb} ${selectedPrinting?.scryfall_id === p.scryfall_id ? styles.thumbActive : ''}`}
-                      onClick={() => setSelectedPrinting(p)}
-                      type="button"
-                    >
-                      <img src={p.urls.small} alt="" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Info panel */}
@@ -159,8 +132,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
               <div className={styles.sectionLabel}>Legality</div>
               <div className={styles.legalities}>
                 {FORMAT_ORDER.map((fmt) => {
-                  const status = card.legalities[fmt]
-                  if (!status || status === 'not_legal') return null
+                  const status = card.legalities[fmt] ?? 'not_legal'
                   return (
                     <div key={fmt} className={`${styles.legalityRow} ${styles[`leg_${status}`]}`}>
                       <span className={styles.format}>{fmt}</span>
