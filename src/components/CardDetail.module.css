@@ -41,23 +41,25 @@
 
 .close {
   position: absolute;
-  top: -14px;
-  right: -14px;
+  top: -16px;
+  right: -16px;
   z-index: 1;
-  color: var(--text-muted);
-  font-size: 16px;
-  width: 28px;
-  height: 28px;
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius);
+  border-radius: 50%;
   transition: color 0.15s, background 0.15s;
 }
 
 .close:hover {
   color: var(--text);
-  background: var(--surface-3);
+  background: var(--accent);
 }
 
 .layout {
