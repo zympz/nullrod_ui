@@ -36,7 +36,7 @@ async function request<T>(
 }
 
 export function searchCards(params: SearchParams): Promise<SearchResponse> {
-  return request<SearchResponse>('/cards/search', {
+  return request<SearchResponse>('/cards', {
     q: params.name,
     oracle_text: params.oracle_text,
     color: params.color,
@@ -53,10 +53,6 @@ export function searchCards(params: SearchParams): Promise<SearchResponse> {
   })
 }
 
-export function getCardByName(name: string): Promise<OracleCard[]> {
-  return request<OracleCard[]>('/cards', { name })
-}
-
 export function getCardById(oracleId: string): Promise<OracleCard> {
   return request<OracleCard>(`/cards/${oracleId}`)
 }
@@ -67,7 +63,7 @@ export function getRulings(oracleId: string): Promise<RulingsResponse> {
 }
 
 export function getSymbology(): Promise<CardSymbol[]> {
-  return request<CardSymbol[]>('/symbology')
+  return request<CardSymbol[]>('/cards/symbols')
 }
 
 // ─── Decks (stubbed — endpoints not yet live) ──────────────────────────────
