@@ -22,21 +22,37 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   const [legalityStatus, setLegalityStatus] = useState<'legal' | 'not_legal' | 'restricted' | 'banned'>('legal')
   const [colorMode, setColorMode] = useState<ColorMode>('color')
 
+  function clearColorParams(extra?: Partial<SearchParams>): SearchParams {
+    return { ...params, color: undefined, color_identity: undefined, color_exact: undefined, colorless: undefined, ...extra, page: 1 }
+  }
+
   function toggleColor(c: Color) {
-    const current = (colorMode === 'color_identity' ? params.color_identity : params.color) ?? []
-    const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
     if (colorMode === 'color_identity') {
-      onChange({ ...params, color_identity: next.length ? next : undefined, color: undefined, color_exact: undefined, page: 1 })
+      const current = params.color_identity ?? []
+      const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
+      onChange(clearColorParams({ color_identity: next.length ? next : undefined }))
     } else if (colorMode === 'color_exact') {
-      onChange({ ...params, color: next.length ? next : undefined, color_exact: next.length ? true : undefined, color_identity: undefined, page: 1 })
+      const current = params.color ?? []
+      const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
+      // selecting a color clears colorless
+      onChange(clearColorParams({ color: next.length ? next : undefined, color_exact: true }))
     } else {
-      onChange({ ...params, color: next.length ? next : undefined, color_exact: undefined, color_identity: undefined, page: 1 })
+      // Contains: cards that include at least these colors
+      const current = params.color ?? []
+      const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
+      onChange(clearColorParams({ color: next.length ? next : undefined }))
     }
+  }
+
+  function toggleColorless() {
+    // only available in Exact mode
+    const next = !params.colorless
+    onChange(clearColorParams({ colorless: next ? true : undefined, color_exact: true }))
   }
 
   function switchColorMode(mode: ColorMode) {
     setColorMode(mode)
-    onChange({ ...params, color: undefined, color_identity: undefined, color_exact: undefined, page: 1 })
+    onChange(clearColorParams())
   }
 
   function setType(v: string) {
@@ -71,17 +87,31 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
       <div className={styles.group}>
         <label className={styles.label}>Color</label>
         <div className={styles.colorRow}>
-          {COLORS.map((value) => (
+          {COLORS.map((value) => {
+            const selected = (colorMode === 'color_identity' ? params.color_identity : params.color) ?? []
+            const isActive = selected.includes(value) && !params.colorless
+            return (
+              <button
+                key={value}
+                className={`${styles.colorBtn} ${isActive ? styles.active : ''}`}
+                onClick={() => toggleColor(value)}
+                type="button"
+                title={value}
+              >
+                <ManaSymbol symbol={value} size={28} />
+              </button>
+            )
+          })}
+          {colorMode === 'color_exact' && (
             <button
-              key={value}
-              className={`${styles.colorBtn} ${((colorMode === 'color' ? params.color : params.color_identity) ?? []).includes(value) ? styles.active : ''}`}
-              onClick={() => toggleColor(value)}
+              className={`${styles.colorBtn} ${params.colorless ? styles.active : ''}`}
+              onClick={toggleColorless}
               type="button"
-              title={value}
+              title="Colorless"
             >
-              <ManaSymbol symbol={value} size={28} />
+              <ManaSymbol symbol="C" size={28} />
             </button>
-          ))}
+          )}
         </div>
         <div className={styles.modeToggle}>
           <button
