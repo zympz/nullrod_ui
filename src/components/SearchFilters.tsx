@@ -1,14 +1,9 @@
 import { useState } from 'react'
 import type { Color, Format, SearchParams } from '../types/card'
+import { ManaSymbol } from './ManaSymbol'
 import styles from './SearchFilters.module.css'
 
-const COLORS: { value: Color; label: string; className: string }[] = [
-  { value: 'W', label: 'W', className: styles.colorW },
-  { value: 'U', label: 'U', className: styles.colorU },
-  { value: 'B', label: 'B', className: styles.colorB },
-  { value: 'R', label: 'R', className: styles.colorR },
-  { value: 'G', label: 'G', className: styles.colorG },
-]
+const COLORS: Color[] = ['W', 'U', 'B', 'R', 'G']
 
 const FORMATS: Format[] = [
   'standard', 'pioneer', 'modern', 'legacy', 'vintage',
@@ -62,14 +57,15 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
       <div className={styles.group}>
         <label className={styles.label}>Color</label>
         <div className={styles.colorRow}>
-          {COLORS.map(({ value, label, className }) => (
+          {COLORS.map((value) => (
             <button
               key={value}
-              className={`${styles.colorBtn} ${className} ${(params.color ?? []).includes(value) ? styles.active : ''}`}
+              className={`${styles.colorBtn} ${(params.color ?? []).includes(value) ? styles.active : ''}`}
               onClick={() => toggleColor(value)}
               type="button"
+              title={value}
             >
-              {label}
+              <ManaSymbol symbol={value} size={28} />
             </button>
           ))}
         </div>
