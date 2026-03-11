@@ -23,15 +23,17 @@
   }
 
   .close {
-    top: 10px;
-    right: 10px;
-    position: absolute;
+    position: sticky;
+    top: 0;
+    float: right;
+    margin: 10px 10px 0 0;
     width: 40px;
     height: 40px;
     font-size: 20px;
     background: var(--surface);
     border: 1px solid var(--border);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    z-index: 2;
   }
 }
 
