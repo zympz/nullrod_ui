@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchSymbolSvg, loadSymbolMap } from '../api/symbology'
+import { loadSymbolMap } from '../api/symbology'
 
 interface ManaSymbolProps {
   symbol: string
@@ -7,39 +7,29 @@ interface ManaSymbolProps {
 }
 
 export function ManaSymbol({ symbol, size = 18 }: ManaSymbolProps) {
-  const [svgText, setSvgText] = useState<string | null>(null)
+  const [svgUrl, setSvgUrl] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
     loadSymbolMap().then((map) => {
-      const uri = map.get(`{${symbol}}`)
-      if (uri) return fetchSymbolSvg(uri)
-    }).then((svg) => {
-      if (!cancelled && svg) setSvgText(svg)
+      if (!cancelled) setSvgUrl(map.get(`{${symbol}}`) ?? null)
     })
     return () => { cancelled = true }
   }, [symbol])
 
-  const style: React.CSSProperties = {
-    display: 'inline-block',
-    width: size,
-    height: size,
-    verticalAlign: 'middle',
-    flexShrink: 0,
-    lineHeight: 0,
-  }
-
-  if (svgText) {
-    // Force the SVG to exactly fill our container by overriding its dimensions.
-    const normalized = svgText
-      .replace(/\bwidth="[^"]*"/, `width="${size}"`)
-      .replace(/\bheight="[^"]*"/, `height="${size}"`)
+  if (svgUrl) {
     return (
-      <span
-        style={style}
-        // SVGs are from the known Scryfall source via api.nullrod.com/symbology.
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: normalized }}
+      <img
+        src={svgUrl}
+        alt={symbol}
+        width={size}
+        height={size}
+        style={{
+          display: 'inline-block',
+          verticalAlign: 'middle',
+          flexShrink: 0,
+          borderRadius: '50%',
+        }}
       />
     )
   }
@@ -48,16 +38,19 @@ export function ManaSymbol({ symbol, size = 18 }: ManaSymbolProps) {
   return (
     <span
       style={{
-        ...style,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
+        width: size,
+        height: size,
         borderRadius: '50%',
         background: '#222233',
         color: '#cccccc',
         border: '1px solid #cccccc40',
         fontSize: size * 0.6,
         fontWeight: 700,
+        lineHeight: 1,
+        flexShrink: 0,
         fontFamily: 'monospace',
       }}
     >

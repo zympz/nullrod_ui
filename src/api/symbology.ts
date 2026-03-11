@@ -12,12 +12,3 @@ export function loadSymbolMap(): Promise<Map<string, string>> {
   return mapPromise
 }
 
-// Per-URI SVG text cache.
-const svgCache = new Map<string, Promise<string>>()
-
-export function fetchSymbolSvg(uri: string): Promise<string> {
-  if (!svgCache.has(uri)) {
-    svgCache.set(uri, fetch(uri).then((r) => r.text()))
-  }
-  return svgCache.get(uri)!
-}
