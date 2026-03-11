@@ -158,7 +158,7 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
           <label className={styles.label}>Format</label>
           <div className={styles.row}>
             <select
-              className={styles.select}
+              className={`${styles.select} ${styles.selectFull}`}
               value={legalityFormat}
               onChange={(e) => {
                 const f = e.target.value as Format | ''
@@ -175,9 +175,6 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
               <button className={styles.clearBtn} onClick={clearLegality} type="button">✕</button>
             )}
           </div>
-          {draft.format && (
-            <div className={styles.legalityBadge}>{draft.format}</div>
-          )}
         </div>
 
       </div>

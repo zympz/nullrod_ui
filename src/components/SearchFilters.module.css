@@ -117,20 +117,9 @@
   color: white;
 }
 
-.setBtn {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-muted);
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.setBtn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+.selectFull {
+  flex: 1;
+  min-width: 0;
 }
 
 .clearBtn {
