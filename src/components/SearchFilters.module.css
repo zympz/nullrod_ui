@@ -1,6 +1,6 @@
 .filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 16px;
   padding: 16px;
   background: var(--surface);
@@ -8,11 +8,20 @@
   border-radius: var(--radius-lg);
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.groupWide {
+  grid-column: span 2;
+}
+
 .group {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-width: 140px;
 }
 
 .label {
@@ -103,18 +112,20 @@
   color: white;
 }
 
-.applyBtn {
-  background: var(--accent);
-  color: white;
+.setBtn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
+  color: var(--text-muted);
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 600;
-  transition: background 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 }
 
-.applyBtn:hover {
-  background: var(--accent-hover);
+.setBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .clearBtn {
@@ -136,4 +147,25 @@
   padding: 2px 8px;
   border-radius: 99px;
   width: fit-content;
+}
+
+.applyRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.applyBtn {
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius);
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.applyBtn:hover {
+  background: var(--accent-hover);
 }
