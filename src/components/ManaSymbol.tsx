@@ -66,6 +66,24 @@ interface ManaCostProps {
 }
 
 export function ManaCost({ cost, size = 18, gap = 2 }: ManaCostProps) {
+  const halves = cost.split(' // ')
+  if (halves.length > 1) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        {halves.map((half, i) => {
+          const symbols = half.match(/\{[^}]+\}/g) ?? []
+          return (
+            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap }}>
+              {i > 0 && <span style={{ color: 'var(--text-dim)', fontSize: size * 0.75, lineHeight: 1 }}>//</span>}
+              {symbols.map((s, j) => (
+                <ManaSymbol key={j} symbol={s.slice(1, -1)} size={size} />
+              ))}
+            </span>
+          )
+        })}
+      </span>
+    )
+  }
   const symbols = cost.match(/\{[^}]+\}/g) ?? []
   if (symbols.length === 0) return null
   return (
