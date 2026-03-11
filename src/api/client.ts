@@ -4,6 +4,7 @@ import type {
   SearchResponse,
   ArtworkResponse,
   RulingsResponse,
+  CardSymbol,
 } from '../types/card'
 import type { DeckSummary, Deck, CreateDeckInput, UpdateDeckInput, DeckLegality } from '../types/deck'
 import type { ComboSummary, Combo, CreateComboInput } from '../types/combo'
@@ -69,6 +70,10 @@ export function getAllPrintings(scryfallId: string): Promise<ArtworkResponse[]> 
 
 export function getRulings(oracleId: string): Promise<RulingsResponse> {
   return request<RulingsResponse>(`/rulings/${oracleId}`)
+}
+
+export function getSymbology(): Promise<CardSymbol[]> {
+  return request<CardSymbol[]>('/symbology')
 }
 
 // ─── Decks (stubbed — endpoints not yet live) ──────────────────────────────

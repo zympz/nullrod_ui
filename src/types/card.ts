@@ -1,5 +1,19 @@
 export type Color = 'W' | 'U' | 'B' | 'R' | 'G'
 
+export interface CardSymbol {
+  symbol: string
+  loose_variant: string | null
+  english: string
+  transposable: boolean
+  represents_mana: boolean
+  appears_in_mana_costs: boolean
+  cmc: number | null
+  funny: boolean
+  colors: Color[]
+  gatherer_alternates: string[] | null
+  svg_uri: string
+}
+
 export type Legality = 'legal' | 'not_legal' | 'restricted' | 'banned'
 
 export type Format =

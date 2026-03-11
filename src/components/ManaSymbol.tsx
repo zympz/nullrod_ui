@@ -1,21 +1,5 @@
-import type { CSSProperties } from 'react'
-
-const MANA_STYLES: Record<string, { color: string; bg: string }> = {
-  W: { color: '#c8b87a', bg: '#2a2a1a' },
-  U: { color: '#6aabf7', bg: '#0d1f35' },
-  B: { color: '#b085f0', bg: '#1a0f30' },
-  R: { color: '#f07060', bg: '#2a0f0f' },
-  G: { color: '#5abf6a', bg: '#0f2015' },
-  C: { color: '#aaaacc', bg: '#1a1a28' },
-  X: { color: '#cccccc', bg: '#222233' },
-  T: { color: '#cccccc', bg: '#222233' },
-}
-
-function getStyle(symbol: string): { color: string; bg: string } {
-  if (MANA_STYLES[symbol]) return MANA_STYLES[symbol]
-  // Generic number or hybrid
-  return { color: '#cccccc', bg: '#222233' }
-}
+import { useEffect, useState } from 'react'
+import { loadSymbolMap } from '../api/symbology'
 
 interface ManaSymbolProps {
   symbol: string
@@ -23,24 +7,47 @@ interface ManaSymbolProps {
 }
 
 export function ManaSymbol({ symbol, size = 18 }: ManaSymbolProps) {
-  const { color, bg } = getStyle(symbol)
-  const style: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: size,
-    height: size,
-    borderRadius: '50%',
-    background: bg,
-    color,
-    border: `1px solid ${color}40`,
-    fontSize: size * 0.6,
-    fontWeight: 700,
-    lineHeight: 1,
-    flexShrink: 0,
-    fontFamily: 'monospace',
+  const [svgUrl, setSvgUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadSymbolMap().then((map) => setSvgUrl(map.get(`{${symbol}}`) ?? null))
+  }, [symbol])
+
+  if (svgUrl) {
+    return (
+      <img
+        src={svgUrl}
+        alt={symbol}
+        width={size}
+        height={size}
+        style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+      />
+    )
   }
-  return <span style={style}>{symbol}</span>
+
+  // Fallback while loading or for unknown symbols.
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: '#222233',
+        color: '#cccccc',
+        border: '1px solid #cccccc40',
+        fontSize: size * 0.6,
+        fontWeight: 700,
+        lineHeight: 1,
+        flexShrink: 0,
+        fontFamily: 'monospace',
+      }}
+    >
+      {symbol}
+    </span>
+  )
 }
 
 interface ManaCostProps {
@@ -61,7 +68,7 @@ export function ManaCost({ cost, size = 18, gap = 2 }: ManaCostProps) {
   )
 }
 
-/** Renders oracle text with inline mana symbols */
+/** Renders oracle text with inline mana symbols. */
 export function OracleText({ text }: { text: string }) {
   const parts = text.split(/(\{[^}]+\})/)
   return (
