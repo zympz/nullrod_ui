@@ -79,11 +79,15 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
                 <ManaSymbol symbol={value} size={28} />
               </button>
             ))}
-          </div>
-          <div className={styles.modeToggle}>
-            <button className={`${styles.modeBtn} ${colorMode === 'contains' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('contains')} type="button">Contains</button>
-            <button className={`${styles.modeBtn} ${colorMode === 'identity' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('identity')} type="button">Identity</button>
-            <button className={`${styles.modeBtn} ${colorMode === 'exact' ? styles.modeBtnActive : ''}`} onClick={() => switchColorMode('exact')} type="button">Exact</button>
+            <select
+              className={`${styles.select} ${styles.colorModeSelect}`}
+              value={colorMode}
+              onChange={(e) => switchColorMode(e.target.value as FilterColorMode)}
+            >
+              <option value="contains">Contains</option>
+              <option value="identity">Identity</option>
+              <option value="exact">Exact</option>
+            </select>
           </div>
         </div>
 
