@@ -23,14 +23,14 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   const [colorMode, setColorMode] = useState<ColorMode>('color')
 
   function clearColorParams(extra?: Partial<SearchParams>): SearchParams {
-    return { ...params, color: undefined, color_identity: undefined, color_exact: undefined, colorless: undefined, ...extra, page: 1 }
+    return { ...params, color: undefined, color_identity: undefined, color_exact: undefined, color_identity_exact: undefined, colorless: undefined, ...extra, page: 1 }
   }
 
   function toggleColor(c: Color) {
     if (colorMode === 'color_identity') {
       const current = params.color_identity ?? []
       const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]
-      onChange(clearColorParams({ color_identity: next.length ? next : undefined }))
+      onChange(clearColorParams({ color_identity: next.length ? next : undefined, color_identity_exact: true }))
     } else if (colorMode === 'color_exact') {
       const current = params.color ?? []
       const next = current.includes(c) ? current.filter((x) => x !== c) : [...current, c]

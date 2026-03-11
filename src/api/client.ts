@@ -42,6 +42,7 @@ export function searchCards(params: SearchParams): Promise<SearchResponse> {
     color: params.color,
     color_identity: params.color_identity,
     color_exact: params.color_exact,
+    color_identity_exact: params.color_identity_exact,
     colorless: params.colorless,
     type: params.type,
     cmc: params.cmc,
