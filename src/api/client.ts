@@ -37,7 +37,7 @@ async function request<T>(
 
 export function searchCards(params: SearchParams): Promise<SearchResponse> {
   return request<SearchResponse>('/cards/search', {
-    name: params.name,
+    q: params.name,
     oracle_text: params.oracle_text,
     color: params.color,
     color_mode: params.color_mode,
