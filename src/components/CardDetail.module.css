@@ -80,26 +80,6 @@
   .layout {
     grid-template-columns: 1fr;
   }
-
-  .artPanel {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding: 16px;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
-  .artFrame {
-    width: 120px;
-    flex-shrink: 0;
-    aspect-ratio: 488 / 680;
-  }
-
-  .infoPanel {
-    max-height: none;
-    padding: 16px;
-  }
 }
 
 .artPanel {
