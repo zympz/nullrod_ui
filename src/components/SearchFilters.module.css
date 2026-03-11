@@ -92,6 +92,8 @@
 }
 
 .colorModeSelect {
+  flex: 1;
+  min-width: 0;
   height: 36px;
   margin-left: 4px;
 }
