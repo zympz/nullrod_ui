@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { loadSymbolMap } from '../api/symbology'
+import { fetchSymbolSvg, loadSymbolMap } from '../api/symbology'
 
 interface ManaSymbolProps {
   symbol: string
@@ -7,41 +7,57 @@ interface ManaSymbolProps {
 }
 
 export function ManaSymbol({ symbol, size = 18 }: ManaSymbolProps) {
-  const [svgUrl, setSvgUrl] = useState<string | null>(null)
+  const [svgText, setSvgText] = useState<string | null>(null)
 
   useEffect(() => {
-    loadSymbolMap().then((map) => setSvgUrl(map.get(`{${symbol}}`) ?? null))
+    let cancelled = false
+    loadSymbolMap().then((map) => {
+      const uri = map.get(`{${symbol}}`)
+      if (uri) return fetchSymbolSvg(uri)
+    }).then((svg) => {
+      if (!cancelled && svg) setSvgText(svg)
+    })
+    return () => { cancelled = true }
   }, [symbol])
 
-  if (svgUrl) {
+  const style: React.CSSProperties = {
+    display: 'inline-block',
+    width: size,
+    height: size,
+    verticalAlign: 'middle',
+    flexShrink: 0,
+    lineHeight: 0,
+  }
+
+  if (svgText) {
+    // Force the SVG to exactly fill our container by overriding its dimensions.
+    const normalized = svgText
+      .replace(/\bwidth="[^"]*"/, `width="${size}"`)
+      .replace(/\bheight="[^"]*"/, `height="${size}"`)
     return (
-      <img
-        src={svgUrl}
-        alt={symbol}
-        width={size}
-        height={size}
-        style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+      <span
+        style={style}
+        // SVGs are from the known Scryfall source via api.nullrod.com/symbology.
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: normalized }}
       />
     )
   }
 
-  // Fallback while loading or for unknown symbols.
+  // Fallback while loading.
   return (
     <span
       style={{
+        ...style,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: size,
-        height: size,
         borderRadius: '50%',
         background: '#222233',
         color: '#cccccc',
         border: '1px solid #cccccc40',
         fontSize: size * 0.6,
         fontWeight: 700,
-        lineHeight: 1,
-        flexShrink: 0,
         fontFamily: 'monospace',
       }}
     >
