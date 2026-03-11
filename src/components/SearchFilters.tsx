@@ -27,7 +27,7 @@ function colorModeToApi(mode: FilterColorMode): { field: 'color' | 'color_identi
 export function SearchFilters({ params, onChange }: SearchFiltersProps) {
   const [colorMode, setColorMode] = useState<FilterColorMode>('contains')
   const [draft, setDraft] = useState<SearchParams>(() => ({ ...params }))
-  const [legalityFormat, setLegalityFormat] = useState<Format>('modern')
+  const [legalityFormat, setLegalityFormat] = useState<Format | ''>('')
 
   const activeColors = colorMode === 'identity' ? draft.color_identity : draft.color
 
@@ -51,12 +51,9 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
     setDraft((d) => ({ ...d, color: undefined, color_mode: undefined, color_identity: undefined, color_identity_mode: undefined }))
   }
 
-  function setLegality() {
-    setDraft((d) => ({ ...d, format: legalityFormat }))
-  }
-
   function clearLegality() {
     setDraft((d) => ({ ...d, format: undefined }))
+    setLegalityFormat('')
   }
 
   function apply() {
@@ -163,13 +160,17 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
             <select
               className={styles.select}
               value={legalityFormat}
-              onChange={(e) => setLegalityFormat(e.target.value as Format)}
+              onChange={(e) => {
+                const f = e.target.value as Format | ''
+                setLegalityFormat(f)
+                setDraft((d) => ({ ...d, format: f || undefined }))
+              }}
             >
+              <option value="">— none —</option>
               {FORMATS.map((f) => (
                 <option key={f} value={f}>{f}</option>
               ))}
             </select>
-            <button className={styles.setBtn} onClick={setLegality} type="button">Set</button>
             {draft.format && (
               <button className={styles.clearBtn} onClick={clearLegality} type="button">✕</button>
             )}
