@@ -194,13 +194,25 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
 }
 
 function StatsRow({ card }: { card: OracleCard }) {
-  const parts: string[] = []
-  if (card.power != null && card.toughness != null) parts.push(`${card.power}/${card.toughness}`)
-  if (card.loyalty != null) parts.push(`Loyalty: ${card.loyalty}`)
-  if (card.hand_modifier != null) parts.push(`Hand: ${card.hand_modifier}`)
-  if (card.life_modifier != null) parts.push(`Life: ${card.life_modifier}`)
-  if (parts.length === 0) return null
-  return <div className={styles.stats}>{parts.join(' · ')}</div>
+  const stats: { label: string; value: string }[] = []
+  if (card.power != null && card.toughness != null) {
+    stats.push({ label: 'Power', value: card.power })
+    stats.push({ label: 'Toughness', value: card.toughness })
+  }
+  if (card.loyalty != null) stats.push({ label: 'Loyalty', value: String(card.loyalty) })
+  if (card.hand_modifier != null) stats.push({ label: 'Hand', value: String(card.hand_modifier) })
+  if (card.life_modifier != null) stats.push({ label: 'Life', value: String(card.life_modifier) })
+  if (stats.length === 0) return null
+  return (
+    <div className={styles.statsRow}>
+      {stats.map(({ label, value }) => (
+        <div key={label} className={styles.statChip}>
+          <span className={styles.statLabel}>{label}</span>
+          <span className={styles.statValue}>{value}</span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean }) {
@@ -220,11 +232,18 @@ function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean
             ))}
           </div>
         )}
-        {face.power != null && face.toughness != null && (
-          <div className={styles.stats}>{face.power}/{face.toughness}</div>
-        )}
-        {face.loyalty != null && (
-          <div className={styles.stats}>Loyalty: {face.loyalty}</div>
+        {(face.power != null || face.loyalty != null) && (
+          <div className={styles.statsRow}>
+            {face.power != null && face.toughness != null && (
+              <>
+                <div className={styles.statChip}><span className={styles.statLabel}>Power</span><span className={styles.statValue}>{face.power}</span></div>
+                <div className={styles.statChip}><span className={styles.statLabel}>Toughness</span><span className={styles.statValue}>{face.toughness}</span></div>
+              </>
+            )}
+            {face.loyalty != null && (
+              <div className={styles.statChip}><span className={styles.statLabel}>Loyalty</span><span className={styles.statValue}>{face.loyalty}</span></div>
+            )}
+          </div>
         )}
       </div>
     </>
