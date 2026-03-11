@@ -60,6 +60,14 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
     onChange({ ...draft, page: 1 })
   }
 
+  function clearAll() {
+    const empty: SearchParams = { page: 1 }
+    setDraft(empty)
+    setColorMode('contains')
+    setLegalityFormat('')
+    onChange(empty)
+  }
+
   return (
     <div className={styles.filters}>
       <div className={styles.grid}>
@@ -184,6 +192,7 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
       </div>
 
       <div className={styles.applyRow}>
+        <button className={styles.clearAllBtn} onClick={clearAll} type="button">Clear</button>
         <button className={styles.applyBtn} onClick={apply} type="button">Apply Filters</button>
       </div>
     </div>
