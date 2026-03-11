@@ -55,6 +55,11 @@
   flex-wrap: wrap;
 }
 
+.row .input[type="number"] {
+  flex: 1;
+  min-width: 0;
+}
+
 .rangeSep {
   color: var(--text-muted);
 }
