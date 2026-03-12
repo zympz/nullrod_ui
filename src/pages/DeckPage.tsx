@@ -110,9 +110,9 @@ export function DeckPage() {
   )
 }
 
-function frontFaceName(name: string) {
-  const idx = name.indexOf(' // ')
-  return idx === -1 ? name : name.slice(0, idx)
+function frontFace(value: string) {
+  const idx = value.indexOf(' // ')
+  return idx === -1 ? value : value.slice(0, idx)
 }
 
 const TYPE_GROUPS = [
@@ -170,9 +170,9 @@ function TypeGroupBlock({ group }: { group: { label: string; cards: DeckCard[] }
       {group.cards.map((card) => (
         <div key={card.scryfall_id} className={styles.mainboardCard}>
           <span className={styles.cardQty}>{card.quantity}</span>
-          <span className={styles.cardName}>{frontFaceName(card.name)}</span>
+          <span className={styles.cardName}>{frontFace(card.name)}</span>
           <span className={styles.cardMana}>
-            {card.mana_cost && <ManaCost cost={card.mana_cost} size={13} />}
+            {card.mana_cost && <ManaCost cost={frontFace(card.mana_cost)} size={13} />}
           </span>
         </div>
       ))}
@@ -226,10 +226,10 @@ function CardZone({ title, cards }: { title: string; cards: DeckCard[] }) {
         {cards.map((card) => (
           <div key={card.scryfall_id} className={styles.cardRow}>
             <span className={styles.cardQty}>{card.quantity}</span>
-            <span className={styles.cardName}>{frontFaceName(card.name)}</span>
+            <span className={styles.cardName}>{frontFace(card.name)}</span>
             <span className={styles.cardType}>{card.type_line}</span>
             <span className={styles.cardMana}>
-              {card.mana_cost && <ManaCost cost={card.mana_cost} size={14} />}
+              {card.mana_cost && <ManaCost cost={frontFace(card.mana_cost)} size={14} />}
             </span>
           </div>
         ))}
