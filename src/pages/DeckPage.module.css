@@ -338,3 +338,8 @@
   background: var(--surface-2);
   border-radius: 3px;
 }
+
+.cmcFallback {
+  font-size: 11px;
+  color: var(--text-dim);
+}

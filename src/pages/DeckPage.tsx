@@ -172,7 +172,11 @@ function TypeGroupBlock({ group }: { group: { label: string; cards: DeckCard[] }
           <span className={styles.cardQty}>{card.quantity}</span>
           <span className={styles.cardName}>{frontFace(card.name)}</span>
           <span className={styles.cardMana}>
-            {card.mana_cost && <ManaCost cost={frontFace(card.mana_cost)} size={13} />}
+            {card.mana_cost ? (
+              <ManaCost cost={frontFace(card.mana_cost)} size={13} />
+            ) : card.cmc > 0 ? (
+              <span className={styles.cmcFallback}>{card.cmc}</span>
+            ) : null}
           </span>
         </div>
       ))}
@@ -229,7 +233,11 @@ function CardZone({ title, cards }: { title: string; cards: DeckCard[] }) {
             <span className={styles.cardName}>{frontFace(card.name)}</span>
             <span className={styles.cardType}>{card.type_line}</span>
             <span className={styles.cardMana}>
-              {card.mana_cost && <ManaCost cost={frontFace(card.mana_cost)} size={14} />}
+              {card.mana_cost ? (
+                <ManaCost cost={frontFace(card.mana_cost)} size={14} />
+              ) : card.cmc > 0 ? (
+                <span className={styles.cmcFallback}>{card.cmc}</span>
+              ) : null}
             </span>
           </div>
         ))}
