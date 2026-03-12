@@ -19,7 +19,7 @@
 
 .header {
   display: grid;
-  grid-template-columns: 1fr 120px 1fr 60px;
+  grid-template-columns: 1fr 120px 1fr;
   gap: 8px;
   padding: 8px 12px;
   background: var(--surface-2);
@@ -32,7 +32,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 120px 1fr 60px;
+  grid-template-columns: 1fr 120px 1fr;
   gap: 8px;
   padding: 8px 12px;
   text-align: left;
@@ -41,6 +41,7 @@
   font-size: 13px;
   color: var(--text);
   align-items: center;
+  cursor: pointer;
 }
 
 .row:hover {
@@ -75,15 +76,10 @@
   white-space: nowrap;
 }
 
-.colStats {
-  color: var(--text-muted);
-  text-align: center;
-}
-
 @media (max-width: 640px) {
   .header,
   .row {
-    grid-template-columns: 1fr 80px 60px;
+    grid-template-columns: 1fr 80px;
   }
 
   .colType {

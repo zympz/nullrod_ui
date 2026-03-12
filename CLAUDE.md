@@ -109,6 +109,15 @@ aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 
 AWS credentials must have access to S3 and CloudFront. The deploy IAM role is `nullrod-ui-deploy` but requires GitHub OIDC — use your personal CLI credentials for local deploys.
 
+## Rules
+
+- When the user says "commit and deploy from local", do all of the following in sequence:
+  1. Stage and commit the changed files with a descriptive message
+  2. Run `npm run build`
+  3. `git push origin main`
+  4. Sync to S3 (assets with immutable cache, index.html with no-cache, everything else with 1hr cache)
+  5. Invalidate CloudFront cache
+
 ## Conventions
 
 - Add new API functions to `src/api/client.ts`

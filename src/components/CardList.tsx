@@ -29,15 +29,9 @@ export function CardList({ cards, total, page, pageSize, onCardClick, onPageChan
           <span className={styles.colName}>Name</span>
           <span className={styles.colMana}>Mana</span>
           <span className={styles.colType}>Type</span>
-          <span className={styles.colStats}>P/T</span>
         </div>
         {cards.map((card) => (
-          <button
-            key={card.oracle_id}
-            className={styles.row}
-            onClick={() => onCardClick(card)}
-            type="button"
-          >
+          <div key={card.oracle_id} className={styles.row} onClick={() => onCardClick(card)}>
             <span className={styles.colName}>
               <Link
                 to={`/cards/${card.oracle_id}`}
@@ -51,14 +45,7 @@ export function CardList({ cards, total, page, pageSize, onCardClick, onPageChan
               {card.mana_cost && <ManaCost cost={card.mana_cost} size={14} />}
             </span>
             <span className={styles.colType}>{card.type_line}</span>
-            <span className={styles.colStats}>
-              {card.power != null && card.toughness != null
-                ? `${card.power}/${card.toughness}`
-                : card.loyalty != null
-                  ? card.loyalty
-                  : ''}
-            </span>
-          </button>
+          </div>
         ))}
       </div>
       {totalPages > 1 && (
