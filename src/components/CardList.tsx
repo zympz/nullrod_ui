@@ -12,7 +12,7 @@ interface CardListProps {
   onPageChange: (page: number) => void
 }
 
-export function CardList({ cards, total, page, pageSize, onCardClick, onPageChange }: CardListProps) {
+export function CardList({ cards, total, page, pageSize, onPageChange }: CardListProps) {
   const totalPages = Math.ceil(total / pageSize)
 
   if (cards.length === 0) {
@@ -31,12 +31,11 @@ export function CardList({ cards, total, page, pageSize, onCardClick, onPageChan
           <span className={styles.colType}>Type</span>
         </div>
         {cards.map((card) => (
-          <div key={card.oracle_id} className={styles.row} onClick={() => onCardClick(card)}>
+          <div key={card.oracle_id} className={styles.row}>
             <span className={styles.colName}>
               <Link
                 to={`/cards/${card.oracle_id}`}
                 className={styles.nameLink}
-                onClick={(e) => e.stopPropagation()}
               >
                 {card.name}
               </Link>

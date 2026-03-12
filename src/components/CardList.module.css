@@ -41,7 +41,6 @@
   font-size: 13px;
   color: var(--text);
   align-items: center;
-  cursor: pointer;
 }
 
 .row:hover {
