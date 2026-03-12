@@ -77,24 +77,29 @@ export function getDeck(id: string): Promise<Deck> {
   return request<Deck>(`/decks/${id}`)
 }
 
-export function createDeck(input: CreateDeckInput): Promise<Deck> {
-  return fetch(`${BASE_URL}/decks`, {
+export async function createDeck(input: CreateDeckInput): Promise<Deck> {
+  const res = await fetch(`${BASE_URL}/decks`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
-  }).then((r) => r.json() as Promise<Deck>)
+  })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
+  return res.json() as Promise<Deck>
 }
 
-export function updateDeck(id: string, input: UpdateDeckInput): Promise<Deck> {
-  return fetch(`${BASE_URL}/decks/${id}`, {
+export async function updateDeck(id: string, input: UpdateDeckInput): Promise<Deck> {
+  const res = await fetch(`${BASE_URL}/decks/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
-  }).then((r) => r.json() as Promise<Deck>)
+  })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
+  return res.json() as Promise<Deck>
 }
 
-export function deleteDeck(id: string): Promise<void> {
-  return fetch(`${BASE_URL}/decks/${id}`, { method: 'DELETE' }).then(() => undefined)
+export async function deleteDeck(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/decks/${id}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
 }
 
 export function getDeckLegality(id: string): Promise<DeckLegality> {
@@ -111,24 +116,30 @@ export function getCombo(id: string): Promise<Combo> {
   return request<Combo>(`/combos/${id}`)
 }
 
-export function createCombo(input: CreateComboInput): Promise<Combo> {
-  return fetch(`${BASE_URL}/combos`, {
+export async function createCombo(input: CreateComboInput): Promise<Combo> {
+  const res = await fetch(`${BASE_URL}/combos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
-  }).then((r) => r.json() as Promise<Combo>)
+  })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
+  return res.json() as Promise<Combo>
 }
 
-export function importSpellbookCombo(spellbookId: string): Promise<Combo> {
-  return fetch(`${BASE_URL}/combos/import/commanderspellbook/${spellbookId}`, {
+export async function importSpellbookCombo(spellbookId: string): Promise<Combo> {
+  const res = await fetch(`${BASE_URL}/combos/import/commanderspellbook/${spellbookId}`, {
     method: 'POST',
-  }).then((r) => r.json() as Promise<Combo>)
+  })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
+  return res.json() as Promise<Combo>
 }
 
-export function linkComboToDeck(deckId: string, comboId: string): Promise<void> {
-  return fetch(`${BASE_URL}/decks/${deckId}/combos/${comboId}`, { method: 'PUT' }).then(() => undefined)
+export async function linkComboToDeck(deckId: string, comboId: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/decks/${deckId}/combos/${comboId}`, { method: 'PUT' })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
 }
 
-export function unlinkComboFromDeck(deckId: string, comboId: string): Promise<void> {
-  return fetch(`${BASE_URL}/decks/${deckId}/combos/${comboId}`, { method: 'DELETE' }).then(() => undefined)
+export async function unlinkComboFromDeck(deckId: string, comboId: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/decks/${deckId}/combos/${comboId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
 }

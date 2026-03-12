@@ -21,8 +21,12 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let cancelled = false
     setRulings(null)
-    getRulings(card.oracle_id).then(setRulings).catch(() => {})
+    getRulings(card.oracle_id)
+      .then((r) => { if (!cancelled) setRulings(r) })
+      .catch(() => {}) // rulings are non-critical; section simply won't render
+    return () => { cancelled = true }
   }, [card.oracle_id])
 
   useEffect(() => {
@@ -194,7 +198,7 @@ function StatsRow({ card }: { card: OracleCard }) {
 function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean }) {
   return (
     <>
-      {separator && <div className={styles.faceDivider}>// Transform</div>}
+      {separator && <div className={styles.faceDivider}>//</div>}
       <div className={styles.face}>
         <div className={styles.faceHeader}>
           <span className={styles.faceName}>{face.name}</span>

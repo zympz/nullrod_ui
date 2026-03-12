@@ -8,7 +8,6 @@ interface CardListProps {
   total: number
   page: number
   pageSize: number
-  onCardClick: (card: OracleCard) => void
   onPageChange: (page: number) => void
 }
 

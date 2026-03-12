@@ -19,16 +19,23 @@ export function CardPage() {
 
   useEffect(() => {
     if (!oracleId) return
+    let cancelled = false
     setCard(null)
     setRulings(null)
     setError(null)
 
     getCardById(oracleId)
       .then((c) => {
+        if (cancelled) return
         setCard(c)
-        getRulings(c.oracle_id).then(setRulings).catch(() => {})
+        getRulings(c.oracle_id)
+          .then((r) => { if (!cancelled) setRulings(r) })
+          .catch(() => {}) // rulings are non-critical
       })
-      .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load card'))
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load card')
+      })
+    return () => { cancelled = true }
   }, [oracleId])
 
   if (error) {
@@ -197,7 +204,7 @@ function StatsRow({ card }: { card: OracleCard }) {
 function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean }) {
   return (
     <>
-      {separator && <div className={styles.faceDivider}>// Transform</div>}
+      {separator && <div className={styles.faceDivider}>//</div>}
       <div className={styles.face}>
         <div className={styles.faceHeader}>
           <span className={styles.faceName}>{face.name}</span>

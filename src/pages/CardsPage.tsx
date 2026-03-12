@@ -110,8 +110,7 @@ export function CardsPage() {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
+  }, [searchParams, searched, runSearch])
 
   function updateUrl(p: SearchParams, view: ViewMode) {
     setSearchParams(paramsToUrl(p, view), { replace: true })
@@ -239,7 +238,6 @@ export function CardsPage() {
           total={total}
           page={params.page ?? 1}
           pageSize={params.page_size ?? PAGE_SIZE}
-          onCardClick={setSelectedCard}
           onPageChange={handlePageChange}
         />
       )}

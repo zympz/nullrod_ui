@@ -12,7 +12,7 @@ function renderList(cards = [mockBolt, mockGoyf], opts?: { page?: number; total?
         total={opts?.total ?? cards.length}
         page={opts?.page ?? 1}
         pageSize={20}
-        onCardClick={vi.fn()}
+
         onPageChange={vi.fn()}
       />
     </MemoryRouter>,
@@ -66,7 +66,7 @@ describe('CardList', () => {
           total={40}
           page={1}
           pageSize={20}
-          onCardClick={vi.fn()}
+  
           onPageChange={onPageChange}
         />
       </MemoryRouter>,
