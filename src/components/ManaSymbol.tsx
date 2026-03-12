@@ -95,20 +95,32 @@ export function ManaCost({ cost, size = 18, gap = 2 }: ManaCostProps) {
   )
 }
 
-/** Renders oracle text with inline mana symbols and italic reminder text. */
-export function OracleText({ text }: { text: string }) {
-  // Split on mana symbols {X} and parenthesized reminder text (...)
-  const parts = text.split(/(\{[^}]+\}|\([^)]+\))/)
+/** Renders inline mana symbols from text containing {X} tokens. */
+function InlineMana({ text }: { text: string }) {
+  const parts = text.split(/(\{[^}]+\})/)
   return (
-    <span>
+    <>
       {parts.map((part, i) => {
         if (part.startsWith('{') && part.endsWith('}')) {
           return <ManaSymbol key={i} symbol={part.slice(1, -1)} size={14} />
         }
-        if (part.startsWith('(') && part.endsWith(')')) {
-          return <em key={i}>{part}</em>
-        }
         return <span key={i}>{part}</span>
+      })}
+    </>
+  )
+}
+
+/** Renders oracle text with inline mana symbols and italic reminder text. */
+export function OracleText({ text }: { text: string }) {
+  // Split on parenthesized reminder text, keeping the delimiters
+  const parts = text.split(/(\([^)]*\))/)
+  return (
+    <span>
+      {parts.map((part, i) => {
+        if (part.startsWith('(') && part.endsWith(')')) {
+          return <em key={i}><InlineMana text={part} /></em>
+        }
+        return <InlineMana key={i} text={part} />
       })}
     </span>
   )
