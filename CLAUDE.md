@@ -10,7 +10,7 @@ Primary use cases: combo building and deck building. Card search is a secondary 
 - **Vite** for dev/build
 - **React Router v6** for client-side routing
 - **CSS Modules** for component styles (no external UI framework)
-- **Vitest** + **Testing Library** for unit tests (71 tests)
+- **Vitest** + **Testing Library** for unit tests (85 tests)
 
 ## Dev
 
@@ -24,8 +24,9 @@ npx vitest run     # run all tests
 ## Routes
 
 ```
-/              → /cards (redirect)
-/decks         — Deck list and builder (coming soon)
+/              → /decks (redirect)
+/decks         — Deck list with Moxfield import (live)
+/decks/:id     — Full deck detail page (live)
 /combos        — Combo browser and creator (coming soon)
 /cards         — Card search and browser (live, URL params synced)
 /cards/:id     — Full card detail page by oracle UUID (live)
@@ -78,11 +79,15 @@ Rate limits: 60 req/min (search), 300 req/min (all others).
 | `GET /cards/{oracle_id}` | Get card by oracle UUID |
 | `GET /cards/symbols` | Mana symbol SVG URIs |
 | `GET /rulings/{oracle_id}` | Official rulings for a card |
+| `GET /decks` | List decks with pagination (page, page_size, format) |
+| `GET /decks/{id}` | Full deck detail by UUID (mainboard, sideboard, commanders, companions, maybeboard) |
+| `POST /decks/import` | Import deck from Moxfield URL or public ID |
 
 Card objects include `image_urls` with optional `normal` and `art_crop` signed CloudFront URLs.
 The `?view=list` param returns lightweight card data (no image_urls, power, toughness).
+Deck card objects use `image_url` (Moxfield CDN) and `card_url` (our API) instead of `image_urls`.
 
-Deck and combo endpoints are stubbed in client.ts — update as they go live.
+Combo endpoints are stubbed in client.ts — update as they go live.
 
 ## Deploy
 

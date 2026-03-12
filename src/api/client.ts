@@ -5,7 +5,7 @@ import type {
   RulingsResponse,
   CardSymbol,
 } from '../types/card'
-import type { DeckSummary, Deck, CreateDeckInput, UpdateDeckInput, DeckLegality } from '../types/deck'
+import type { DeckListResponse, Deck, ImportDeckInput } from '../types/deck'
 import type { ComboSummary, Combo, CreateComboInput } from '../types/combo'
 
 const BASE_URL = 'https://api.nullrod.com'
@@ -67,43 +67,24 @@ export function getSymbology(): Promise<CardSymbol[]> {
   return request<CardSymbol[]>('/cards/symbols')
 }
 
-// ─── Decks (stubbed — endpoints not yet live) ──────────────────────────────
+// ─── Decks ──────────────────────────────────────────────────────────────────
 
-export function listDecks(): Promise<DeckSummary[]> {
-  return request<DeckSummary[]>('/decks')
+export function listDecks(params?: { page?: number; page_size?: number; format?: string }): Promise<DeckListResponse> {
+  return request<DeckListResponse>('/decks', params as Record<string, string | number | undefined>)
 }
 
 export function getDeck(id: string): Promise<Deck> {
   return request<Deck>(`/decks/${id}`)
 }
 
-export async function createDeck(input: CreateDeckInput): Promise<Deck> {
-  const res = await fetch(`${BASE_URL}/decks`, {
+export async function importDeck(input: ImportDeckInput): Promise<Deck> {
+  const res = await fetch(`${BASE_URL}/decks/import`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
   if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
   return res.json() as Promise<Deck>
-}
-
-export async function updateDeck(id: string, input: UpdateDeckInput): Promise<Deck> {
-  const res = await fetch(`${BASE_URL}/decks/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  })
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
-  return res.json() as Promise<Deck>
-}
-
-export async function deleteDeck(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/decks/${id}`, { method: 'DELETE' })
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
-}
-
-export function getDeckLegality(id: string): Promise<DeckLegality> {
-  return request<DeckLegality>(`/decks/${id}/legality`)
 }
 
 // ─── Combos (stubbed — endpoints not yet live) ─────────────────────────────

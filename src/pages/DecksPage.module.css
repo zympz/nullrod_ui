@@ -1,0 +1,248 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.importBtn {
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.importBtn:hover {
+  background: var(--accent-hover);
+}
+
+/* Import form */
+.importForm {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+
+.importInput {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  min-width: 0;
+}
+
+.importInput:focus {
+  border-color: var(--accent);
+}
+
+.importSubmit {
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.importSubmit:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.importSubmit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.importCancel {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.importCancel:hover {
+  color: var(--text);
+}
+
+/* Deck list table */
+.list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.listHeader {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr 80px;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.listRow {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr 80px;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  transition: background 0.1s;
+  font-size: 13px;
+  color: var(--text);
+  align-items: center;
+}
+
+.listRow:hover {
+  background: var(--surface-2);
+}
+
+.colName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.nameLink {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nameLink:hover {
+  color: var(--accent);
+}
+
+.colFormat {
+  text-transform: capitalize;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.colCommanders {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.colCount {
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .listHeader,
+  .listRow {
+    grid-template-columns: 1fr 100px 60px;
+  }
+
+  .colCommanders {
+    display: none;
+  }
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.pageBtn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 6px 14px;
+  font-size: 13px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pageBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pageInfo {
+  color: var(--text-muted);
+  font-size: 13px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.loading {
+  color: var(--text-muted);
+  padding: 32px;
+  text-align: center;
+}
+
+.error {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 13px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 48px;
+  font-size: 15px;
+}
