@@ -94,10 +94,10 @@ describe('DeckPage', () => {
     expect(screen.getByText('A squirrel tribal deck')).toBeInTheDocument()
   })
 
-  it('renders commander zone', async () => {
+  it('renders commander group in mainboard', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     await act(async () => { renderDeckPage() })
-    expect(screen.getByText('Commanders')).toBeInTheDocument()
+    expect(screen.getByText('Commander')).toBeInTheDocument()
     expect(screen.getByText('Chatterfang, Squirrel General')).toBeInTheDocument()
   })
 

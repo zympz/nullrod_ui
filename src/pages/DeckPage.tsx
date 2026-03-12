@@ -87,14 +87,98 @@ export function DeckPage() {
         </div>
       )}
 
-      {/* Card zones */}
+      {/* Mainboard grouped by type */}
+      {(deck.commanders.length > 0 || deck.mainboard.length > 0) && (
+        <div className={styles.zone}>
+          <div className={styles.zoneHeader}>
+            <span className={styles.sectionLabel}>Mainboard</span>
+            <span className={styles.zoneCount}>
+              ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
+            </span>
+          </div>
+          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} />
+        </div>
+      )}
+
+      {/* Other zones */}
       <div className={styles.zones}>
-        <CardZone title="Commanders" cards={deck.commanders} />
         {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} />}
-        <CardZone title="Mainboard" cards={deck.mainboard} />
         {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} />}
         {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} />}
       </div>
+    </div>
+  )
+}
+
+const TYPE_GROUPS = [
+  { label: 'Commander', match: (_: DeckCard) => false as boolean }, // placeholder, filled by commanders prop
+  { label: 'Planeswalkers', match: (c: DeckCard) => c.type_line.includes('Planeswalker') },
+  { label: 'Creatures', match: (c: DeckCard) => c.type_line.includes('Creature') },
+  { label: 'Sorceries', match: (c: DeckCard) => c.type_line.includes('Sorcery') },
+  { label: 'Instants', match: (c: DeckCard) => c.type_line.includes('Instant') },
+  { label: 'Artifacts', match: (c: DeckCard) => c.type_line.includes('Artifact') && !c.type_line.includes('Creature') },
+  { label: 'Enchantments', match: (c: DeckCard) => c.type_line.includes('Enchantment') && !c.type_line.includes('Creature') },
+  { label: 'Lands', match: (c: DeckCard) => c.type_line.includes('Land') },
+] as const
+
+function groupMainboard(commanders: DeckCard[], cards: DeckCard[]) {
+  const groups: { label: string; cards: DeckCard[] }[] = []
+  const used = new Set<number>()
+
+  // Commanders first
+  if (commanders.length > 0) {
+    groups.push({ label: 'Commander', cards: commanders })
+  }
+
+  // Categorize mainboard cards
+  for (const group of TYPE_GROUPS) {
+    if (group.label === 'Commander') continue
+    const matched: DeckCard[] = []
+    cards.forEach((card, idx) => {
+      if (!used.has(idx) && group.match(card)) {
+        matched.push(card)
+        used.add(idx)
+      }
+    })
+    if (matched.length > 0) {
+      groups.push({ label: group.label, cards: matched })
+    }
+  }
+
+  // Anything uncategorized
+  const other = cards.filter((_, idx) => !used.has(idx))
+  if (other.length > 0) {
+    groups.push({ label: 'Other', cards: other })
+  }
+
+  return groups
+}
+
+function MainboardGrid({ commanders, cards }: { commanders: DeckCard[]; cards: DeckCard[] }) {
+  const groups = groupMainboard(commanders, cards)
+
+  return (
+    <div className={styles.mainboardGrid}>
+      {groups.map((group) => {
+        const total = group.cards.reduce((s, c) => s + c.quantity, 0)
+        return (
+          <div key={group.label} className={styles.typeGroup}>
+            <div className={styles.typeGroupHeader}>
+              <span className={styles.typeGroupLabel}>{group.label}</span>
+              <span className={styles.typeGroupCount}>({total})</span>
+            </div>
+            {group.cards.map((card) => (
+              <div key={card.scryfall_id} className={styles.mainboardCard}>
+                <span className={styles.cardQty}>{card.quantity}</span>
+                <span className={styles.cardName}>{card.name}</span>
+                <span className={styles.cardMana}>
+                  {card.mana_cost && <ManaCost cost={card.mana_cost} size={13} />}
+                </span>
+              </div>
+            ))}
+          </div>
+        )
+      })}
     </div>
   )
 }
