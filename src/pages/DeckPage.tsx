@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { Deck, DeckCard } from '../types/deck'
-import { getDeck, getCardByName } from '../api/client'
+import { getDeck, searchCardByName } from '../api/client'
 import { ManaCost } from '../components/ManaSymbol'
 import styles from './DeckPage.module.css'
 
@@ -41,12 +41,12 @@ export function DeckPage() {
 
     Promise.all(
       uniqueNames.map((name) =>
-        getCardByName(name)
+        searchCardByName(name)
           .then((res) => {
-            const card = res.results[0]
-            if (!card) return null
-            const manaCost = card.card_faces?.[0]?.mana_cost ?? card.mana_cost
-            return manaCost ? [name, manaCost] as const : null
+            // Find the DFC card whose front face matches
+            const card = res.results.find((c) => c.name.startsWith(name + ' // '))
+            if (!card?.card_faces?.[0]?.mana_cost) return null
+            return [name, card.card_faces[0].mana_cost] as const
           })
           .catch(() => null)
       )
