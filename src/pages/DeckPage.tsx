@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { Deck, DeckCard } from '../types/deck'
-import { getDeck } from '../api/client'
+import { getDeck, getCardByName } from '../api/client'
 import { ManaCost } from '../components/ManaSymbol'
 import styles from './DeckPage.module.css'
 
@@ -10,12 +10,14 @@ export function DeckPage() {
   const navigate = useNavigate()
   const [deck, setDeck] = useState<Deck | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [dfcManaCosts, setDfcManaCosts] = useState<Map<string, string>>(new Map())
 
   useEffect(() => {
     if (!deckId) return
     let cancelled = false
     setDeck(null)
     setError(null)
+    setDfcManaCosts(new Map())
 
     getDeck(deckId)
       .then((d) => { if (!cancelled) setDeck(d) })
@@ -24,6 +26,41 @@ export function DeckPage() {
       })
     return () => { cancelled = true }
   }, [deckId])
+
+  // Fetch mana costs for DFC cards (decks API returns null for these)
+  useEffect(() => {
+    if (!deck) return
+    let cancelled = false
+
+    const allCards = [...deck.commanders, ...deck.companions, ...deck.mainboard, ...deck.sideboard, ...deck.maybeboard]
+    const dfcCards = allCards.filter((c) => c.name.includes(' // ') && !c.mana_cost)
+    if (dfcCards.length === 0) return
+
+    // Deduplicate by front face name
+    const uniqueNames = [...new Set(dfcCards.map((c) => frontFace(c.name)))]
+
+    Promise.all(
+      uniqueNames.map((name) =>
+        getCardByName(name)
+          .then((res) => {
+            const card = res.results[0]
+            if (!card) return null
+            const manaCost = card.card_faces?.[0]?.mana_cost ?? card.mana_cost
+            return manaCost ? [name, manaCost] as const : null
+          })
+          .catch(() => null)
+      )
+    ).then((results) => {
+      if (cancelled) return
+      const map = new Map<string, string>()
+      for (const r of results) {
+        if (r) map.set(r[0], r[1])
+      }
+      setDfcManaCosts(map)
+    })
+
+    return () => { cancelled = true }
+  }, [deck])
 
   if (error) {
     return (
@@ -96,15 +133,15 @@ export function DeckPage() {
               ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
             </span>
           </div>
-          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={deck.format === 'commander' || deck.format === 'brawl' || deck.format === 'oathbreaker' || deck.format === 'duel'} />
+          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={deck.format === 'commander' || deck.format === 'brawl' || deck.format === 'oathbreaker' || deck.format === 'duel'} dfcManaCosts={dfcManaCosts} />
         </div>
       )}
 
       {/* Other zones */}
       <div className={styles.zones}>
-        {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} />}
-        {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} />}
-        {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} />}
+        {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} dfcManaCosts={dfcManaCosts} />}
+        {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} dfcManaCosts={dfcManaCosts} />}
+        {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} dfcManaCosts={dfcManaCosts} />}
       </div>
     </div>
   )
@@ -159,7 +196,14 @@ function groupMainboard(commanders: DeckCard[], cards: DeckCard[]) {
   return groups
 }
 
-function TypeGroupBlock({ group }: { group: { label: string; cards: DeckCard[] } }) {
+function resolveMana(card: DeckCard, dfcManaCosts: Map<string, string>): string | null {
+  if (card.mana_cost) return frontFace(card.mana_cost)
+  const dfcCost = dfcManaCosts.get(frontFace(card.name))
+  if (dfcCost) return dfcCost
+  return null
+}
+
+function TypeGroupBlock({ group, dfcManaCosts }: { group: { label: string; cards: DeckCard[] }; dfcManaCosts: Map<string, string> }) {
   const total = group.cards.reduce((s, c) => s + c.quantity, 0)
   return (
     <div className={styles.typeGroup}>
@@ -167,24 +211,27 @@ function TypeGroupBlock({ group }: { group: { label: string; cards: DeckCard[] }
         <span className={styles.typeGroupLabel}>{group.label}</span>
         <span className={styles.typeGroupCount}>({total})</span>
       </div>
-      {group.cards.map((card) => (
-        <div key={card.scryfall_id} className={styles.mainboardCard}>
-          <span className={styles.cardQty}>{card.quantity}</span>
-          <span className={styles.cardName}>{frontFace(card.name)}</span>
-          <span className={styles.cardMana}>
-            {card.mana_cost ? (
-              <ManaCost cost={frontFace(card.mana_cost)} size={13} />
-            ) : card.cmc > 0 ? (
-              <span className={styles.cmcFallback}>{card.cmc}</span>
-            ) : null}
-          </span>
-        </div>
-      ))}
+      {group.cards.map((card) => {
+        const mana = resolveMana(card, dfcManaCosts)
+        return (
+          <div key={card.scryfall_id} className={styles.mainboardCard}>
+            <span className={styles.cardQty}>{card.quantity}</span>
+            <span className={styles.cardName}>{frontFace(card.name)}</span>
+            <span className={styles.cardMana}>
+              {mana ? (
+                <ManaCost cost={mana} size={13} />
+              ) : card.cmc > 0 ? (
+                <span className={styles.cmcFallback}>{card.cmc}</span>
+              ) : null}
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-function MainboardGrid({ commanders, cards, isCommander }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean }) {
+function MainboardGrid({ commanders, cards, isCommander, dfcManaCosts }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean; dfcManaCosts: Map<string, string> }) {
   const groups = groupMainboard(commanders, cards)
   const lands = groups.find((g) => g.label === 'Lands')
   const nonLands = groups.filter((g) => g.label !== 'Lands')
@@ -195,11 +242,11 @@ function MainboardGrid({ commanders, cards, isCommander }: { commanders: DeckCar
       <div className={styles.mainboardSplit}>
         <div className={styles.mainboardFlow}>
           {nonLands.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} />
+            <TypeGroupBlock key={group.label} group={group} dfcManaCosts={dfcManaCosts} />
           ))}
         </div>
         <div className={styles.mainboardLands}>
-          <TypeGroupBlock group={lands} />
+          <TypeGroupBlock group={lands} dfcManaCosts={dfcManaCosts} />
         </div>
       </div>
     )
@@ -209,13 +256,13 @@ function MainboardGrid({ commanders, cards, isCommander }: { commanders: DeckCar
   return (
     <div className={styles.mainboardFlowFull}>
       {groups.map((group) => (
-        <TypeGroupBlock key={group.label} group={group} />
+        <TypeGroupBlock key={group.label} group={group} dfcManaCosts={dfcManaCosts} />
       ))}
     </div>
   )
 }
 
-function CardZone({ title, cards }: { title: string; cards: DeckCard[] }) {
+function CardZone({ title, cards, dfcManaCosts }: { title: string; cards: DeckCard[]; dfcManaCosts: Map<string, string> }) {
   if (cards.length === 0) return null
 
   const totalCards = cards.reduce((sum, c) => sum + c.quantity, 0)
@@ -227,20 +274,23 @@ function CardZone({ title, cards }: { title: string; cards: DeckCard[] }) {
         <span className={styles.zoneCount}>({totalCards})</span>
       </div>
       <div className={styles.cardTable}>
-        {cards.map((card) => (
-          <div key={card.scryfall_id} className={styles.cardRow}>
-            <span className={styles.cardQty}>{card.quantity}</span>
-            <span className={styles.cardName}>{frontFace(card.name)}</span>
-            <span className={styles.cardType}>{card.type_line}</span>
-            <span className={styles.cardMana}>
-              {card.mana_cost ? (
-                <ManaCost cost={frontFace(card.mana_cost)} size={14} />
-              ) : card.cmc > 0 ? (
-                <span className={styles.cmcFallback}>{card.cmc}</span>
-              ) : null}
-            </span>
-          </div>
-        ))}
+        {cards.map((card) => {
+          const mana = resolveMana(card, dfcManaCosts)
+          return (
+            <div key={card.scryfall_id} className={styles.cardRow}>
+              <span className={styles.cardQty}>{card.quantity}</span>
+              <span className={styles.cardName}>{frontFace(card.name)}</span>
+              <span className={styles.cardType}>{card.type_line}</span>
+              <span className={styles.cardMana}>
+                {mana ? (
+                  <ManaCost cost={mana} size={14} />
+                ) : card.cmc > 0 ? (
+                  <span className={styles.cmcFallback}>{card.cmc}</span>
+                ) : null}
+              </span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

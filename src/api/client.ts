@@ -58,6 +58,10 @@ export function getCardById(oracleId: string): Promise<OracleCard> {
   return request<OracleCard>(`/cards/${oracleId}`)
 }
 
+export function getCardByName(name: string): Promise<SearchResponse> {
+  return request<SearchResponse>('/cards', { name })
+}
+
 
 export function getRulings(oracleId: string): Promise<RulingsResponse> {
   return request<RulingsResponse>(`/rulings/${oracleId}`)
