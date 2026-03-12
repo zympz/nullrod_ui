@@ -48,6 +48,7 @@ export function searchCards(params: SearchParams): Promise<SearchResponse> {
     cmc_max: params.cmc_max,
     keywords: params.keywords,
     format: params.format,
+    view: params.view,
     page: params.page,
     page_size: params.page_size,
   })

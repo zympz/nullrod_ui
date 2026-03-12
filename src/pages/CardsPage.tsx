@@ -4,12 +4,15 @@ import type { Color, ColorMode, OracleCard, SearchParams } from '../types/card'
 import { searchCards } from '../api/client'
 import { SearchFilters } from '../components/SearchFilters'
 import { CardGrid } from '../components/CardGrid'
+import { CardList } from '../components/CardList'
 import { CardDetail } from '../components/CardDetail'
 import styles from './CardsPage.module.css'
 
 const PAGE_SIZE = 20
 
-function paramsToUrl(p: SearchParams): Record<string, string> {
+type ViewMode = 'grid' | 'list'
+
+function paramsToUrl(p: SearchParams, view: ViewMode): Record<string, string> {
   const out: Record<string, string> = {}
   if (p.name) out.q = p.name
   if (p.oracle_text) out.oracle = p.oracle_text
@@ -23,6 +26,7 @@ function paramsToUrl(p: SearchParams): Record<string, string> {
   if (p.keywords?.length) out.kw = p.keywords.join(',')
   if (p.format) out.fmt = p.format
   if (p.page && p.page > 1) out.page = String(p.page)
+  if (view === 'list') out.view = 'list'
   return out
 }
 
@@ -43,6 +47,10 @@ function urlToParams(sp: URLSearchParams): SearchParams {
   return p
 }
 
+function urlToView(sp: URLSearchParams): ViewMode {
+  return sp.get('view') === 'list' ? 'list' : 'grid'
+}
+
 function hasSearchCriteria(p: SearchParams): boolean {
   return !!(
     p.name || p.oracle_text || p.color?.length || p.color_identity?.length ||
@@ -55,6 +63,7 @@ export function CardsPage() {
   const initialParams = urlToParams(searchParams)
   const [params, setParams] = useState<SearchParams>(initialParams)
   const [query, setQuery] = useState(initialParams.name ?? '')
+  const [viewMode, setViewMode] = useState<ViewMode>(urlToView(searchParams))
   const [showFilters, setShowFilters] = useState(false)
   const [results, setResults] = useState<OracleCard[]>([])
   const [total, setTotal] = useState(0)
@@ -62,6 +71,7 @@ export function CardsPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
   const [searched, setSearched] = useState(false)
+
   const runSearch = useCallback(async (p: SearchParams) => {
     setLoading(true)
     setError(null)
@@ -91,8 +101,10 @@ export function CardsPage() {
       const p = urlToParams(searchParams)
       setParams(p)
       setQuery(p.name ?? '')
+      setViewMode(urlToView(searchParams))
       if (hasSearchCriteria(p)) {
-        runSearch(p)
+        const view = urlToView(searchParams)
+        runSearch(view === 'list' ? { ...p, view: 'list' } : p)
         if (!p.name && (p.color?.length || p.color_identity?.length || p.type || p.cmc_min != null || p.cmc_max != null || p.keywords?.length || p.oracle_text || p.format)) {
           setShowFilters(true)
         }
@@ -101,31 +113,40 @@ export function CardsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
-  function updateUrl(p: SearchParams) {
-    setSearchParams(paramsToUrl(p), { replace: true })
+  function updateUrl(p: SearchParams, view: ViewMode) {
+    setSearchParams(paramsToUrl(p, view), { replace: true })
   }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    const next = { ...params, name: query || undefined, page: 1 }
+    const next = { ...params, name: query || undefined, page: 1, view: viewMode === 'list' ? 'list' as const : undefined }
     setParams(next)
-    updateUrl(next)
+    updateUrl(next, viewMode)
     runSearch(next)
   }
 
   function handleParamsChange(next: SearchParams) {
-    const merged = { ...next, name: query || undefined }
+    const merged = { ...next, name: query || undefined, view: viewMode === 'list' ? 'list' as const : undefined }
     setParams(merged)
-    updateUrl(merged)
+    updateUrl(merged, viewMode)
     runSearch(merged)
   }
 
   function handlePageChange(page: number) {
-    const next = { ...params, page }
+    const next = { ...params, page, view: viewMode === 'list' ? 'list' as const : undefined }
     setParams(next)
-    updateUrl(next)
+    updateUrl(next, viewMode)
     runSearch(next)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleViewChange(view: ViewMode) {
+    setViewMode(view)
+    if (searched) {
+      const next = { ...params, view: view === 'list' ? 'list' as const : undefined }
+      updateUrl(next, view)
+      runSearch(next)
+    }
   }
 
   const hasFilters = !!(
@@ -165,6 +186,33 @@ export function CardsPage() {
         >
           Filters{hasFilters ? ' ·' : ''}
         </button>
+        <div className={styles.viewToggle}>
+          <button
+            className={`${styles.viewBtn} ${viewMode === 'grid' ? styles.viewBtnActive : ''}`}
+            type="button"
+            onClick={() => handleViewChange('grid')}
+            title="Grid view"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <rect x="1" y="1" width="6" height="6" rx="1" />
+              <rect x="9" y="1" width="6" height="6" rx="1" />
+              <rect x="1" y="9" width="6" height="6" rx="1" />
+              <rect x="9" y="9" width="6" height="6" rx="1" />
+            </svg>
+          </button>
+          <button
+            className={`${styles.viewBtn} ${viewMode === 'list' ? styles.viewBtnActive : ''}`}
+            type="button"
+            onClick={() => handleViewChange('list')}
+            title="List view"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <rect x="1" y="1.5" width="14" height="3" rx="1" />
+              <rect x="1" y="6.5" width="14" height="3" rx="1" />
+              <rect x="1" y="11.5" width="14" height="3" rx="1" />
+            </svg>
+          </button>
+        </div>
       </form>
 
       {showFilters && (
@@ -174,8 +222,19 @@ export function CardsPage() {
       {loading && <div className={styles.loading}>Searching…</div>}
       {error && <div className={styles.error}>{error}</div>}
 
-      {!loading && searched && (
+      {!loading && searched && viewMode === 'grid' && (
         <CardGrid
+          cards={results}
+          total={total}
+          page={params.page ?? 1}
+          pageSize={params.page_size ?? PAGE_SIZE}
+          onCardClick={setSelectedCard}
+          onPageChange={handlePageChange}
+        />
+      )}
+
+      {!loading && searched && viewMode === 'list' && (
+        <CardList
           cards={results}
           total={total}
           page={params.page ?? 1}

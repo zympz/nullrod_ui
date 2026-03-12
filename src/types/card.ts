@@ -97,6 +97,7 @@ export interface SearchParams {
   cmc_max?: number
   keywords?: string[]
   format?: string
+  view?: 'list'
   page?: number
   page_size?: number
 }

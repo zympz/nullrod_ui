@@ -88,6 +88,37 @@
   color: var(--accent);
 }
 
+.viewToggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--text-dim);
+  transition: color 0.15s, background 0.15s;
+}
+
+.viewBtn + .viewBtn {
+  border-left: 1px solid var(--border);
+}
+
+.viewBtn:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.viewBtnActive {
+  color: var(--accent);
+  background: var(--surface-2);
+}
+
 .loading {
   color: var(--text-muted);
   padding: 32px;
