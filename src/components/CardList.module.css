@@ -19,7 +19,7 @@
 
 .header {
   display: grid;
-  grid-template-columns: 1fr 120px 1fr;
+  grid-template-columns: 1fr 1fr 60px 1fr;
   gap: 8px;
   padding: 8px 12px;
   background: var(--surface-2);
@@ -32,7 +32,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 120px 1fr;
+  grid-template-columns: 1fr 1fr 60px 1fr;
   gap: 8px;
   padding: 8px 12px;
   text-align: left;
@@ -75,10 +75,15 @@
   white-space: nowrap;
 }
 
+.colCmc {
+  color: var(--text-muted);
+  text-align: center;
+}
+
 @media (max-width: 640px) {
   .header,
   .row {
-    grid-template-columns: 1fr 80px;
+    grid-template-columns: 1fr 1fr 50px;
   }
 
   .colType {
