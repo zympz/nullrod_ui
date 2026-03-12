@@ -96,7 +96,7 @@ export function DeckPage() {
               ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
             </span>
           </div>
-          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} />
+          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={deck.format === 'commander' || deck.format === 'brawl' || deck.format === 'oathbreaker' || deck.format === 'duel'} />
         </div>
       )}
 
@@ -154,31 +154,54 @@ function groupMainboard(commanders: DeckCard[], cards: DeckCard[]) {
   return groups
 }
 
-function MainboardGrid({ commanders, cards }: { commanders: DeckCard[]; cards: DeckCard[] }) {
-  const groups = groupMainboard(commanders, cards)
-
+function TypeGroupBlock({ group }: { group: { label: string; cards: DeckCard[] } }) {
+  const total = group.cards.reduce((s, c) => s + c.quantity, 0)
   return (
-    <div className={styles.mainboardGrid}>
-      {groups.map((group) => {
-        const total = group.cards.reduce((s, c) => s + c.quantity, 0)
-        return (
-          <div key={group.label} className={styles.typeGroup}>
-            <div className={styles.typeGroupHeader}>
-              <span className={styles.typeGroupLabel}>{group.label}</span>
-              <span className={styles.typeGroupCount}>({total})</span>
-            </div>
-            {group.cards.map((card) => (
-              <div key={card.scryfall_id} className={styles.mainboardCard}>
-                <span className={styles.cardQty}>{card.quantity}</span>
-                <span className={styles.cardName}>{card.name}</span>
-                <span className={styles.cardMana}>
-                  {card.mana_cost && <ManaCost cost={card.mana_cost} size={13} />}
-                </span>
-              </div>
-            ))}
-          </div>
-        )
-      })}
+    <div className={styles.typeGroup}>
+      <div className={styles.typeGroupHeader}>
+        <span className={styles.typeGroupLabel}>{group.label}</span>
+        <span className={styles.typeGroupCount}>({total})</span>
+      </div>
+      {group.cards.map((card) => (
+        <div key={card.scryfall_id} className={styles.mainboardCard}>
+          <span className={styles.cardQty}>{card.quantity}</span>
+          <span className={styles.cardName}>{card.name}</span>
+          <span className={styles.cardMana}>
+            {card.mana_cost && <ManaCost cost={card.mana_cost} size={13} />}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function MainboardGrid({ commanders, cards, isCommander }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean }) {
+  const groups = groupMainboard(commanders, cards)
+  const lands = groups.find((g) => g.label === 'Lands')
+  const nonLands = groups.filter((g) => g.label !== 'Lands')
+
+  // Commander decks: 3 flowing columns for spells + dedicated 4th column for lands
+  if (isCommander && lands) {
+    return (
+      <div className={styles.mainboardSplit}>
+        <div className={styles.mainboardFlow}>
+          {nonLands.map((group) => (
+            <TypeGroupBlock key={group.label} group={group} />
+          ))}
+        </div>
+        <div className={styles.mainboardLands}>
+          <TypeGroupBlock group={lands} />
+        </div>
+      </div>
+    )
+  }
+
+  // Non-commander: all groups flow naturally in 4 columns
+  return (
+    <div className={styles.mainboardFlowFull}>
+      {groups.map((group) => (
+        <TypeGroupBlock key={group.label} group={group} />
+      ))}
     </div>
   )
 }

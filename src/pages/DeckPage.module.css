@@ -247,22 +247,49 @@
   }
 }
 
-/* Mainboard 4-column grid */
-.mainboardGrid {
+/* Commander layout: 3 flowing columns + dedicated lands column */
+.mainboardSplit {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 3fr 1fr;
   gap: 16px;
 }
 
+.mainboardFlow {
+  column-count: 3;
+  column-gap: 16px;
+}
+
+.mainboardLands {
+  min-width: 0;
+}
+
+/* Non-commander: all groups flow in 4 columns */
+.mainboardFlowFull {
+  column-count: 4;
+  column-gap: 16px;
+}
+
 @media (max-width: 900px) {
-  .mainboardGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .mainboardSplit {
+    grid-template-columns: 1fr;
+  }
+
+  .mainboardFlow {
+    column-count: 2;
+  }
+
+  .mainboardFlowFull {
+    column-count: 2;
   }
 }
 
 @media (max-width: 500px) {
-  .mainboardGrid {
-    grid-template-columns: 1fr;
+  .mainboardFlow {
+    column-count: 1;
+  }
+
+  .mainboardFlowFull {
+    column-count: 1;
   }
 }
 
@@ -270,6 +297,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  break-inside: avoid;
+  margin-bottom: 12px;
 }
 
 .typeGroupHeader {
