@@ -184,46 +184,79 @@
   color: var(--text);
 }
 
-.curve {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 40px;
-  padding: 0 4px;
-  max-width: 50%;
-}
-
-.curveBar {
-  flex: 1;
+/* Deck Stats */
+.statsSection {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  min-width: 20px;
+  gap: 12px;
 }
 
-.curveBarFill {
-  width: 100%;
-  background: var(--accent);
-  border-radius: 3px 3px 0 0;
-  min-height: 2px;
-  opacity: 0.7;
-  transition: opacity 0.15s;
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 400px;
 }
 
-.curveBarFill:hover {
-  opacity: 1;
+.statBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.curveCount {
-  font-size: 10px;
+.statLabel {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text-muted);
+}
+
+/* Horizontal mana curve */
+.curveH {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.curveRowH {
+  display: grid;
+  grid-template-columns: 20px 1fr 28px;
+  gap: 8px;
+  align-items: center;
+}
+
+.curveCmcH {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
   font-weight: 600;
 }
 
-.curveCmc {
-  font-size: 10px;
-  color: var(--text-dim);
+.curveTrack {
+  height: 14px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.curveBarFillH {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  opacity: 0.7;
+  transition: opacity 0.15s, width 0.3s ease;
+  min-width: 2px;
+}
+
+.curveBarFillH:hover {
+  opacity: 1;
+}
+
+.curveCountH {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 /* Card zones */
@@ -231,6 +264,12 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.otherZones {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .zone {

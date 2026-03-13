@@ -148,34 +148,46 @@ export function DeckPage() {
         <hr className={styles.zoneDivider} />
       )}
 
-      {/* Other zones */}
-      <div className={styles.zones}>
-        {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} />}
-        {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} />}
-        {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} />}
-      </div>
-
-      {/* CMC Curve */}
-      {curveEntries.length > 0 && (
-        <div className={styles.curveSection}>
-          <div className={styles.sectionLabel}>Mana Curve</div>
-          <div className={styles.curve}>
-            {curveEntries.map(({ cmc, count }) => (
-              <div key={cmc} className={styles.curveBar}>
-                <span className={styles.curveCount}>{count}</span>
-                <div
-                  className={styles.curveBarFill}
-                  style={{ height: `${(count / maxCount) * 30}px` }}
-                />
-                <span className={styles.curveCmc}>{cmc}</span>
-              </div>
-            ))}
-          </div>
+      {/* Other zones — flow inline */}
+      {(deck.companions.length > 0 || deck.sideboard.length > 0 || deck.maybeboard.length > 0) && (
+        <div className={styles.otherZones}>
+          {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} />}
+          {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} />}
+          {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} />}
         </div>
       )}
 
         </div>
       </div>
+
+      {/* Deck Stats */}
+      {curveEntries.length > 0 && (
+        <>
+          <hr className={styles.zoneDivider} />
+          <div className={styles.statsSection}>
+            <div className={styles.sectionLabel}>Deck Stats</div>
+            <div className={styles.statsGrid}>
+              <div className={styles.statBlock}>
+                <div className={styles.statLabel}>Mana Curve</div>
+                <div className={styles.curveH}>
+                  {curveEntries.map(({ cmc, count }) => (
+                    <div key={cmc} className={styles.curveRowH}>
+                      <span className={styles.curveCmcH}>{cmc}</span>
+                      <div className={styles.curveTrack}>
+                        <div
+                          className={styles.curveBarFillH}
+                          style={{ width: `${(count / maxCount) * 100}%` }}
+                        />
+                      </div>
+                      <span className={styles.curveCountH}>{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {selectedCard && <CardDetail card={selectedCard} onClose={() => setSelectedCard(null)} />}
     </div>
