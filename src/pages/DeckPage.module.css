@@ -227,6 +227,12 @@
   gap: 12px;
 }
 
+.statGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
 .infoIcon {
   display: inline-flex;
   align-items: center;
