@@ -35,18 +35,9 @@ export function DeckPage() {
   }, [imageCache])
 
   const onCardHover = useCallback((card: DeckCard | null) => {
-    if (!card) {
-      // Revert to commander image if available
-      if (deck?.commanders[0]) {
-        const cached = imageCache.get(deck.commanders[0].name)
-        setHoveredImageUrl(cached ?? null)
-      } else {
-        setHoveredImageUrl(null)
-      }
-      return
-    }
+    if (!card) return // keep last hovered image
     fetchCardImage(card)
-  }, [deck, imageCache, fetchCardImage])
+  }, [fetchCardImage])
 
   const onCardClick = useCallback((cardName: string) => {
     searchCardByName(frontFace(cardName))
