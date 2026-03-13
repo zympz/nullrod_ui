@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 1400px;
+  width: 80%;
+  margin: 0 auto;
 }
 
 /* Two-column layout: preview + deck content */
@@ -168,9 +171,10 @@
 .curve {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
-  height: 80px;
+  gap: 3px;
+  height: 40px;
   padding: 0 4px;
+  max-width: 50%;
 }
 
 .curveBar {
@@ -178,8 +182,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  min-width: 28px;
+  gap: 2px;
+  min-width: 20px;
 }
 
 .curveBarFill {

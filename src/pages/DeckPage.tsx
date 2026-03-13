@@ -14,11 +14,27 @@ export function DeckPage() {
   const [error, setError] = useState<string | null>(null)
   const [dfcManaCosts, setDfcManaCosts] = useState<Map<string, string>>(new Map())
   const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
-  const [hoveredCard, setHoveredCard] = useState<DeckCard | null>(null)
+  const [hoveredImageUrl, setHoveredImageUrl] = useState<string | null>(null)
+  const imageCache = useState(() => new Map<string, string>())[0]
 
   const onCardHover = useCallback((card: DeckCard | null) => {
-    setHoveredCard(card)
-  }, [])
+    if (!card) { setHoveredImageUrl(null); return }
+    const cached = imageCache.get(card.name)
+    if (cached) { setHoveredImageUrl(cached); return }
+    // Fetch from cards API for a working signed image URL
+    searchCardByName(frontFace(card.name))
+      .then((res) => {
+        const match = res.results.find((c) => c.name === card.name || c.name.startsWith(frontFace(card.name) + ' // '))
+          ?? res.results.find((c) => c.name === frontFace(card.name))
+          ?? res.results[0]
+        const url = match?.image_urls?.normal ?? match?.image_urls?.art_crop ?? null
+        if (url) {
+          imageCache.set(card.name, url)
+          setHoveredImageUrl(url)
+        }
+      })
+      .catch(() => {})
+  }, [imageCache])
 
   const onCardClick = useCallback((cardName: string) => {
     searchCardByName(frontFace(cardName))
@@ -111,8 +127,8 @@ export function DeckPage() {
 
       <div className={styles.deckLayout}>
         <div className={styles.previewPanel}>
-          {hoveredCard?.image_url ? (
-            <img src={hoveredCard.image_url} alt={frontFace(hoveredCard.name)} className={styles.previewImage} />
+          {hoveredImageUrl ? (
+            <img src={hoveredImageUrl} alt="Card preview" className={styles.previewImage} />
           ) : (
             <div className={styles.previewEmpty}>Hover a card to preview</div>
           )}
@@ -135,25 +151,6 @@ export function DeckPage() {
         )}
       </div>
 
-      {/* CMC Curve */}
-      {curveEntries.length > 0 && (
-        <div className={styles.curveSection}>
-          <div className={styles.sectionLabel}>Mana Curve</div>
-          <div className={styles.curve}>
-            {curveEntries.map(({ cmc, count }) => (
-              <div key={cmc} className={styles.curveBar}>
-                <span className={styles.curveCount}>{count}</span>
-                <div
-                  className={styles.curveBarFill}
-                  style={{ height: `${(count / maxCount) * 60}px` }}
-                />
-                <span className={styles.curveCmc}>{cmc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Mainboard grouped by type */}
       {(deck.commanders.length > 0 || deck.mainboard.length > 0) && (
         <div className={styles.zone}>
@@ -173,6 +170,25 @@ export function DeckPage() {
         {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />}
         {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />}
       </div>
+
+      {/* CMC Curve */}
+      {curveEntries.length > 0 && (
+        <div className={styles.curveSection}>
+          <div className={styles.sectionLabel}>Mana Curve</div>
+          <div className={styles.curve}>
+            {curveEntries.map(({ cmc, count }) => (
+              <div key={cmc} className={styles.curveBar}>
+                <span className={styles.curveCount}>{count}</span>
+                <div
+                  className={styles.curveBarFill}
+                  style={{ height: `${(count / maxCount) * 30}px` }}
+                />
+                <span className={styles.curveCmc}>{cmc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
         </div>
       </div>
