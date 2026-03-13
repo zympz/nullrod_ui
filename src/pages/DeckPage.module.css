@@ -195,20 +195,18 @@
 }
 
 /* Deck Stats */
-.statsColumns {
+.statsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 32px;
 }
 
-@media (max-width: 900px) {
-  .statsColumns {
-    grid-template-columns: 1fr 1fr;
-  }
+.statSpanFull {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 640px) {
-  .statsColumns {
+  .statsGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -216,7 +214,7 @@
 .statBlock {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .statLabel {
@@ -227,27 +225,113 @@
   color: var(--text-muted);
 }
 
-.colorLegend {
+/* Vertical mana curve bar chart */
+.curveBar {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 120px;
+  padding-top: 4px;
+}
+
+.curveColumn {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.colorLegendItem {
-  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  height: 100%;
 }
 
-.colorLegendLabel {
-  font-size: 12px;
+.curveCount {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  min-height: 16px;
+}
+
+.curveTrack {
+  flex: 1;
+  width: 100%;
+  max-width: 40px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.curveFill {
+  width: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  opacity: 0.8;
+  transition: height 0.3s ease;
+  min-height: 2px;
+}
+
+/* Color analysis table */
+.colorTable {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.colorTableHeader {
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto;
+  gap: 10px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.colorTableRow {
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.colorTableName {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.colorTableValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.colorTablePct {
+  font-weight: 400;
   color: var(--text-muted);
 }
 
-.colorLegendValue {
+.colorTableCmc {
   font-size: 12px;
-  color: var(--text);
   font-weight: 600;
+  color: var(--text);
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+  justify-content: flex-end;
+}
+
+.colorTableCmcBar {
+  height: 10px;
+  border-radius: 2px;
+  opacity: 0.7;
+  min-width: 2px;
 }
 
 /* Avg CMC by color */
@@ -543,12 +627,11 @@
   border-radius: 3px;
 }
 
-/* Mana curve & type breakdown labels */
+/* Bar graph labels */
 .curveLabel {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-  text-align: center;
 }
 
 .wideBarGraph .cmcRow {

@@ -116,7 +116,7 @@ describe('DeckPage', () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     await act(async () => { renderDeckPage() })
     expect(screen.getByText('Deck Stats')).toBeInTheDocument()
-    expect(screen.getByText('Color Distribution')).toBeInTheDocument()
+    expect(screen.getByText('Color Analysis')).toBeInTheDocument()
   })
 
   it('renders sample hand section for decks with enough cards', async () => {

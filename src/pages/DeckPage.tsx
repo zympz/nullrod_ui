@@ -558,81 +558,27 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
         <span className={styles.sectionLabel}>Deck Stats</span>
       </button>
       {!collapsed && (
-        <>
-        {/* Row 1: Color Distribution, Avg CMC, Mana Production */}
-        <div className={styles.statsColumns}>
-          <div className={styles.statBlock}>
-            <div className={styles.statLabel}>Color Distribution</div>
-            <div className={styles.colorLegend}>
-              {colorDist.map(({ key, count, pct, label, symbol }) => (
-                <div key={key} className={styles.colorLegendItem}>
-                  <ManaCost cost={symbol} size={16} />
-                  <span className={styles.colorLegendLabel}>{label}</span>
-                  <span className={styles.colorLegendValue}>{count} ({pct}%)</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.statBlock}>
-            <div className={styles.statLabel}>Avg CMC by Color</div>
-            <div className={styles.cmcByColor}>
-              {colorDist.map(({ key, avgCmc, symbol, bg }) => (
-                <div key={key} className={styles.cmcRow}>
-                  <ManaCost cost={symbol} size={16} />
-                  <div className={styles.cmcTrack}>
-                    <div
-                      className={styles.cmcBarFill}
-                      style={{ width: `${(avgCmc / maxAvgCmc) * 100}%`, backgroundColor: bg }}
-                    />
-                  </div>
-                  <span className={styles.cmcValue}>{avgCmc.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {manaProd.length > 0 && (
-            <div className={styles.statBlock}>
-              <div className={styles.statLabel}>Mana Production</div>
-              <div className={styles.cmcByColor}>
-                {manaProd.map(({ key, count, pct, symbol, bg }) => (
-                  <div key={key} className={styles.cmcRow}>
-                    <ManaCost cost={symbol} size={16} />
-                    <div className={styles.cmcTrack}>
-                      <div
-                        className={styles.cmcBarFill}
-                        style={{ width: `${pct}%`, backgroundColor: bg }}
-                      />
-                    </div>
-                    <span className={styles.cmcValue}>{count} ({pct}%)</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Row 2: Mana Curve, Type Breakdown, Deck Composition */}
-        <div className={styles.statsColumns}>
-          <div className={styles.statBlock}>
+        <div className={styles.statsGrid}>
+          {/* Mana Curve — full width */}
+          <div className={`${styles.statBlock} ${styles.statSpanFull}`}>
             <div className={styles.statLabel}>Mana Curve</div>
-            <div className={styles.cmcByColor}>
+            <div className={styles.curveBar}>
               {manaCurve.map(({ label, count }) => (
-                <div key={label} className={styles.cmcRow}>
-                  <span className={styles.curveLabel}>{label}</span>
-                  <div className={styles.cmcTrack}>
+                <div key={label} className={styles.curveColumn}>
+                  <span className={styles.curveCount}>{count || ''}</span>
+                  <div className={styles.curveTrack}>
                     <div
-                      className={styles.cmcBarFill}
-                      style={{ width: `${(count / maxCurveCount) * 100}%`, backgroundColor: 'var(--accent)' }}
+                      className={styles.curveFill}
+                      style={{ height: `${maxCurveCount > 0 ? (count / maxCurveCount) * 100 : 0}%` }}
                     />
                   </div>
-                  <span className={styles.cmcValue}>{count}</span>
+                  <span className={styles.curveLabel}>{label}</span>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Type Breakdown */}
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Type Breakdown</div>
             <div className={`${styles.cmcByColor} ${styles.wideBarGraph}`}>
@@ -651,6 +597,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
             </div>
           </div>
 
+          {/* Deck Composition */}
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Deck Composition</div>
             <div className={styles.compositionList}>
@@ -702,39 +649,83 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
               )}
             </div>
           </div>
-        </div>
 
-        {/* Color Availability by Turn */}
-        {manaProd.length > 0 && (
+          {/* Color Analysis — merged color distribution + avg CMC */}
           <div className={styles.statBlock}>
-            <div className={styles.statLabel}>Color Availability by Turn</div>
-            <div className={styles.turnTable}>
-              <div className={styles.turnRow}>
-                <span className={styles.turnHeader}>Turn</span>
-                {manaProd.map(({ key, symbol }) => (
-                  <span key={key} className={styles.turnHeader}><ManaCost cost={symbol} size={16} /></span>
-                ))}
+            <div className={styles.statLabel}>Color Analysis</div>
+            <div className={styles.colorTable}>
+              <div className={styles.colorTableHeader}>
+                <span />
+                <span>Color</span>
+                <span>Spells</span>
+                <span>Avg CMC</span>
               </div>
-              {TURNS.map((turn) => {
-                const drawn = 6 + turn
-                return (
-                  <div key={turn} className={styles.turnRow}>
-                    <span className={styles.turnLabel}>T{turn}</span>
-                    {manaProd.map(({ key, count }) => {
-                      const pct = Math.round(pAtLeastOne(deckSize, count, drawn) * 100)
-                      return (
-                        <span key={key} className={styles.turnCell} style={{ opacity: 0.4 + 0.6 * (pct / 100) }}>
-                          {pct}%
-                        </span>
-                      )
-                    })}
-                  </div>
-                )
-              })}
+              {colorDist.map(({ key, count, pct, label, symbol, avgCmc, bg }) => (
+                <div key={key} className={styles.colorTableRow}>
+                  <ManaCost cost={symbol} size={16} />
+                  <span className={styles.colorTableName}>{label}</span>
+                  <span className={styles.colorTableValue}>{count} <span className={styles.colorTablePct}>({pct}%)</span></span>
+                  <span className={styles.colorTableCmc}>
+                    <span className={styles.colorTableCmcBar} style={{ width: `${(avgCmc / maxAvgCmc) * 60}%`, backgroundColor: bg }} />
+                    {avgCmc.toFixed(2)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        )}
-        </>
+
+          {/* Mana Production */}
+          {manaProd.length > 0 && (
+            <div className={styles.statBlock}>
+              <div className={styles.statLabel}>Mana Production</div>
+              <div className={styles.cmcByColor}>
+                {manaProd.map(({ key, count, pct, symbol, bg }) => (
+                  <div key={key} className={styles.cmcRow}>
+                    <ManaCost cost={symbol} size={16} />
+                    <div className={styles.cmcTrack}>
+                      <div
+                        className={styles.cmcBarFill}
+                        style={{ width: `${pct}%`, backgroundColor: bg }}
+                      />
+                    </div>
+                    <span className={styles.cmcValue}>{count} ({pct}%)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Color Availability by Turn */}
+          {manaProd.length > 0 && (
+            <div className={`${styles.statBlock} ${styles.statSpanFull}`}>
+              <div className={styles.statLabel}>Color Availability by Turn</div>
+              <div className={styles.turnTable}>
+                <div className={styles.turnRow}>
+                  <span className={styles.turnHeader}>Turn</span>
+                  {manaProd.map(({ key, symbol }) => (
+                    <span key={key} className={styles.turnHeader}><ManaCost cost={symbol} size={16} /></span>
+                  ))}
+                </div>
+                {TURNS.map((turn) => {
+                  const drawn = 6 + turn
+                  return (
+                    <div key={turn} className={styles.turnRow}>
+                      <span className={styles.turnLabel}>T{turn}</span>
+                      {manaProd.map(({ key, count }) => {
+                        const pct = Math.round(pAtLeastOne(deckSize, count, drawn) * 100)
+                        return (
+                          <span key={key} className={styles.turnCell} style={{ opacity: 0.4 + 0.6 * (pct / 100) }}>
+                            {pct}%
+                          </span>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
