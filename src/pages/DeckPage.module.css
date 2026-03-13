@@ -217,11 +217,24 @@
   gap: 12px;
 }
 
-.statDesc {
-  font-size: 12px;
+.infoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--text-dim);
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
   color: var(--text-dim);
-  line-height: 1.4;
-  margin-top: -4px;
+  cursor: help;
+  vertical-align: middle;
+  margin-left: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1;
 }
 
 .statLabel {
