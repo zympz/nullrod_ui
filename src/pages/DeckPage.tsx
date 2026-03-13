@@ -146,14 +146,10 @@ export function DeckPage() {
         </div>
       )}
 
-      {/* Other zones — flow inline */}
-      {(deck.companions.length > 0 || deck.sideboard.length > 0 || deck.maybeboard.length > 0) && (
-        <div className={styles.otherZones}>
-          {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
-          {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
-          {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
-        </div>
-      )}
+      {/* Other zones */}
+      {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
+      {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
+      {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
 
       {/* Deck Stats */}
       {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} manaCurve={manaCurve} analysis={deckAnalysis} />}
