@@ -26,9 +26,9 @@ export function CardList({ cards, total, page, pageSize, onPageChange }: CardLis
       <div className={styles.list}>
         <div className={styles.header}>
           <span className={styles.colName}>Name</span>
-          <span className={styles.colMana}>Mana</span>
-          <span className={styles.colCmc}>CMC</span>
           <span className={styles.colType}>Type</span>
+          <span className={styles.colCmc}>CMC</span>
+          <span className={styles.colMana}>Mana</span>
         </div>
         {cards.map((card) => (
           <div key={card.oracle_id} className={styles.row}>
@@ -40,11 +40,11 @@ export function CardList({ cards, total, page, pageSize, onPageChange }: CardLis
                 {card.name}
               </Link>
             </span>
+            <span className={styles.colType}>{card.type_line}</span>
+            <span className={styles.colCmc}>{card.cmc}</span>
             <span className={styles.colMana}>
               {card.mana_cost && <ManaCost cost={card.mana_cost} size={14} />}
             </span>
-            <span className={styles.colCmc}>{card.cmc}</span>
-            <span className={styles.colType}>{card.type_line}</span>
           </div>
         ))}
       </div>
