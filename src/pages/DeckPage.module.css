@@ -4,7 +4,9 @@
   gap: 20px;
   width: 98vw;
   max-width: 1800px;
-  margin-left: calc(50% - 49vw);
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* Two-column layout: preview + deck content */
