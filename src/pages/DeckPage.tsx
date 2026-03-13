@@ -98,6 +98,7 @@ export function DeckPage() {
   const allMainCards = [...deck.commanders, ...deck.mainboard]
   const colorDist = getColorDistribution(allMainCards)
   const manaProd = getManaProduction(allMainCards)
+  const deckSize = allMainCards.reduce((s, c) => s + c.quantity, 0)
 
   return (
     <div className={styles.page}>
@@ -153,7 +154,7 @@ export function DeckPage() {
       )}
 
       {/* Deck Stats */}
-      {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} />}
+      {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} />}
 
       {/* Sample Hand */}
       {allMainCards.length >= 7 && <SampleHand cards={allMainCards} onCardClick={onCardClick} />}
@@ -440,7 +441,21 @@ function SampleHand({ cards, onCardClick }: { cards: DeckCard[]; onCardClick: (n
   )
 }
 
-function DeckStats({ colorDist, manaProd }: { colorDist: ReturnType<typeof getColorDistribution>; manaProd: ReturnType<typeof getManaProduction> }) {
+/** P(at least 1 success in `drawn` cards) via hypergeometric distribution */
+function pAtLeastOne(deckSize: number, successes: number, drawn: number): number {
+  if (successes <= 0 || drawn <= 0 || deckSize <= 0) return 0
+  // P(0 successes) = C(N-K, n) / C(N, n) — compute via product to avoid large factorials
+  let p0 = 1
+  for (let i = 0; i < drawn; i++) {
+    p0 *= (deckSize - successes - i) / (deckSize - i)
+    if (p0 <= 0) return 1
+  }
+  return 1 - p0
+}
+
+const TURNS = [1, 2, 3, 4, 5]
+
+function DeckStats({ colorDist, manaProd, deckSize }: { colorDist: ReturnType<typeof getColorDistribution>; manaProd: ReturnType<typeof getManaProduction>; deckSize: number }) {
   const [collapsed, setCollapsed] = useState(false)
   const maxAvgCmc = Math.max(...colorDist.map((c) => c.avgCmc), 1)
 
@@ -451,6 +466,7 @@ function DeckStats({ colorDist, manaProd }: { colorDist: ReturnType<typeof getCo
         <span className={styles.sectionLabel}>Deck Stats</span>
       </button>
       {!collapsed && (
+        <>
         <div className={styles.statsColumns}>
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Color Distribution</div>
@@ -503,6 +519,37 @@ function DeckStats({ colorDist, manaProd }: { colorDist: ReturnType<typeof getCo
             </div>
           )}
         </div>
+
+        {manaProd.length > 0 && (
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Color Availability by Turn</div>
+            <div className={styles.turnTable}>
+              <div className={styles.turnRow}>
+                <span className={styles.turnHeader}>Turn</span>
+                {manaProd.map(({ key, symbol }) => (
+                  <span key={key} className={styles.turnHeader}><ManaCost cost={symbol} size={16} /></span>
+                ))}
+              </div>
+              {TURNS.map((turn) => {
+                const drawn = 6 + turn // 7 cards on turn 1 (opening hand), +1 per turn
+                return (
+                  <div key={turn} className={styles.turnRow}>
+                    <span className={styles.turnLabel}>T{turn}</span>
+                    {manaProd.map(({ key, count }) => {
+                      const pct = Math.round(pAtLeastOne(deckSize, count, drawn) * 100)
+                      return (
+                        <span key={key} className={styles.turnCell} style={{ opacity: 0.4 + 0.6 * (pct / 100) }}>
+                          {pct}%
+                        </span>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+        </>
       )}
     </div>
   )

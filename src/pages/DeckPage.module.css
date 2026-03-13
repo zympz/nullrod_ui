@@ -543,6 +543,60 @@
   border-radius: 3px;
 }
 
+/* Color availability turn table */
+.turnTable {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-width: 500px;
+}
+
+.turnRow {
+  display: flex;
+  align-items: center;
+}
+
+.turnRow:not(:first-child) {
+  border-top: 1px solid var(--border);
+}
+
+.turnRow:first-child {
+  background: var(--surface-2);
+}
+
+.turnRow:not(:first-child):hover {
+  background: var(--surface-2);
+}
+
+.turnHeader {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 8px;
+}
+
+.turnLabel {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 8px;
+}
+
+.turnCell {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 6px 8px;
+}
+
 /* Sample Hand */
 .sampleHandSection {
   display: flex;
