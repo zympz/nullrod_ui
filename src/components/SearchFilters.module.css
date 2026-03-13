@@ -14,17 +14,9 @@
   gap: 16px;
 }
 
-.groupWide {
-  grid-column: span 2;
-}
-
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;
-  }
-
-  .groupWide {
-    grid-column: span 1;
   }
 }
 
@@ -123,15 +115,6 @@
 
 .clearBtn:hover {
   color: var(--danger);
-}
-
-.legalityBadge {
-  font-size: 11px;
-  color: var(--accent);
-  background: var(--accent-dim);
-  padding: 2px 8px;
-  border-radius: 99px;
-  width: fit-content;
 }
 
 .applyRow {

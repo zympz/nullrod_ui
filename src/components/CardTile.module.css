@@ -33,12 +33,6 @@
   display: block;
 }
 
-.artSkeleton {
-  width: 100%;
-  height: 100%;
-  background: var(--surface-2);
-}
-
 .artMissing {
   width: 100%;
   height: 100%;
