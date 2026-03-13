@@ -91,7 +91,11 @@
   flex-direction: column;
   justify-content: center;
   gap: 8px;
-  padding: 32px 48px;
+  /* 284px = 260px preview panel + 24px gap, centering matches .page max-width */
+  width: 98vw;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px 48px 32px 284px;
   min-height: 280px;
   background: linear-gradient(
     to right,
@@ -129,6 +133,12 @@
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.5;
   max-width: 600px;
+}
+
+@media (max-width: 900px) {
+  .bannerOverlay {
+    padding: 32px 48px;
+  }
 }
 
 @media (max-width: 640px) {
