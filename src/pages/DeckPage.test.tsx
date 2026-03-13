@@ -5,8 +5,11 @@ import { DeckPage } from './DeckPage'
 
 const mockGetDeck = vi.fn()
 
+const mockSearchCardByName = vi.fn()
+
 vi.mock('../api/client', () => ({
   getDeck: (...args: unknown[]) => mockGetDeck(...args),
+  searchCardByName: (...args: unknown[]) => mockSearchCardByName(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
@@ -66,6 +69,7 @@ const mockDeck = {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockSearchCardByName.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
 })
 
 function renderDeckPage(deckId = 'deck-1') {

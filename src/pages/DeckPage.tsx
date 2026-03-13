@@ -17,11 +17,9 @@ export function DeckPage() {
   const [hoveredImageUrl, setHoveredImageUrl] = useState<string | null>(null)
   const imageCache = useState(() => new Map<string, string>())[0]
 
-  const onCardHover = useCallback((card: DeckCard | null) => {
-    if (!card) { setHoveredImageUrl(null); return }
+  const fetchCardImage = useCallback((card: DeckCard) => {
     const cached = imageCache.get(card.name)
     if (cached) { setHoveredImageUrl(cached); return }
-    // Fetch from cards API for a working signed image URL
     searchCardByName(frontFace(card.name))
       .then((res) => {
         const match = res.results.find((c) => c.name === card.name || c.name.startsWith(frontFace(card.name) + ' // '))
@@ -35,6 +33,20 @@ export function DeckPage() {
       })
       .catch(() => {})
   }, [imageCache])
+
+  const onCardHover = useCallback((card: DeckCard | null) => {
+    if (!card) {
+      // Revert to commander image if available
+      if (deck?.commanders[0]) {
+        const cached = imageCache.get(deck.commanders[0].name)
+        setHoveredImageUrl(cached ?? null)
+      } else {
+        setHoveredImageUrl(null)
+      }
+      return
+    }
+    fetchCardImage(card)
+  }, [deck, imageCache, fetchCardImage])
 
   const onCardClick = useCallback((cardName: string) => {
     searchCardByName(frontFace(cardName))
@@ -62,6 +74,12 @@ export function DeckPage() {
       })
     return () => { cancelled = true }
   }, [deckId])
+
+  // Show commander image by default
+  useEffect(() => {
+    if (!deck || deck.commanders.length === 0) return
+    fetchCardImage(deck.commanders[0])
+  }, [deck, fetchCardImage])
 
   // Fetch mana costs for DFC cards (decks API returns null for these)
   useEffect(() => {
