@@ -278,6 +278,22 @@
   gap: 8px;
 }
 
+.zoneFlow {
+  column-gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .zoneFlow {
+    column-count: 2 !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .zoneFlow {
+    column-count: 1 !important;
+  }
+}
+
 .zoneDivider {
   border: none;
   border-top: 1px solid var(--border);

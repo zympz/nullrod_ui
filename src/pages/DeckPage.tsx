@@ -157,9 +157,6 @@ export function DeckPage() {
         </div>
       )}
 
-        </div>
-      </div>
-
       {/* Deck Stats */}
       {curveEntries.length > 0 && (
         <>
@@ -188,6 +185,9 @@ export function DeckPage() {
           </div>
         </>
       )}
+
+        </div>
+      </div>
 
       {selectedCard && <CardDetail card={selectedCard} onClose={() => setSelectedCard(null)} />}
     </div>
@@ -307,6 +307,8 @@ function CardZone({ title, cards, onCardClick, onCardHover }: { title: string; c
 
   const groups = groupByType(cards)
   const totalCards = cards.reduce((sum, c) => sum + c.quantity, 0)
+  // ~8 cards per column, min 1, max 4
+  const cols = Math.min(4, Math.max(1, Math.ceil(cards.length / 8)))
 
   return (
     <div className={styles.zone}>
@@ -314,7 +316,7 @@ function CardZone({ title, cards, onCardClick, onCardHover }: { title: string; c
         <span className={styles.sectionLabel}>{title}</span>
         <span className={styles.zoneCount}>({totalCards})</span>
       </div>
-      <div className={styles.mainboardFlowFull}>
+      <div className={styles.zoneFlow} style={{ columnCount: cols }}>
         {groups.map((group) => (
           <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} />
         ))}
