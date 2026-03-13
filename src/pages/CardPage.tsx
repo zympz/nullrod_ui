@@ -3,12 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import type { OracleCard, RulingsResponse, CardFace } from '../types/card'
 import { getCardById, getRulings } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
+import { FORMAT_ORDER } from '../constants'
 import styles from './CardPage.module.css'
-
-const FORMAT_ORDER = [
-  'standard', 'pioneer', 'modern', 'legacy', 'vintage',
-  'commander', 'pauper', 'explorer', 'historic', 'timeless',
-] as const
 
 export function CardPage() {
   const { oracleId } = useParams<{ oracleId: string }>()

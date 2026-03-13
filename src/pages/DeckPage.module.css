@@ -207,13 +207,6 @@
   text-decoration: underline;
 }
 
-/* CMC curve */
-.curveSection {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .sectionLabel {
   font-size: 14px;
   font-weight: 700;
@@ -229,10 +222,6 @@
   gap: 28px 32px;
 }
 
-.statSpanFull {
-  grid-column: 1 / -1;
-}
-
 @media (max-width: 640px) {
   .statsGrid {
     grid-template-columns: 1fr;
@@ -243,12 +232,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.statGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
 }
 
 .infoIcon {
@@ -389,60 +372,7 @@
   color: var(--text-muted);
 }
 
-/* Avg CMC by color */
-.cmcByColor {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
-}
-
-.cmcByColor.fullWidth {
-  max-width: none;
-}
-
-.cmcRow {
-  display: grid;
-  grid-template-columns: 24px 1fr auto;
-  gap: 8px;
-  align-items: center;
-}
-
-.cmcTrack {
-  height: 18px;
-  background: var(--surface-2);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.cmcBarFill {
-  height: 100%;
-  border-radius: 3px;
-  opacity: 0.8;
-  transition: width 0.3s ease;
-  min-width: 2px;
-}
-
-.cmcValue {
-  font-size: 12px;
-  color: var(--text);
-  font-weight: 600;
-  text-align: right;
-}
-
 /* Card zones */
-.zones {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.otherZones {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .zone {
   display: flex;
   flex-direction: column;
@@ -471,12 +401,6 @@
   .zoneFlow {
     column-count: 1 !important;
   }
-}
-
-.zoneDivider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 4px 0;
 }
 
 .zoneHeader {
@@ -520,34 +444,6 @@
   font-weight: 400;
 }
 
-.cardTable {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.cardRow {
-  display: grid;
-  grid-template-columns: 30px 1fr 1fr 60px;
-  gap: 8px;
-  padding: 6px 12px;
-  border-top: 1px solid var(--border);
-  font-size: 13px;
-  color: var(--text);
-  align-items: center;
-  transition: background 0.1s;
-}
-
-.cardRow:first-child {
-  border-top: none;
-}
-
-.cardRow:hover {
-  background: var(--surface-2);
-}
-
 .cardQty {
   color: var(--text-dim);
   font-size: 12px;
@@ -570,28 +466,10 @@
   color: var(--accent);
 }
 
-.cardType {
-  color: var(--text-muted);
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .cardMana {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-}
-
-@media (max-width: 640px) {
-  .cardRow {
-    grid-template-columns: 30px 1fr 60px;
-  }
-
-  .cardType {
-    display: none;
-  }
 }
 
 /* Commander layout: 3 flowing columns + dedicated lands column */
@@ -691,17 +569,6 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-}
-
-.wideBarGraph .cmcRow {
-  grid-template-columns: 80px 1fr auto;
-}
-
-.typeLabel {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  white-space: nowrap;
 }
 
 /* Deck composition */

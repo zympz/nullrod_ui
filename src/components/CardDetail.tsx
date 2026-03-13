@@ -4,12 +4,8 @@ import { Link } from 'react-router-dom'
 import type { OracleCard, RulingsResponse, CardFace } from '../types/card'
 import { getRulings } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
+import { FORMAT_ORDER } from '../constants'
 import styles from './CardDetail.module.css'
-
-const FORMAT_ORDER = [
-  'standard', 'pioneer', 'modern', 'legacy', 'vintage',
-  'commander', 'pauper', 'explorer', 'historic', 'timeless',
-] as const
 
 interface CardDetailProps {
   card: OracleCard
