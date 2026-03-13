@@ -141,11 +141,6 @@ export function DeckPage() {
         </div>
       )}
 
-      {/* Divider after mainboard */}
-      {(deck.companions.length > 0 || deck.sideboard.length > 0 || deck.maybeboard.length > 0) && (
-        <hr className={styles.zoneDivider} />
-      )}
-
       {/* Other zones — flow inline */}
       {(deck.companions.length > 0 || deck.sideboard.length > 0 || deck.maybeboard.length > 0) && (
         <div className={styles.otherZones}>
@@ -340,12 +335,15 @@ const COLOR_ORDER = ['W', 'U', 'B', 'R', 'G', 'C']
 
 function getColorDistribution(cards: DeckCard[]) {
   const counts: Record<string, number> = {}
+  const cmcTotals: Record<string, number> = {}
   for (const card of cards) {
     if (card.colors.length === 0) {
       counts.C = (counts.C ?? 0) + card.quantity
+      cmcTotals.C = (cmcTotals.C ?? 0) + card.cmc * card.quantity
     } else {
       for (const c of card.colors) {
         counts[c] = (counts[c] ?? 0) + card.quantity
+        cmcTotals[c] = (cmcTotals[c] ?? 0) + card.cmc * card.quantity
       }
     }
   }
@@ -353,11 +351,17 @@ function getColorDistribution(cards: DeckCard[]) {
   if (total === 0) return []
   return COLOR_ORDER
     .filter((c) => (counts[c] ?? 0) > 0)
-    .map((c) => ({ key: c, count: counts[c], pct: Math.round((counts[c] / total) * 100), ...COLOR_META[c] }))
+    .map((c) => ({
+      key: c, count: counts[c],
+      pct: Math.round((counts[c] / total) * 100),
+      avgCmc: counts[c] > 0 ? cmcTotals[c] / counts[c] : 0,
+      ...COLOR_META[c],
+    }))
 }
 
 function DeckStats({ colorDist }: { colorDist: ReturnType<typeof getColorDistribution> }) {
   const [collapsed, setCollapsed] = useState(false)
+  const maxAvgCmc = Math.max(...colorDist.map((c) => c.avgCmc), 1)
 
   return (
     <div className={styles.zone}>
@@ -384,6 +388,22 @@ function DeckStats({ colorDist }: { colorDist: ReturnType<typeof getColorDistrib
                 <ManaCost cost={symbol} size={16} />
                 <span className={styles.colorLegendLabel}>{label}</span>
                 <span className={styles.colorLegendValue}>{count} ({pct}%)</span>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.statLabel}>Avg CMC by Color</div>
+          <div className={styles.cmcByColor}>
+            {colorDist.map(({ key, avgCmc, symbol, bg }) => (
+              <div key={key} className={styles.cmcRow}>
+                <ManaCost cost={symbol} size={16} />
+                <div className={styles.cmcTrack}>
+                  <div
+                    className={styles.cmcBarFill}
+                    style={{ width: `${(avgCmc / maxAvgCmc) * 100}%`, backgroundColor: bg }}
+                  />
+                </div>
+                <span className={styles.cmcValue}>{avgCmc.toFixed(2)}</span>
               </div>
             ))}
           </div>

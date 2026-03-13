@@ -235,6 +235,43 @@
   font-weight: 600;
 }
 
+/* Avg CMC by color */
+.cmcByColor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 400px;
+}
+
+.cmcRow {
+  display: grid;
+  grid-template-columns: 24px 1fr 40px;
+  gap: 8px;
+  align-items: center;
+}
+
+.cmcTrack {
+  height: 14px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cmcBarFill {
+  height: 100%;
+  border-radius: 3px;
+  opacity: 0.8;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+.cmcValue {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+}
+
 /* Card zones */
 .zones {
   display: flex;
@@ -299,7 +336,9 @@
 }
 
 .zoneHeaderBtn {
-  all: unset;
+  border: none;
+  font: inherit;
+  color: inherit;
   display: flex;
   align-items: center;
   gap: 8px;
