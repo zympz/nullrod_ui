@@ -94,10 +94,8 @@ export function DeckPage() {
     )
   }
 
-  const curveEntries = Object.entries(deck.cmc_curve)
-    .map(([cmc, count]) => ({ cmc: Number(cmc), count }))
-    .sort((a, b) => a.cmc - b.cmc)
-  const maxCount = Math.max(...curveEntries.map((e) => e.count), 1)
+  // Color distribution from mainboard + commanders
+  const colorDist = getColorDistribution([...deck.commanders, ...deck.mainboard])
 
   return (
     <div className={styles.page}>
@@ -133,7 +131,7 @@ export function DeckPage() {
       {/* Mainboard grouped by type */}
       {(deck.commanders.length > 0 || deck.mainboard.length > 0) && (
         <div className={styles.zone}>
-          <div className={styles.zoneHeader}>
+          <div className={`${styles.zoneHeader} ${styles.zoneHeaderBg}`}>
             <span className={styles.sectionLabel}>Mainboard</span>
             <span className={styles.zoneCount}>
               ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
@@ -158,33 +156,7 @@ export function DeckPage() {
       )}
 
       {/* Deck Stats */}
-      {curveEntries.length > 0 && (
-        <>
-          <hr className={styles.zoneDivider} />
-          <div className={styles.statsSection}>
-            <div className={styles.sectionLabel}>Deck Stats</div>
-            <div className={styles.statsGrid}>
-              <div className={styles.statBlock}>
-                <div className={styles.statLabel}>Mana Curve</div>
-                <div className={styles.curveH}>
-                  {curveEntries.map(({ cmc, count }) => (
-                    <div key={cmc} className={styles.curveRowH}>
-                      <span className={styles.curveCmcH}>{cmc}</span>
-                      <div className={styles.curveTrack}>
-                        <div
-                          className={styles.curveBarFillH}
-                          style={{ width: `${(count / maxCount) * 100}%` }}
-                        />
-                      </div>
-                      <span className={styles.curveCountH}>{count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {colorDist.length > 0 && <DeckStats colorDist={colorDist} />}
 
         </div>
       </div>
@@ -313,7 +285,7 @@ function CardZone({ title, cards, onCardClick, onCardHover, defaultCollapsed = f
 
   return (
     <div className={styles.zone}>
-      <button type="button" className={styles.zoneHeaderBtn} onClick={() => setCollapsed(!collapsed)}>
+      <button type="button" className={`${styles.zoneHeaderBtn} ${styles.zoneHeaderBg}`} onClick={() => setCollapsed(!collapsed)}>
         <span className={styles.collapseIcon}>{collapsed ? '▸' : '▾'}</span>
         <span className={styles.sectionLabel}>{title}</span>
         <span className={styles.zoneCount}>({totalCards})</span>
@@ -353,4 +325,70 @@ function groupByType(cards: DeckCard[]) {
   }
 
   return groups
+}
+
+const COLOR_META: Record<string, { label: string; symbol: string; bg: string }> = {
+  W: { label: 'White', symbol: '{W}', bg: '#F9FAF4' },
+  U: { label: 'Blue', symbol: '{U}', bg: '#0E68AB' },
+  B: { label: 'Black', symbol: '{B}', bg: '#150B00' },
+  R: { label: 'Red', symbol: '{R}', bg: '#D3202A' },
+  G: { label: 'Green', symbol: '{G}', bg: '#00733E' },
+  C: { label: 'Colorless', symbol: '{C}', bg: '#8888aa' },
+}
+
+const COLOR_ORDER = ['W', 'U', 'B', 'R', 'G', 'C']
+
+function getColorDistribution(cards: DeckCard[]) {
+  const counts: Record<string, number> = {}
+  for (const card of cards) {
+    if (card.colors.length === 0) {
+      counts.C = (counts.C ?? 0) + card.quantity
+    } else {
+      for (const c of card.colors) {
+        counts[c] = (counts[c] ?? 0) + card.quantity
+      }
+    }
+  }
+  const total = Object.values(counts).reduce((s, n) => s + n, 0)
+  if (total === 0) return []
+  return COLOR_ORDER
+    .filter((c) => (counts[c] ?? 0) > 0)
+    .map((c) => ({ key: c, count: counts[c], pct: Math.round((counts[c] / total) * 100), ...COLOR_META[c] }))
+}
+
+function DeckStats({ colorDist }: { colorDist: ReturnType<typeof getColorDistribution> }) {
+  const [collapsed, setCollapsed] = useState(false)
+
+  return (
+    <div className={styles.zone}>
+      <button type="button" className={`${styles.zoneHeaderBtn} ${styles.zoneHeaderBg}`} onClick={() => setCollapsed(!collapsed)}>
+        <span className={styles.collapseIcon}>{collapsed ? '▸' : '▾'}</span>
+        <span className={styles.sectionLabel}>Deck Stats</span>
+      </button>
+      {!collapsed && (
+        <div className={styles.statsContent}>
+          <div className={styles.statLabel}>Color Distribution</div>
+          <div className={styles.colorBar}>
+            {colorDist.map(({ key, pct, label, bg }) => (
+              <div
+                key={key}
+                className={styles.colorBarSegment}
+                style={{ width: `${pct}%`, backgroundColor: bg }}
+                title={`${label}: ${pct}%`}
+              />
+            ))}
+          </div>
+          <div className={styles.colorLegend}>
+            {colorDist.map(({ key, count, pct, label, symbol }) => (
+              <div key={key} className={styles.colorLegendItem}>
+                <ManaCost cost={symbol} size={16} />
+                <span className={styles.colorLegendLabel}>{label}</span>
+                <span className={styles.colorLegendValue}>{count} ({pct}%)</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }

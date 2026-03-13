@@ -19,7 +19,7 @@
 
 .previewPanel {
   position: sticky;
-  top: 20px;
+  top: 72px;
   width: 260px;
 }
 
@@ -185,23 +185,10 @@
 }
 
 /* Deck Stats */
-.statsSection {
+.statsContent {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.statsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  max-width: 400px;
-}
-
-.statBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .statLabel {
@@ -212,50 +199,39 @@
   color: var(--text-muted);
 }
 
-/* Horizontal mana curve */
-.curveH {
+.colorBar {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.curveRowH {
-  display: grid;
-  grid-template-columns: 20px 1fr 28px;
-  gap: 8px;
-  align-items: center;
-}
-
-.curveCmcH {
-  font-size: 12px;
-  color: var(--text-muted);
-  text-align: right;
-  font-weight: 600;
-}
-
-.curveTrack {
-  height: 14px;
-  background: var(--surface-2);
-  border-radius: 3px;
+  height: 20px;
+  border-radius: 4px;
   overflow: hidden;
+  gap: 2px;
 }
 
-.curveBarFillH {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  opacity: 0.7;
-  transition: opacity 0.15s, width 0.3s ease;
-  min-width: 2px;
+.colorBarSegment {
+  transition: width 0.3s ease;
+  min-width: 4px;
 }
 
-.curveBarFillH:hover {
-  opacity: 1;
+.colorLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.curveCountH {
+.colorLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.colorLegendLabel {
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.colorLegendValue {
+  font-size: 12px;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -312,6 +288,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.zoneHeaderBg {
+  background: var(--surface-2);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  margin: 0 -12px;
+  width: calc(100% + 24px);
 }
 
 .zoneHeaderBtn {
@@ -481,12 +465,12 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text);
+  color: var(--text-muted);
 }
 
 .typeGroupCount {
   font-size: 12px;
-  color: var(--text);
+  color: var(--text-muted);
   font-weight: 400;
 }
 

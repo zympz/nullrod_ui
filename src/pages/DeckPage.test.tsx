@@ -112,10 +112,11 @@ describe('DeckPage', () => {
     expect(screen.getByText('Sol Ring')).toBeInTheDocument()
   })
 
-  it('renders CMC curve', async () => {
+  it('renders deck stats', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     await act(async () => { renderDeckPage() })
-    expect(screen.getByText('Mana Curve')).toBeInTheDocument()
+    expect(screen.getByText('Deck Stats')).toBeInTheDocument()
+    expect(screen.getByText('Color Distribution')).toBeInTheDocument()
   })
 
   it('renders source link', async () => {
