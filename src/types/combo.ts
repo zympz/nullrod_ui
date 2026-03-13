@@ -1,52 +1,69 @@
-import type { OracleCard } from './card'
-
-export type ComboSource = 'user' | 'commanderspellbook' | 'edhrec'
-
-export interface ComboCard {
-  card: OracleCard
-  role?: string  // e.g. "Sac outlet", "Token generator"
-}
-
-export interface Combo {
-  id: string
-  name: string | null
-  description: string
-  result: string          // e.g. "Infinite mana", "Win the game"
-  cards: ComboCard[]
-  steps: string[]         // ordered steps to execute the combo
-  prerequisites: string[] // board state requirements
-  source: ComboSource
-  source_id: string | null // e.g. Commander Spellbook combo ID
-  tags: string[]
-  created_at: string
-  updated_at: string
+export interface ComboProduces {
+  name: string
+  quantity: number
 }
 
 export interface ComboSummary {
   id: string
-  name: string | null
-  result: string
-  card_count: number
-  source: ComboSource
-  tags: string[]
-  created_at: string
+  spellbook_id: string
+  card_names: string[]
+  produces: ComboProduces[]
+  identity: string
+  popularity: number
+  bracket_tag: string
 }
 
-export interface CreateComboInput {
-  name?: string
-  description: string
-  result: string
-  card_oracle_ids: string[]
-  steps: string[]
-  prerequisites?: string[]
-  tags?: string[]
+export interface ComboListResponse {
+  results: ComboSummary[]
+  total: number
+  page: number
+  page_size: number
 }
 
-/** Commander Spellbook combo format for import */
-export interface SpellbookCombo {
+export interface ComboCardUse {
+  card: {
+    name: string
+    oracle_id: string
+    type_line: string
+    image_url: string
+  }
+  quantity: number
+  zone_locations: string[]
+  battlefield_card_state: string
+  exile_card_state: string
+  library_card_state: string
+  graveyard_card_state: string
+  must_be_commander: boolean
+}
+
+export interface ComboRequirement {
+  name: string
+  scryfall_query: string
+  quantity: number
+  zone_locations: string[]
+}
+
+export interface Combo {
   id: string
-  uses: Array<{ card: { name: string; oracleId?: string }; zoneLocations: string[] }>
-  produces: Array<{ feature: { name: string } }>
+  spellbook_id: string
+  uses: ComboCardUse[]
+  requires: ComboRequirement[]
+  produces: ComboProduces[]
+  card_names: string[]
   description: string
   notes: string
+  mana_needed: string
+  mana_value_needed: number
+  easy_prerequisites: string
+  notable_prerequisites: string
+  identity: string
+  legalities: Record<string, boolean>
+  popularity: number
+  bracket_tag: string
+  prices: {
+    tcgplayer: string
+    cardmarket: string
+    cardkingdom: string
+  }
+  spoiler: boolean
 }

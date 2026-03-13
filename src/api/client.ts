@@ -6,7 +6,7 @@ import type {
   CardSymbol,
 } from '../types/card'
 import type { DeckListResponse, Deck, ImportDeckInput } from '../types/deck'
-import type { ComboSummary, Combo, CreateComboInput } from '../types/combo'
+import type { ComboListResponse, Combo } from '../types/combo'
 
 const BASE_URL = 'https://api.nullrod.com'
 
@@ -91,40 +91,12 @@ export async function importDeck(input: ImportDeckInput): Promise<Deck> {
   return res.json() as Promise<Deck>
 }
 
-// ─── Combos (stubbed — endpoints not yet live) ─────────────────────────────
+// ─── Combos ─────────────────────────────────────────────────────────────────
 
-export function listCombos(params?: { q?: string; tags?: string[]; page?: number; page_size?: number }): Promise<{ results: ComboSummary[]; total: number; page: number; page_size: number }> {
-  return request('/combos', params as Record<string, string | number | undefined>)
+export function listCombos(params?: { identity?: string; page?: number; page_size?: number }): Promise<ComboListResponse> {
+  return request<ComboListResponse>('/combos', params as Record<string, string | number | undefined>)
 }
 
 export function getCombo(id: string): Promise<Combo> {
   return request<Combo>(`/combos/${id}`)
-}
-
-export async function createCombo(input: CreateComboInput): Promise<Combo> {
-  const res = await fetch(`${BASE_URL}/combos`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  })
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
-  return res.json() as Promise<Combo>
-}
-
-export async function importSpellbookCombo(spellbookId: string): Promise<Combo> {
-  const res = await fetch(`${BASE_URL}/combos/import/commanderspellbook/${spellbookId}`, {
-    method: 'POST',
-  })
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
-  return res.json() as Promise<Combo>
-}
-
-export async function linkComboToDeck(deckId: string, comboId: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/decks/${deckId}/combos/${comboId}`, { method: 'PUT' })
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
-}
-
-export async function unlinkComboFromDeck(deckId: string, comboId: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/decks/${deckId}/combos/${comboId}`, { method: 'DELETE' })
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
 }

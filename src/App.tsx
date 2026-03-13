@@ -5,6 +5,7 @@ import { CardPage } from './pages/CardPage'
 import { DecksPage } from './pages/DecksPage'
 import { DeckPage } from './pages/DeckPage'
 import { CombosPage } from './pages/CombosPage'
+import { ComboPage } from './pages/ComboPage'
 import styles from './App.module.css'
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/decks" element={<DecksPage />} />
           <Route path="/decks/:deckId" element={<DeckPage />} />
           <Route path="/combos" element={<CombosPage />} />
+          <Route path="/combos/:comboId" element={<ComboPage />} />
           <Route path="/cards" element={<CardsPage />} />
           <Route path="/cards/:oracleId" element={<CardPage />} />
         </Routes>

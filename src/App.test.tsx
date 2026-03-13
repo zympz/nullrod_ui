@@ -7,6 +7,7 @@ vi.mock('./pages/CardPage', () => ({ CardPage: () => <div>CardPage</div> }))
 vi.mock('./pages/DecksPage', () => ({ DecksPage: () => <div>DecksPage</div> }))
 vi.mock('./pages/DeckPage', () => ({ DeckPage: () => <div>DeckPage</div> }))
 vi.mock('./pages/CombosPage', () => ({ CombosPage: () => <div>CombosPage</div> }))
+vi.mock('./pages/ComboPage', () => ({ ComboPage: () => <div>ComboPage</div> }))
 vi.mock('./api/symbology', () => ({
   loadSymbolMap: vi.fn(() => Promise.resolve(new Map())),
 }))
