@@ -309,6 +309,56 @@
   min-height: 2px;
 }
 
+/* Color summary table */
+.colorSummary {
+  display: flex;
+  flex-direction: column;
+}
+
+.colorSummaryHeader {
+  display: grid;
+  grid-template-columns: 24px 1fr repeat(3, auto);
+  gap: 12px;
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.colorSummaryRow {
+  display: grid;
+  grid-template-columns: 24px 1fr repeat(3, auto);
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.colorSummaryRow:last-child {
+  border-bottom: none;
+}
+
+.colorSummaryName {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.colorSummaryVal {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+  min-width: 60px;
+}
+
+.colorSummaryPct {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
 /* Avg CMC by color */
 .cmcByColor {
   display: flex;

@@ -543,7 +543,6 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, analysis }: {
   analysis: ReturnType<typeof getDeckAnalysis>
 }) {
   const [collapsed, setCollapsed] = useState(false)
-  const maxAvgCmc = Math.max(...colorDist.map((c) => c.avgCmc), 1)
   const maxCurveCount = Math.max(...manaCurve.map((b) => b.count), 1)
 
   return (
@@ -664,63 +663,34 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, analysis }: {
             </div>
           </div>
 
-          {/* Color Stats — stacked in one column */}
-          <div className={styles.statGroup}>
-            <div className={styles.statBlock}>
-              <div className={styles.statLabel}>Color Distribution <span className={styles.infoIcon} title="How many spells of each color are in the deck.">i</span></div>
-              <div className={`${styles.cmcByColor} ${styles.fullWidth}`}>
-                {colorDist.map(({ key, count, pct, symbol, bg }) => (
-                  <div key={key} className={styles.cmcRow}>
+          {/* Color Summary — combined table */}
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Color Summary <span className={styles.infoIcon} title="Spell distribution, average mana value, and land mana sources per color.">i</span></div>
+            <div className={styles.colorSummary}>
+              <div className={styles.colorSummaryHeader}>
+                <span />
+                <span>Color</span>
+                <span>Spells</span>
+                <span>Avg CMC</span>
+                {manaProd.length > 0 && <span>Sources</span>}
+              </div>
+              {colorDist.map(({ key, count, pct, label, symbol, avgCmc }) => {
+                const prod = manaProd.find((p) => p.key === key)
+                return (
+                  <div key={key} className={styles.colorSummaryRow}>
                     <ManaCost cost={symbol} size={16} />
-                    <div className={styles.cmcTrack}>
-                      <div
-                        className={styles.cmcBarFill}
-                        style={{ width: `${pct}%`, backgroundColor: bg }}
-                      />
-                    </div>
-                    <span className={styles.cmcValue}>{count} ({pct}%)</span>
+                    <span className={styles.colorSummaryName}>{label}</span>
+                    <span className={styles.colorSummaryVal}>{count} <span className={styles.colorSummaryPct}>({pct}%)</span></span>
+                    <span className={styles.colorSummaryVal}>{avgCmc.toFixed(2)}</span>
+                    {manaProd.length > 0 && (
+                      <span className={styles.colorSummaryVal}>
+                        {prod ? <>{prod.count} <span className={styles.colorSummaryPct}>({prod.pct}%)</span></> : '—'}
+                      </span>
+                    )}
                   </div>
-                ))}
-              </div>
+                )
+              })}
             </div>
-
-            <div className={styles.statBlock}>
-              <div className={styles.statLabel}>Avg CMC by Color <span className={styles.infoIcon} title="Average mana value of spells for each color.">i</span></div>
-              <div className={`${styles.cmcByColor} ${styles.fullWidth}`}>
-                {colorDist.map(({ key, avgCmc, symbol, bg }) => (
-                  <div key={key} className={styles.cmcRow}>
-                    <ManaCost cost={symbol} size={16} />
-                    <div className={styles.cmcTrack}>
-                      <div
-                        className={styles.cmcBarFill}
-                        style={{ width: `${(avgCmc / maxAvgCmc) * 100}%`, backgroundColor: bg }}
-                      />
-                    </div>
-                    <span className={styles.cmcValue}>{avgCmc.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {manaProd.length > 0 && (
-              <div className={styles.statBlock}>
-                <div className={styles.statLabel}>Mana Production <span className={styles.infoIcon} title="What colors of mana your lands can produce, based on color identity.">i</span></div>
-                <div className={`${styles.cmcByColor} ${styles.fullWidth}`}>
-                  {manaProd.map(({ key, count, pct, symbol, bg }) => (
-                    <div key={key} className={styles.cmcRow}>
-                      <ManaCost cost={symbol} size={16} />
-                      <div className={styles.cmcTrack}>
-                        <div
-                          className={styles.cmcBarFill}
-                          style={{ width: `${pct}%`, backgroundColor: bg }}
-                        />
-                      </div>
-                      <span className={styles.cmcValue}>{count} ({pct}%)</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
