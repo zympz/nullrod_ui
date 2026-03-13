@@ -13,12 +13,16 @@ export function DeckPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
   const [hoveredImageUrl, setHoveredImageUrl] = useState<string | null>(null)
+  const [hoveredCard, setHoveredCard] = useState<DeckCard | null>(null)
+  const [previewFace, setPreviewFace] = useState(0)
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const cardCache = useState(() => new Map<string, OracleCard>())[0]
 
   const onCardHover = useCallback((card: DeckCard | null) => {
     if (!card || !card.image_url) return
     setHoveredImageUrl(card.image_url)
+    setHoveredCard(card)
+    setPreviewFace(0)
   }, [])
 
   const onCardClick = useCallback((cardName: string) => {
@@ -123,13 +127,13 @@ export function DeckPage() {
       </div>
 
       <div className={styles.deckLayout}>
-        <div className={styles.previewPanel}>
-          {hoveredImageUrl ? (
-            <img src={hoveredImageUrl} alt="Card preview" className={styles.previewImage} />
-          ) : (
-            <div className={styles.previewEmpty}>Hover a card to preview</div>
-          )}
-        </div>
+        <PreviewPanel
+          hoveredCard={hoveredCard}
+          hoveredImageUrl={hoveredImageUrl}
+          previewFace={previewFace}
+          onFlip={() => setPreviewFace(previewFace === 0 ? 1 : 0)}
+          cardCache={cardCache}
+        />
 
         <div className={styles.deckContent}>
 
@@ -168,6 +172,47 @@ export function DeckPage() {
 function frontFace(value: string) {
   const idx = value.indexOf(' // ')
   return idx === -1 ? value : value.slice(0, idx)
+}
+
+function backFace(value: string) {
+  const idx = value.indexOf(' // ')
+  return idx === -1 ? null : value.slice(idx + 4)
+}
+
+function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip, cardCache }: {
+  hoveredCard: DeckCard | null
+  hoveredImageUrl: string | null
+  previewFace: number
+  onFlip: () => void
+  cardCache: Map<string, OracleCard>
+}) {
+  const isDfc = hoveredCard != null && hoveredCard.name.includes(' // ')
+  const otherFaceName = hoveredCard ? (previewFace === 0 ? backFace(hoveredCard.name) : frontFace(hoveredCard.name)) : null
+
+  // For DFCs on back face, try to get image from cards API cache
+  let imgUrl = hoveredImageUrl
+  if (isDfc && previewFace === 1 && hoveredCard) {
+    const cached = cardCache.get(hoveredCard.name)
+    if (cached?.image_urls?.normal) {
+      // API currently returns single image for DFCs — show it on both faces for now
+      imgUrl = cached.image_urls.normal
+    }
+  }
+
+  return (
+    <div className={styles.previewPanel}>
+      {imgUrl ? (
+        <img src={imgUrl} alt="Card preview" className={styles.previewImage} />
+      ) : (
+        <div className={styles.previewEmpty}>Hover a card to preview</div>
+      )}
+      {isDfc && otherFaceName && (
+        <button type="button" className={styles.flipBtn} onClick={onFlip}>
+          ↻ {otherFaceName}
+        </button>
+      )}
+    </div>
+  )
 }
 
 const TYPE_GROUPS = [

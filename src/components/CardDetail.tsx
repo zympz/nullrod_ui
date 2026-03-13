@@ -18,6 +18,7 @@ interface CardDetailProps {
 
 export function CardDetail({ card, onClose }: CardDetailProps) {
   const [rulings, setRulings] = useState<RulingsResponse | null>(null)
+  const [activeFace, setActiveFace] = useState(0)
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -46,9 +47,10 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
     if (e.target === overlayRef.current) onClose()
   }
 
-  const imgUrl = card.image_urls.normal ?? card.image_urls.art_crop
-
   const faces = card.card_faces
+  const isDfc = faces != null && faces.length === 2
+  const currentFace = isDfc ? faces[activeFace] : null
+  const imgUrl = card.image_urls.normal ?? card.image_urls.art_crop
 
   return createPortal(
     <div className={styles.overlay} ref={overlayRef} onClick={handleOverlayClick}>
@@ -65,17 +67,32 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
                 <div className={styles.artEmpty}>No image</div>
               )}
             </div>
-
+            {isDfc && (
+              <button type="button" className={styles.flipBtn} onClick={() => setActiveFace(activeFace === 0 ? 1 : 0)}>
+                ↻ Flip to {faces[activeFace === 0 ? 1 : 0].name}
+              </button>
+            )}
           </div>
 
           {/* Info panel */}
           <div className={styles.infoPanel}>
-            <div className={styles.header}>
-              <Link to={`/cards/${card.oracle_id}`} className={styles.name} onClick={onClose}>{card.name}</Link>
-              {card.mana_cost && <ManaCost cost={card.mana_cost} size={20} />}
-            </div>
-
-            <div className={styles.typeLine}>{card.type_line}</div>
+            {isDfc && currentFace ? (
+              <>
+                <div className={styles.header}>
+                  <Link to={`/cards/${card.oracle_id}`} className={styles.name} onClick={onClose}>{currentFace.name}</Link>
+                  {currentFace.mana_cost && <ManaCost cost={currentFace.mana_cost} size={20} />}
+                </div>
+                <div className={styles.typeLine}>{currentFace.type_line}</div>
+              </>
+            ) : (
+              <>
+                <div className={styles.header}>
+                  <Link to={`/cards/${card.oracle_id}`} className={styles.name} onClick={onClose}>{card.name}</Link>
+                  {card.mana_cost && <ManaCost cost={card.mana_cost} size={20} />}
+                </div>
+                <div className={styles.typeLine}>{card.type_line}</div>
+              </>
+            )}
 
             {card.color_identity.length > 0 && (
               <div className={styles.colorIdentity}>
@@ -92,8 +109,31 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
               <div className={styles.reserved}>Reserved List</div>
             )}
 
-            {/* Card faces (DFC / modal) */}
-            {faces ? (
+            {/* Card text */}
+            {isDfc && currentFace ? (
+              <>
+                {currentFace.oracle_text && (
+                  <div className={styles.oracleText}>
+                    {currentFace.oracle_text.split('\n').map((line, i) => (
+                      <p key={i}><OracleText text={line} /></p>
+                    ))}
+                  </div>
+                )}
+                {(currentFace.power != null || currentFace.loyalty != null) && (
+                  <div className={styles.statsRow}>
+                    {currentFace.power != null && currentFace.toughness != null && (
+                      <>
+                        <div className={styles.statChip}><span className={styles.statLabel}>Power</span><span className={styles.statValue}>{currentFace.power}</span></div>
+                        <div className={styles.statChip}><span className={styles.statLabel}>Toughness</span><span className={styles.statValue}>{currentFace.toughness}</span></div>
+                      </>
+                    )}
+                    {currentFace.loyalty != null && (
+                      <div className={styles.statChip}><span className={styles.statLabel}>Loyalty</span><span className={styles.statValue}>{currentFace.loyalty}</span></div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : faces ? (
               <div className={styles.faces}>
                 {faces.map((face, i) => (
                   <CardFaceBlock key={i} face={face} separator={i > 0} />

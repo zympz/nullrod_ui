@@ -91,6 +91,23 @@
   font-size: 13px;
 }
 
+.flipBtn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.15s, color 0.15s;
+  text-align: center;
+}
+
+.flipBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .infoPanel {
   padding: 28px;
   display: flex;
