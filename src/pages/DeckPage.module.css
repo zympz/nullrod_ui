@@ -543,6 +543,65 @@
   border-radius: 3px;
 }
 
+/* Mana curve & type breakdown labels */
+.curveLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.wideBarGraph .cmcRow {
+  grid-template-columns: 80px 1fr auto;
+}
+
+.typeLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Deck composition */
+.compositionList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.compositionRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.compositionLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.compositionValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.compositionPct {
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 70px;
+  text-align: right;
+}
+
+.compositionDivider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2px 0;
+}
+
 /* Color availability turn table */
 .turnTable {
   display: flex;

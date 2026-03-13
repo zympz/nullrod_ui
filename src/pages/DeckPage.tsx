@@ -99,6 +99,9 @@ export function DeckPage() {
   const colorDist = getColorDistribution(allMainCards)
   const manaProd = getManaProduction(allMainCards)
   const deckSize = allMainCards.reduce((s, c) => s + c.quantity, 0)
+  const manaCurve = getManaCurve(allMainCards)
+  const typeBreakdown = getTypeBreakdown(allMainCards)
+  const deckAnalysis = getDeckAnalysis(allMainCards)
 
   return (
     <div className={styles.page}>
@@ -154,7 +157,7 @@ export function DeckPage() {
       )}
 
       {/* Deck Stats */}
-      {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} />}
+      {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} manaCurve={manaCurve} typeBreakdown={typeBreakdown} analysis={deckAnalysis} />}
 
       {/* Sample Hand */}
       {allMainCards.length >= 7 && <SampleHand cards={allMainCards} onCardClick={onCardClick} />}
@@ -388,6 +391,86 @@ function getManaProduction(cards: DeckCard[]) {
     }))
 }
 
+function getManaCurve(cards: DeckCard[]) {
+  const buckets: Record<string, number> = {}
+  for (const card of cards) {
+    if (card.type_line.includes('Land')) continue
+    const key = card.cmc >= 6 ? '6+' : String(Math.floor(card.cmc))
+    buckets[key] = (buckets[key] ?? 0) + card.quantity
+  }
+  const labels = ['0', '1', '2', '3', '4', '5', '6+']
+  return labels.map((l) => ({ label: l, count: buckets[l] ?? 0 }))
+}
+
+function getTypeBreakdown(cards: DeckCard[]) {
+  const types = [
+    { label: 'Creatures', match: (c: DeckCard) => c.type_line.includes('Creature') },
+    { label: 'Instants', match: (c: DeckCard) => c.type_line.includes('Instant') },
+    { label: 'Sorceries', match: (c: DeckCard) => c.type_line.includes('Sorcery') },
+    { label: 'Artifacts', match: (c: DeckCard) => c.type_line.includes('Artifact') && !c.type_line.includes('Creature') },
+    { label: 'Enchantments', match: (c: DeckCard) => c.type_line.includes('Enchantment') && !c.type_line.includes('Creature') },
+    { label: 'Planeswalkers', match: (c: DeckCard) => c.type_line.includes('Planeswalker') },
+    { label: 'Lands', match: (c: DeckCard) => c.type_line.includes('Land') },
+  ]
+  const used = new Set<number>()
+  const result: { label: string; count: number }[] = []
+  for (const type of types) {
+    let count = 0
+    cards.forEach((card, idx) => {
+      if (!used.has(idx) && type.match(card)) {
+        count += card.quantity
+        used.add(idx)
+      }
+    })
+    if (count > 0) result.push({ label: type.label, count })
+  }
+  const otherCount = cards.filter((_, idx) => !used.has(idx)).reduce((s, c) => s + c.quantity, 0)
+  if (otherCount > 0) result.push({ label: 'Other', count: otherCount })
+  return result
+}
+
+function getDeckAnalysis(cards: DeckCard[]) {
+  const totalCards = cards.reduce((s, c) => s + c.quantity, 0)
+  const lands = cards.filter((c) => c.type_line.includes('Land'))
+  const landCount = lands.reduce((s, c) => s + c.quantity, 0)
+  const spellCount = totalCards - landCount
+
+  const creatures = cards.filter((c) => c.type_line.includes('Creature'))
+  let totalPower = 0, totalToughness = 0, creatureCount = 0
+  for (const c of creatures) {
+    const p = parseFloat(c.power ?? '')
+    const t = parseFloat(c.toughness ?? '')
+    if (!isNaN(p) && !isNaN(t)) {
+      totalPower += p * c.quantity
+      totalToughness += t * c.quantity
+      creatureCount += c.quantity
+    }
+  }
+
+  const drawPatterns = /\bdraw|draws\b/i
+  const interactionPatterns = /\bdestroy|destroys|exile|exiles|counter target\b/i
+
+  let drawCount = 0, interactionCount = 0
+  for (const card of cards) {
+    if (card.type_line.includes('Land')) continue
+    const text = card.oracle_text ?? ''
+    if (drawPatterns.test(text)) drawCount += card.quantity
+    if (interactionPatterns.test(text)) interactionCount += card.quantity
+  }
+
+  const uniqueCards = cards.length
+  const totalSlots = totalCards
+
+  return {
+    landCount, spellCount, totalCards,
+    avgPower: creatureCount > 0 ? totalPower / creatureCount : 0,
+    avgToughness: creatureCount > 0 ? totalToughness / creatureCount : 0,
+    creatureCount,
+    drawCount, interactionCount,
+    uniqueCards, totalSlots,
+  }
+}
+
 function drawSampleHand(cards: DeckCard[], count = 7): DeckCard[] {
   // Build pool expanding by quantity
   const pool: DeckCard[] = []
@@ -455,9 +538,18 @@ function pAtLeastOne(deckSize: number, successes: number, drawn: number): number
 
 const TURNS = [1, 2, 3, 4, 5]
 
-function DeckStats({ colorDist, manaProd, deckSize }: { colorDist: ReturnType<typeof getColorDistribution>; manaProd: ReturnType<typeof getManaProduction>; deckSize: number }) {
+function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, analysis }: {
+  colorDist: ReturnType<typeof getColorDistribution>
+  manaProd: ReturnType<typeof getManaProduction>
+  deckSize: number
+  manaCurve: ReturnType<typeof getManaCurve>
+  typeBreakdown: ReturnType<typeof getTypeBreakdown>
+  analysis: ReturnType<typeof getDeckAnalysis>
+}) {
   const [collapsed, setCollapsed] = useState(false)
   const maxAvgCmc = Math.max(...colorDist.map((c) => c.avgCmc), 1)
+  const maxCurveCount = Math.max(...manaCurve.map((b) => b.count), 1)
+  const maxTypeCount = Math.max(...typeBreakdown.map((t) => t.count), 1)
 
   return (
     <div className={styles.zone}>
@@ -467,6 +559,7 @@ function DeckStats({ colorDist, manaProd, deckSize }: { colorDist: ReturnType<ty
       </button>
       {!collapsed && (
         <>
+        {/* Row 1: Color Distribution, Avg CMC, Mana Production */}
         <div className={styles.statsColumns}>
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Color Distribution</div>
@@ -520,6 +613,98 @@ function DeckStats({ colorDist, manaProd, deckSize }: { colorDist: ReturnType<ty
           )}
         </div>
 
+        {/* Row 2: Mana Curve, Type Breakdown, Deck Composition */}
+        <div className={styles.statsColumns}>
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Mana Curve</div>
+            <div className={styles.cmcByColor}>
+              {manaCurve.map(({ label, count }) => (
+                <div key={label} className={styles.cmcRow}>
+                  <span className={styles.curveLabel}>{label}</span>
+                  <div className={styles.cmcTrack}>
+                    <div
+                      className={styles.cmcBarFill}
+                      style={{ width: `${(count / maxCurveCount) * 100}%`, backgroundColor: 'var(--accent)' }}
+                    />
+                  </div>
+                  <span className={styles.cmcValue}>{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Type Breakdown</div>
+            <div className={`${styles.cmcByColor} ${styles.wideBarGraph}`}>
+              {typeBreakdown.map(({ label, count }) => (
+                <div key={label} className={styles.cmcRow}>
+                  <span className={styles.typeLabel}>{label}</span>
+                  <div className={styles.cmcTrack}>
+                    <div
+                      className={styles.cmcBarFill}
+                      style={{ width: `${(count / maxTypeCount) * 100}%`, backgroundColor: 'var(--accent)' }}
+                    />
+                  </div>
+                  <span className={styles.cmcValue}>{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Deck Composition</div>
+            <div className={styles.compositionList}>
+              <div className={styles.compositionRow}>
+                <span className={styles.compositionLabel}>Lands</span>
+                <span className={styles.compositionValue}>{analysis.landCount}</span>
+                <span className={styles.compositionPct}>{Math.round((analysis.landCount / analysis.totalCards) * 100)}%</span>
+              </div>
+              <div className={styles.compositionRow}>
+                <span className={styles.compositionLabel}>Spells</span>
+                <span className={styles.compositionValue}>{analysis.spellCount}</span>
+                <span className={styles.compositionPct}>{Math.round((analysis.spellCount / analysis.totalCards) * 100)}%</span>
+              </div>
+              <div className={styles.compositionDivider} />
+              <div className={styles.compositionRow}>
+                <span className={styles.compositionLabel}>Card Draw</span>
+                <span className={styles.compositionValue}>{analysis.drawCount}</span>
+                <span className={styles.compositionPct}>{analysis.spellCount > 0 ? Math.round((analysis.drawCount / analysis.spellCount) * 100) : 0}% of spells</span>
+              </div>
+              <div className={styles.compositionRow}>
+                <span className={styles.compositionLabel}>Interaction</span>
+                <span className={styles.compositionValue}>{analysis.interactionCount}</span>
+                <span className={styles.compositionPct}>{analysis.spellCount > 0 ? Math.round((analysis.interactionCount / analysis.spellCount) * 100) : 0}% of spells</span>
+              </div>
+              {analysis.creatureCount > 0 && (
+                <>
+                  <div className={styles.compositionDivider} />
+                  <div className={styles.compositionRow}>
+                    <span className={styles.compositionLabel}>Avg Power</span>
+                    <span className={styles.compositionValue}>{analysis.avgPower.toFixed(1)}</span>
+                    <span className={styles.compositionPct}>{analysis.creatureCount} creatures</span>
+                  </div>
+                  <div className={styles.compositionRow}>
+                    <span className={styles.compositionLabel}>Avg Toughness</span>
+                    <span className={styles.compositionValue}>{analysis.avgToughness.toFixed(1)}</span>
+                    <span className={styles.compositionPct} />
+                  </div>
+                </>
+              )}
+              {analysis.uniqueCards !== analysis.totalSlots && (
+                <>
+                  <div className={styles.compositionDivider} />
+                  <div className={styles.compositionRow}>
+                    <span className={styles.compositionLabel}>Unique Cards</span>
+                    <span className={styles.compositionValue}>{analysis.uniqueCards}</span>
+                    <span className={styles.compositionPct}>of {analysis.totalSlots} slots</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Color Availability by Turn */}
         {manaProd.length > 0 && (
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Color Availability by Turn</div>
@@ -531,7 +716,7 @@ function DeckStats({ colorDist, manaProd, deckSize }: { colorDist: ReturnType<ty
                 ))}
               </div>
               {TURNS.map((turn) => {
-                const drawn = 6 + turn // 7 cards on turn 1 (opening hand), +1 per turn
+                const drawn = 6 + turn
                 return (
                   <div key={turn} className={styles.turnRow}>
                     <span className={styles.turnLabel}>T{turn}</span>
