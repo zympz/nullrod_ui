@@ -4,6 +4,55 @@
   gap: 20px;
 }
 
+/* Two-column layout: preview + deck content */
+.deckLayout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.previewPanel {
+  position: sticky;
+  top: 20px;
+  width: 260px;
+}
+
+.previewImage {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.previewEmpty {
+  width: 100%;
+  aspect-ratio: 488 / 680;
+  border-radius: 10px;
+  border: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.deckContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .deckLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .previewPanel {
+    display: none;
+  }
+}
+
 .back {
   font-size: 13px;
   color: var(--text-muted);
@@ -221,6 +270,22 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.cardNameLink {
+  all: unset;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--text);
+  transition: color 0.15s;
+  text-align: left;
+}
+
+.cardNameLink:hover {
+  color: var(--accent);
 }
 
 .cardType {

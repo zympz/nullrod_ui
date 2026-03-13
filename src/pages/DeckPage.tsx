@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { Deck, DeckCard } from '../types/deck'
+import type { OracleCard } from '../types/card'
 import { getDeck, searchCardByName } from '../api/client'
 import { ManaCost } from '../components/ManaSymbol'
+import { CardDetail } from '../components/CardDetail'
 import styles from './DeckPage.module.css'
 
 export function DeckPage() {
@@ -11,6 +13,24 @@ export function DeckPage() {
   const [deck, setDeck] = useState<Deck | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [dfcManaCosts, setDfcManaCosts] = useState<Map<string, string>>(new Map())
+  const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
+  const [hoveredCard, setHoveredCard] = useState<DeckCard | null>(null)
+
+  const onCardHover = useCallback((card: DeckCard | null) => {
+    setHoveredCard(card)
+  }, [])
+
+  const onCardClick = useCallback((cardName: string) => {
+    searchCardByName(frontFace(cardName))
+      .then((res) => {
+        // Prefer exact match (DFC or single-faced)
+        const card = res.results.find((c) => c.name === cardName || c.name.startsWith(frontFace(cardName) + ' // '))
+          ?? res.results.find((c) => c.name === frontFace(cardName))
+          ?? res.results[0]
+        if (card) setSelectedCard(card)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!deckId) return
@@ -89,6 +109,16 @@ export function DeckPage() {
     <div className={styles.page}>
       <button className={styles.back} onClick={() => navigate('/decks')} type="button">&larr; Back to decks</button>
 
+      <div className={styles.deckLayout}>
+        <div className={styles.previewPanel}>
+          {hoveredCard?.image_url ? (
+            <img src={hoveredCard.image_url} alt={frontFace(hoveredCard.name)} className={styles.previewImage} />
+          ) : (
+            <div className={styles.previewEmpty}>Hover a card to preview</div>
+          )}
+        </div>
+
+        <div className={styles.deckContent}>
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <h1 className={styles.name}>{deck.name}</h1>
@@ -133,16 +163,21 @@ export function DeckPage() {
               ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
             </span>
           </div>
-          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={deck.format === 'commander' || deck.format === 'brawl' || deck.format === 'oathbreaker' || deck.format === 'duel'} dfcManaCosts={dfcManaCosts} />
+          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={deck.format === 'commander' || deck.format === 'brawl' || deck.format === 'oathbreaker' || deck.format === 'duel'} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />
         </div>
       )}
 
       {/* Other zones */}
       <div className={styles.zones}>
-        {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} dfcManaCosts={dfcManaCosts} />}
-        {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} dfcManaCosts={dfcManaCosts} />}
-        {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} dfcManaCosts={dfcManaCosts} />}
+        {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />}
+        {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />}
+        {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />}
       </div>
+
+        </div>
+      </div>
+
+      {selectedCard && <CardDetail card={selectedCard} onClose={() => setSelectedCard(null)} />}
     </div>
   )
 }
@@ -203,7 +238,7 @@ function resolveMana(card: DeckCard, dfcManaCosts: Map<string, string>): string 
   return null
 }
 
-function TypeGroupBlock({ group, dfcManaCosts }: { group: { label: string; cards: DeckCard[] }; dfcManaCosts: Map<string, string> }) {
+function TypeGroupBlock({ group, dfcManaCosts, onCardClick, onCardHover }: { group: { label: string; cards: DeckCard[] }; dfcManaCosts: Map<string, string>; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void }) {
   const total = group.cards.reduce((s, c) => s + c.quantity, 0)
   return (
     <div className={styles.typeGroup}>
@@ -214,9 +249,9 @@ function TypeGroupBlock({ group, dfcManaCosts }: { group: { label: string; cards
       {group.cards.map((card) => {
         const mana = resolveMana(card, dfcManaCosts)
         return (
-          <div key={card.scryfall_id} className={styles.mainboardCard}>
+          <div key={card.scryfall_id} className={styles.mainboardCard} onMouseEnter={() => onCardHover(card)} onMouseLeave={() => onCardHover(null)}>
             <span className={styles.cardQty}>{card.quantity}</span>
-            <span className={styles.cardName}>{frontFace(card.name)}</span>
+            <button type="button" className={styles.cardNameLink} onClick={() => onCardClick(card.name)}>{frontFace(card.name)}</button>
             <span className={styles.cardMana}>
               {mana ? (
                 <ManaCost cost={mana} size={13} />
@@ -231,7 +266,7 @@ function TypeGroupBlock({ group, dfcManaCosts }: { group: { label: string; cards
   )
 }
 
-function MainboardGrid({ commanders, cards, isCommander, dfcManaCosts }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean; dfcManaCosts: Map<string, string> }) {
+function MainboardGrid({ commanders, cards, isCommander, dfcManaCosts, onCardClick, onCardHover }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean; dfcManaCosts: Map<string, string>; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void }) {
   const groups = groupMainboard(commanders, cards)
   const lands = groups.find((g) => g.label === 'Lands')
   const nonLands = groups.filter((g) => g.label !== 'Lands')
@@ -242,11 +277,11 @@ function MainboardGrid({ commanders, cards, isCommander, dfcManaCosts }: { comma
       <div className={styles.mainboardSplit}>
         <div className={styles.mainboardFlow}>
           {nonLands.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} dfcManaCosts={dfcManaCosts} />
+            <TypeGroupBlock key={group.label} group={group} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />
           ))}
         </div>
         <div className={styles.mainboardLands}>
-          <TypeGroupBlock group={lands} dfcManaCosts={dfcManaCosts} />
+          <TypeGroupBlock group={lands} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />
         </div>
       </div>
     )
@@ -256,13 +291,13 @@ function MainboardGrid({ commanders, cards, isCommander, dfcManaCosts }: { comma
   return (
     <div className={styles.mainboardFlowFull}>
       {groups.map((group) => (
-        <TypeGroupBlock key={group.label} group={group} dfcManaCosts={dfcManaCosts} />
+        <TypeGroupBlock key={group.label} group={group} dfcManaCosts={dfcManaCosts} onCardClick={onCardClick} onCardHover={onCardHover} />
       ))}
     </div>
   )
 }
 
-function CardZone({ title, cards, dfcManaCosts }: { title: string; cards: DeckCard[]; dfcManaCosts: Map<string, string> }) {
+function CardZone({ title, cards, dfcManaCosts, onCardClick, onCardHover }: { title: string; cards: DeckCard[]; dfcManaCosts: Map<string, string>; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void }) {
   if (cards.length === 0) return null
 
   const totalCards = cards.reduce((sum, c) => sum + c.quantity, 0)
@@ -277,9 +312,9 @@ function CardZone({ title, cards, dfcManaCosts }: { title: string; cards: DeckCa
         {cards.map((card) => {
           const mana = resolveMana(card, dfcManaCosts)
           return (
-            <div key={card.scryfall_id} className={styles.cardRow}>
+            <div key={card.scryfall_id} className={styles.cardRow} onMouseEnter={() => onCardHover(card)} onMouseLeave={() => onCardHover(null)}>
               <span className={styles.cardQty}>{card.quantity}</span>
-              <span className={styles.cardName}>{frontFace(card.name)}</span>
+              <button type="button" className={styles.cardNameLink} onClick={() => onCardClick(card.name)}>{frontFace(card.name)}</button>
               <span className={styles.cardType}>{card.type_line}</span>
               <span className={styles.cardMana}>
                 {mana ? (
