@@ -91,6 +91,12 @@
   gap: 8px;
   padding: 24px 32px;
   min-height: 200px;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    transparent 70%
+  );
 }
 
 .bannerName {
