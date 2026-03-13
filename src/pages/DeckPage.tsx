@@ -143,6 +143,11 @@ export function DeckPage() {
         </div>
       )}
 
+      {/* Divider after mainboard */}
+      {(deck.companions.length > 0 || deck.sideboard.length > 0 || deck.maybeboard.length > 0) && (
+        <hr className={styles.zoneDivider} />
+      )}
+
       {/* Other zones */}
       <div className={styles.zones}>
         {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} />}
@@ -288,6 +293,7 @@ function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHove
 function CardZone({ title, cards, onCardClick, onCardHover }: { title: string; cards: DeckCard[]; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void }) {
   if (cards.length === 0) return null
 
+  const groups = groupByType(cards)
   const totalCards = cards.reduce((sum, c) => sum + c.quantity, 0)
 
   return (
@@ -296,25 +302,37 @@ function CardZone({ title, cards, onCardClick, onCardHover }: { title: string; c
         <span className={styles.sectionLabel}>{title}</span>
         <span className={styles.zoneCount}>({totalCards})</span>
       </div>
-      <div className={styles.cardTable}>
-        {cards.map((card) => {
-          const mana = card.mana_cost ? frontFace(card.mana_cost) : null
-          return (
-            <div key={card.scryfall_id} className={styles.cardRow} onMouseEnter={() => onCardHover(card)} onMouseLeave={() => onCardHover(null)}>
-              <span className={styles.cardQty}>{card.quantity}</span>
-              <button type="button" className={styles.cardNameLink} onClick={() => onCardClick(card.name)}>{frontFace(card.name)}</button>
-              <span className={styles.cardType}>{card.type_line}</span>
-              <span className={styles.cardMana}>
-                {mana ? (
-                  <ManaCost cost={mana} size={14} />
-                ) : card.cmc > 0 ? (
-                  <span className={styles.cmcFallback}>{card.cmc}</span>
-                ) : null}
-              </span>
-            </div>
-          )
-        })}
+      <div className={styles.mainboardFlowFull}>
+        {groups.map((group) => (
+          <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} />
+        ))}
       </div>
     </div>
   )
+}
+
+function groupByType(cards: DeckCard[]) {
+  const groups: { label: string; cards: DeckCard[] }[] = []
+  const used = new Set<number>()
+
+  for (const group of TYPE_GROUPS) {
+    if (group.label === 'Commander') continue
+    const matched: DeckCard[] = []
+    cards.forEach((card, idx) => {
+      if (!used.has(idx) && group.match(card)) {
+        matched.push(card)
+        used.add(idx)
+      }
+    })
+    if (matched.length > 0) {
+      groups.push({ label: group.label, cards: matched })
+    }
+  }
+
+  const other = cards.filter((_, idx) => !used.has(idx))
+  if (other.length > 0) {
+    groups.push({ label: 'Other', cards: other })
+  }
+
+  return groups
 }
