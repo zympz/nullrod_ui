@@ -17,40 +17,27 @@ export function DeckPage() {
   const [hoveredImageUrl, setHoveredImageUrl] = useState<string | null>(null)
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const imageCache = useState(() => new Map<string, string>())[0]
-
-  const fetchCardImage = useCallback((card: DeckCard) => {
-    const cached = imageCache.get(card.name)
-    if (cached) { setHoveredImageUrl(cached); return }
-    searchCardByName(frontFace(card.name))
-      .then((res) => {
-        const match = res.results.find((c) => c.name === card.name || c.name.startsWith(frontFace(card.name) + ' // '))
-          ?? res.results.find((c) => c.name === frontFace(card.name))
-          ?? res.results[0]
-        const url = match?.image_urls?.normal ?? match?.image_urls?.art_crop ?? null
-        if (url) {
-          imageCache.set(card.name, url)
-          setHoveredImageUrl(url)
-        }
-      })
-      .catch(() => {})
-  }, [imageCache])
+  const cardCache = useState(() => new Map<string, OracleCard>())[0]
 
   const onCardHover = useCallback((card: DeckCard | null) => {
-    if (!card) return // keep last hovered image
-    fetchCardImage(card)
-  }, [fetchCardImage])
+    if (!card) return
+    const url = imageCache.get(card.name)
+    if (url) setHoveredImageUrl(url)
+  }, [imageCache])
 
   const onCardClick = useCallback((cardName: string) => {
+    const cached = cardCache.get(cardName)
+    if (cached) { setSelectedCard(cached); return }
+    // Fallback fetch if not yet preloaded
     searchCardByName(frontFace(cardName))
       .then((res) => {
-        // Prefer exact match (DFC or single-faced)
         const card = res.results.find((c) => c.name === cardName || c.name.startsWith(frontFace(cardName) + ' // '))
           ?? res.results.find((c) => c.name === frontFace(cardName))
           ?? res.results[0]
-        if (card) setSelectedCard(card)
+        if (card) { cardCache.set(cardName, card); setSelectedCard(card) }
       })
       .catch(() => {})
-  }, [])
+  }, [cardCache])
 
   useEffect(() => {
     if (!deckId) return
@@ -67,65 +54,68 @@ export function DeckPage() {
     return () => { cancelled = true }
   }, [deckId])
 
-  // Fetch banner art and default card preview
-  useEffect(() => {
-    if (!deck) return
-    let cancelled = false
-    const featuredCard = deck.commanders[0] ?? deck.mainboard[0]
-    if (!featuredCard) return
-    searchCardByName(frontFace(featuredCard.name))
-      .then((res) => {
-        if (cancelled) return
-        const match = res.results.find((c) => c.name === featuredCard.name || c.name.startsWith(frontFace(featuredCard.name) + ' // '))
-          ?? res.results.find((c) => c.name === frontFace(featuredCard.name))
-          ?? res.results[0]
-        if (!match) return
-        const artCrop = match.image_urls?.art_crop
-        if (artCrop) setBannerUrl(artCrop)
-        const normal = match.image_urls?.normal ?? artCrop ?? null
-        if (normal) {
-          imageCache.set(featuredCard.name, normal)
-          setHoveredImageUrl(normal)
-        }
-      })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [deck, imageCache])
-
-  // Fetch mana costs for DFC cards (decks API returns null for these)
+  // Preload all card images, banner art, and DFC mana costs
   useEffect(() => {
     if (!deck) return
     let cancelled = false
 
     const allCards = [...deck.commanders, ...deck.companions, ...deck.mainboard, ...deck.sideboard, ...deck.maybeboard]
-    const dfcCards = allCards.filter((c) => c.name.includes(' // ') && !c.mana_cost)
-    if (dfcCards.length === 0) return
-
     // Deduplicate by front face name
-    const uniqueNames = [...new Set(dfcCards.map((c) => frontFace(c.name)))]
+    const seen = new Set<string>()
+    const uniqueCards: DeckCard[] = []
+    for (const c of allCards) {
+      const key = frontFace(c.name)
+      if (!seen.has(key)) { seen.add(key); uniqueCards.push(c) }
+    }
 
-    Promise.all(
-      uniqueNames.map((name) =>
-        searchCardByName(name)
-          .then((res) => {
-            // Find the DFC card whose front face matches
-            const card = res.results.find((c) => c.name.startsWith(name + ' // '))
-            if (!card?.card_faces?.[0]?.mana_cost) return null
-            return [name, card.card_faces[0].mana_cost] as const
-          })
-          .catch(() => null)
-      )
-    ).then((results) => {
-      if (cancelled) return
-      const map = new Map<string, string>()
-      for (const r of results) {
-        if (r) map.set(r[0], r[1])
+    const featuredCard = deck.commanders[0] ?? deck.mainboard[0]
+    const dfcMana = new Map<string, string>()
+
+    // Batch fetch in chunks to respect rate limits
+    const BATCH = 10
+    let i = 0
+    function fetchBatch() {
+      if (cancelled || i >= uniqueCards.length) {
+        if (!cancelled && dfcMana.size > 0) setDfcManaCosts(dfcMana)
+        return
       }
-      setDfcManaCosts(map)
-    })
+      const batch = uniqueCards.slice(i, i + BATCH)
+      i += BATCH
+      Promise.all(
+        batch.map((card) =>
+          searchCardByName(frontFace(card.name))
+            .then((res) => {
+              if (cancelled) return
+              const match = res.results.find((c) => c.name === card.name || c.name.startsWith(frontFace(card.name) + ' // '))
+                ?? res.results.find((c) => c.name === frontFace(card.name))
+                ?? res.results[0]
+              if (!match) return
+
+              // Cache card data and image URL
+              cardCache.set(card.name, match)
+              const url = match.image_urls?.normal ?? match.image_urls?.art_crop ?? null
+              if (url) imageCache.set(card.name, url)
+
+              // Banner from featured card
+              if (card === featuredCard) {
+                const artCrop = match.image_urls?.art_crop
+                if (artCrop && !cancelled) setBannerUrl(artCrop)
+                if (url && !cancelled) setHoveredImageUrl(url)
+              }
+
+              // DFC mana cost
+              if (card.name.includes(' // ') && !card.mana_cost && match.card_faces?.[0]?.mana_cost) {
+                dfcMana.set(frontFace(card.name), match.card_faces[0].mana_cost)
+              }
+            })
+            .catch(() => {})
+        )
+      ).then(fetchBatch)
+    }
+    fetchBatch()
 
     return () => { cancelled = true }
-  }, [deck])
+  }, [deck, imageCache, cardCache])
 
   if (error) {
     return (
