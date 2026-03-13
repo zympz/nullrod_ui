@@ -21,6 +21,17 @@ export default function App() {
           <Route path="/cards/:oracleId" element={<CardPage />} />
         </Routes>
       </main>
+      <footer className={styles.footer}>
+        <p>
+          Card data and images provided by <a href="https://scryfall.com" target="_blank" rel="noopener noreferrer">Scryfall</a>.
+          Scryfall is not affiliated with nullrod.com.
+        </p>
+        <p>
+          Nullrod is unofficial Fan Content permitted under the <a href="https://company.wizards.com/en/legal/fancontentpolicy" target="_blank" rel="noopener noreferrer">Wizards of the Coast Fan Content Policy</a>.
+          Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast.
+          &copy; Wizards of the Coast LLC.
+        </p>
+      </footer>
     </BrowserRouter>
   )
 }

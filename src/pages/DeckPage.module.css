@@ -223,14 +223,19 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
+  background: var(--surface-2);
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  margin: 0 -10px;
+  width: calc(100% + 20px);
 }
 
 /* Vertical mana curve bar chart */
 .curveBar {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
-  height: 120px;
+  gap: 8px;
+  height: 140px;
   padding-top: 4px;
 }
 
@@ -253,9 +258,8 @@
 .curveTrack {
   flex: 1;
   width: 100%;
-  max-width: 40px;
   background: var(--surface-2);
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
   display: flex;
   align-items: flex-end;
@@ -264,8 +268,7 @@
 .curveFill {
   width: 100%;
   background: var(--accent);
-  border-radius: 3px;
-  opacity: 0.8;
+  border-radius: 4px;
   transition: height 0.3s ease;
   min-height: 2px;
 }
@@ -747,7 +750,7 @@
 }
 
 .redrawBtn {
-  align-self: flex-start;
+  align-self: center;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);

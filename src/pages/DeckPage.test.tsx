@@ -131,7 +131,6 @@ describe('DeckPage', () => {
     mockGetDeck.mockResolvedValue(bigDeck)
     await act(async () => { renderDeckPage() })
     expect(screen.getByText('Sample Hand')).toBeInTheDocument()
-    expect(screen.getByText('↻ New Hand')).toBeInTheDocument()
   })
 
   it('renders source link', async () => {

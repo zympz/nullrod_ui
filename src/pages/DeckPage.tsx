@@ -487,7 +487,7 @@ function drawSampleHand(cards: DeckCard[], count = 7): DeckCard[] {
 }
 
 function SampleHand({ cards, onCardClick }: { cards: DeckCard[]; onCardClick: (name: string) => void }) {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const [hand, setHand] = useState(() => drawSampleHand(cards))
 
   return (
