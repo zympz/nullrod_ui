@@ -671,7 +671,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
                 <div key={label} className={`${styles.compositionRow} ${styles.compositionIndent}`}>
                   <span className={styles.compositionLabel}>{label}</span>
                   <span className={styles.compositionValue}>{count}</span>
-                  <span className={styles.compositionPct}>{analysis.spellCount > 0 ? Math.round((count / analysis.spellCount) * 100) : 0}%</span>
+                  <span className={styles.compositionPct}>{analysis.totalCards > 0 ? Math.round((count / analysis.totalCards) * 100) : 0}%</span>
                 </div>
               ))}
               <div className={styles.compositionDivider} />
