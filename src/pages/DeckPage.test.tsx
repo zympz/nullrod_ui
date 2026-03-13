@@ -119,6 +119,21 @@ describe('DeckPage', () => {
     expect(screen.getByText('Color Distribution')).toBeInTheDocument()
   })
 
+  it('renders sample hand section for decks with enough cards', async () => {
+    const bigDeck = {
+      ...mockDeck,
+      mainboard: Array.from({ length: 7 }, (_, i) => ({
+        ...mockDeck.mainboard[0],
+        scryfall_id: `card-${i}`,
+        name: `Card ${i}`,
+      })),
+    }
+    mockGetDeck.mockResolvedValue(bigDeck)
+    await act(async () => { renderDeckPage() })
+    expect(screen.getByText('Sample Hand')).toBeInTheDocument()
+    expect(screen.getByText('↻ New Hand')).toBeInTheDocument()
+  })
+
   it('renders source link', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     await act(async () => { renderDeckPage() })

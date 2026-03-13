@@ -95,7 +95,9 @@ export function DeckPage() {
   }
 
   // Color distribution from mainboard + commanders
-  const colorDist = getColorDistribution([...deck.commanders, ...deck.mainboard])
+  const allMainCards = [...deck.commanders, ...deck.mainboard]
+  const colorDist = getColorDistribution(allMainCards)
+  const manaProd = getManaProduction(allMainCards)
 
   return (
     <div className={styles.page}>
@@ -151,7 +153,10 @@ export function DeckPage() {
       )}
 
       {/* Deck Stats */}
-      {colorDist.length > 0 && <DeckStats colorDist={colorDist} />}
+      {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} />}
+
+      {/* Sample Hand */}
+      {allMainCards.length >= 7 && <SampleHand cards={allMainCards} onCardClick={onCardClick} />}
 
         </div>
       </div>
@@ -359,7 +364,83 @@ function getColorDistribution(cards: DeckCard[]) {
     }))
 }
 
-function DeckStats({ colorDist }: { colorDist: ReturnType<typeof getColorDistribution> }) {
+function getManaProduction(cards: DeckCard[]) {
+  const lands = cards.filter((c) => c.type_line.includes('Land'))
+  const counts: Record<string, number> = {}
+  for (const land of lands) {
+    if (land.color_identity.length === 0) {
+      counts.C = (counts.C ?? 0) + land.quantity
+    } else {
+      for (const c of land.color_identity) {
+        counts[c] = (counts[c] ?? 0) + land.quantity
+      }
+    }
+  }
+  const total = Object.values(counts).reduce((s, n) => s + n, 0)
+  if (total === 0) return []
+  return COLOR_ORDER
+    .filter((c) => (counts[c] ?? 0) > 0)
+    .map((c) => ({
+      key: c, count: counts[c],
+      pct: Math.round((counts[c] / total) * 100),
+      ...COLOR_META[c],
+    }))
+}
+
+function drawSampleHand(cards: DeckCard[], count = 7): DeckCard[] {
+  // Build pool expanding by quantity
+  const pool: DeckCard[] = []
+  for (const card of cards) {
+    for (let i = 0; i < card.quantity; i++) pool.push(card)
+  }
+  // Fisher-Yates shuffle on a copy, take first `count`
+  const shuffled = [...pool]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, count)
+}
+
+function SampleHand({ cards, onCardClick }: { cards: DeckCard[]; onCardClick: (name: string) => void }) {
+  const [collapsed, setCollapsed] = useState(false)
+  const [hand, setHand] = useState(() => drawSampleHand(cards))
+
+  return (
+    <div className={styles.zone}>
+      <button type="button" className={`${styles.zoneHeaderBtn} ${styles.zoneHeaderBg}`} onClick={() => setCollapsed(!collapsed)}>
+        <span className={styles.collapseIcon}>{collapsed ? '▸' : '▾'}</span>
+        <span className={styles.sectionLabel}>Sample Hand</span>
+      </button>
+      {!collapsed && (
+        <div className={styles.sampleHandSection}>
+          <button type="button" className={styles.redrawBtn} onClick={() => setHand(drawSampleHand(cards))}>
+            ↻ New Hand
+          </button>
+          <div className={styles.sampleHand}>
+            {hand.map((card, i) => (
+              <button
+                key={`${card.scryfall_id}-${i}`}
+                type="button"
+                className={styles.sampleCard}
+                onClick={() => onCardClick(card.name)}
+                title={card.name}
+              >
+                {card.image_url ? (
+                  <img src={card.image_url} alt={card.name} className={styles.sampleCardImg} />
+                ) : (
+                  <div className={styles.sampleCardPlaceholder}>{frontFace(card.name)}</div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DeckStats({ colorDist, manaProd }: { colorDist: ReturnType<typeof getColorDistribution>; manaProd: ReturnType<typeof getManaProduction> }) {
   const [collapsed, setCollapsed] = useState(false)
   const maxAvgCmc = Math.max(...colorDist.map((c) => c.avgCmc), 1)
 
@@ -370,43 +451,57 @@ function DeckStats({ colorDist }: { colorDist: ReturnType<typeof getColorDistrib
         <span className={styles.sectionLabel}>Deck Stats</span>
       </button>
       {!collapsed && (
-        <div className={styles.statsContent}>
-          <div className={styles.statLabel}>Color Distribution</div>
-          <div className={styles.colorBar}>
-            {colorDist.map(({ key, pct, label, bg }) => (
-              <div
-                key={key}
-                className={styles.colorBarSegment}
-                style={{ width: `${pct}%`, backgroundColor: bg }}
-                title={`${label}: ${pct}%`}
-              />
-            ))}
-          </div>
-          <div className={styles.colorLegend}>
-            {colorDist.map(({ key, count, pct, label, symbol }) => (
-              <div key={key} className={styles.colorLegendItem}>
-                <ManaCost cost={symbol} size={16} />
-                <span className={styles.colorLegendLabel}>{label}</span>
-                <span className={styles.colorLegendValue}>{count} ({pct}%)</span>
-              </div>
-            ))}
+        <div className={styles.statsColumns}>
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Color Distribution</div>
+            <div className={styles.colorLegend}>
+              {colorDist.map(({ key, count, pct, label, symbol }) => (
+                <div key={key} className={styles.colorLegendItem}>
+                  <ManaCost cost={symbol} size={16} />
+                  <span className={styles.colorLegendLabel}>{label}</span>
+                  <span className={styles.colorLegendValue}>{count} ({pct}%)</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className={styles.statLabel}>Avg CMC by Color</div>
-          <div className={styles.cmcByColor}>
-            {colorDist.map(({ key, avgCmc, symbol, bg }) => (
-              <div key={key} className={styles.cmcRow}>
-                <ManaCost cost={symbol} size={16} />
-                <div className={styles.cmcTrack}>
-                  <div
-                    className={styles.cmcBarFill}
-                    style={{ width: `${(avgCmc / maxAvgCmc) * 100}%`, backgroundColor: bg }}
-                  />
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Avg CMC by Color</div>
+            <div className={styles.cmcByColor}>
+              {colorDist.map(({ key, avgCmc, symbol, bg }) => (
+                <div key={key} className={styles.cmcRow}>
+                  <ManaCost cost={symbol} size={16} />
+                  <div className={styles.cmcTrack}>
+                    <div
+                      className={styles.cmcBarFill}
+                      style={{ width: `${(avgCmc / maxAvgCmc) * 100}%`, backgroundColor: bg }}
+                    />
+                  </div>
+                  <span className={styles.cmcValue}>{avgCmc.toFixed(2)}</span>
                 </div>
-                <span className={styles.cmcValue}>{avgCmc.toFixed(2)}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
+          {manaProd.length > 0 && (
+            <div className={styles.statBlock}>
+              <div className={styles.statLabel}>Mana Production</div>
+              <div className={styles.cmcByColor}>
+                {manaProd.map(({ key, count, pct, symbol, bg }) => (
+                  <div key={key} className={styles.cmcRow}>
+                    <ManaCost cost={symbol} size={16} />
+                    <div className={styles.cmcTrack}>
+                      <div
+                        className={styles.cmcBarFill}
+                        style={{ width: `${pct}%`, backgroundColor: bg }}
+                      />
+                    </div>
+                    <span className={styles.cmcValue}>{count} ({pct}%)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

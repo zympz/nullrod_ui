@@ -129,9 +129,19 @@
 }
 
 @media (max-width: 640px) {
+  .banner {
+    min-height: 140px;
+  }
+
   .bannerOverlay {
     padding: 16px 20px;
     min-height: 140px;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.7) 50%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
   }
 
   .bannerName {
@@ -185,10 +195,28 @@
 }
 
 /* Deck Stats */
-.statsContent {
+.statsColumns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .statsColumns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .statsColumns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statBlock {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .statLabel {
@@ -199,23 +227,10 @@
   color: var(--text-muted);
 }
 
-.colorBar {
-  display: flex;
-  height: 20px;
-  border-radius: 4px;
-  overflow: hidden;
-  gap: 2px;
-}
-
-.colorBarSegment {
-  transition: width 0.3s ease;
-  min-width: 4px;
-}
-
 .colorLegend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .colorLegendItem {
@@ -245,7 +260,7 @@
 
 .cmcRow {
   display: grid;
-  grid-template-columns: 24px 1fr 40px;
+  grid-template-columns: 24px 1fr auto;
   gap: 8px;
   align-items: center;
 }
@@ -526,6 +541,85 @@
 .mainboardCard:hover {
   background: var(--surface-2);
   border-radius: 3px;
+}
+
+/* Sample Hand */
+.sampleHandSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.redrawBtn {
+  align-self: flex-start;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.redrawBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.sampleHand {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sampleCard {
+  all: unset;
+  cursor: pointer;
+  flex: 0 0 auto;
+  width: calc((100% - 72px) / 7);
+  min-width: 90px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.sampleCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.sampleCardImg {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+.sampleCardPlaceholder {
+  aspect-ratio: 488 / 680;
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 11px;
+  text-align: center;
+  padding: 8px;
+}
+
+@media (max-width: 900px) {
+  .sampleCard {
+    width: calc((100% - 24px) / 4);
+  }
+}
+
+@media (max-width: 500px) {
+  .sampleCard {
+    width: calc((100% - 16px) / 3);
+  }
 }
 
 .cmcFallback {
