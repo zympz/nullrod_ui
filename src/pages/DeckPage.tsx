@@ -340,7 +340,8 @@ const COLOR_ORDER = ['W', 'U', 'B', 'R', 'G', 'C']
 function getColorDistribution(cards: DeckCard[]) {
   const counts: Record<string, number> = {}
   const cmcTotals: Record<string, number> = {}
-  for (const card of cards) {
+  const spells = cards.filter((c) => !c.type_line.includes('Land'))
+  for (const card of spells) {
     if (card.colors.length === 0) {
       counts.C = (counts.C ?? 0) + card.quantity
       cmcTotals.C = (cmcTotals.C ?? 0) + card.cmc * card.quantity
