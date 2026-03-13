@@ -282,6 +282,14 @@
   column-gap: 16px;
 }
 
+.zoneFlow .typeGroup {
+  break-inside: auto;
+}
+
+.zoneFlow .typeGroupHeader {
+  break-after: avoid;
+}
+
 @media (max-width: 900px) {
   .zoneFlow {
     column-count: 2 !important;
