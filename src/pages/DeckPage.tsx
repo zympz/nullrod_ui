@@ -435,6 +435,31 @@ function getDeckAnalysis(cards: DeckCard[]) {
   const landCount = lands.reduce((s, c) => s + c.quantity, 0)
   const spellCount = totalCards - landCount
 
+  // Spell subcategories (mutually exclusive, same priority as TYPE_GROUPS)
+  const spellTypes = [
+    { label: 'Creatures', match: (c: DeckCard) => c.type_line.includes('Creature') },
+    { label: 'Planeswalkers', match: (c: DeckCard) => c.type_line.includes('Planeswalker') && !c.type_line.includes('Creature') },
+    { label: 'Instants', match: (c: DeckCard) => c.type_line.includes('Instant') },
+    { label: 'Sorceries', match: (c: DeckCard) => c.type_line.includes('Sorcery') },
+    { label: 'Artifacts', match: (c: DeckCard) => c.type_line.includes('Artifact') && !c.type_line.includes('Creature') },
+    { label: 'Enchantments', match: (c: DeckCard) => c.type_line.includes('Enchantment') && !c.type_line.includes('Creature') },
+  ]
+  const used = new Set<number>()
+  const spellBreakdown: { label: string; count: number }[] = []
+  const nonLands = cards.filter((c) => !c.type_line.includes('Land'))
+  for (const type of spellTypes) {
+    let count = 0
+    nonLands.forEach((card, idx) => {
+      if (!used.has(idx) && type.match(card)) {
+        count += card.quantity
+        used.add(idx)
+      }
+    })
+    if (count > 0) spellBreakdown.push({ label: type.label, count })
+  }
+  const otherSpells = nonLands.filter((_, idx) => !used.has(idx)).reduce((s, c) => s + c.quantity, 0)
+  if (otherSpells > 0) spellBreakdown.push({ label: 'Other', count: otherSpells })
+
   const creatures = cards.filter((c) => c.type_line.includes('Creature'))
   let totalPower = 0, totalToughness = 0, creatureCount = 0
   for (const c of creatures) {
@@ -462,7 +487,7 @@ function getDeckAnalysis(cards: DeckCard[]) {
   const totalSlots = totalCards
 
   return {
-    landCount, spellCount, totalCards,
+    landCount, spellCount, totalCards, spellBreakdown,
     avgPower: creatureCount > 0 ? totalPower / creatureCount : 0,
     avgToughness: creatureCount > 0 ? totalToughness / creatureCount : 0,
     creatureCount,
@@ -562,6 +587,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
           {/* Mana Curve */}
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Mana Curve</div>
+            <p className={styles.statDesc}>Distribution of spells by mana value, excluding lands.</p>
             <div className={styles.curveBar}>
               {manaCurve.map(({ label, count }) => (
                 <div key={label} className={styles.curveColumn}>
@@ -582,6 +608,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
           {manaProd.length > 0 && (
             <div className={styles.statBlock}>
               <div className={styles.statLabel}>Color Availability by Turn</div>
+              <p className={styles.statDesc}>Probability of having at least one source of each color by a given turn.</p>
               <div className={styles.turnTable}>
                 <div className={styles.turnRow}>
                   <span className={styles.turnHeader}>Turn</span>
@@ -612,6 +639,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
           {/* Type Breakdown */}
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Type Breakdown</div>
+            <p className={styles.statDesc}>How many cards of each type are in the deck.</p>
             <div className={`${styles.cmcByColor} ${styles.wideBarGraph} ${styles.fullWidth}`}>
               {typeBreakdown.map(({ label, count }) => (
                 <div key={label} className={styles.cmcRow}>
@@ -631,6 +659,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
           {/* Deck Composition */}
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Deck Composition</div>
+            <p className={styles.statDesc}>Land/spell ratio, card draw and removal density, and creature combat stats.</p>
             <div className={styles.compositionList}>
               <div className={styles.compositionRow}>
                 <span className={styles.compositionLabel}>Lands</span>
@@ -642,6 +671,13 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
                 <span className={styles.compositionValue}>{analysis.spellCount}</span>
                 <span className={styles.compositionPct}>{Math.round((analysis.spellCount / analysis.totalCards) * 100)}%</span>
               </div>
+              {analysis.spellBreakdown.map(({ label, count }) => (
+                <div key={label} className={`${styles.compositionRow} ${styles.compositionIndent}`}>
+                  <span className={styles.compositionLabel}>{label}</span>
+                  <span className={styles.compositionValue}>{count}</span>
+                  <span className={styles.compositionPct} />
+                </div>
+              ))}
               <div className={styles.compositionDivider} />
               <div className={styles.compositionRow}>
                 <span className={styles.compositionLabel}>Card Draw</span>
@@ -684,6 +720,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
           {/* Color Analysis — merged color distribution + avg CMC */}
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Color Analysis</div>
+            <p className={styles.statDesc}>Spell count per color and how expensive each color&apos;s spells are on average.</p>
             <div className={styles.colorTable}>
               <div className={styles.colorTableHeader}>
                 <span />
@@ -709,6 +746,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
           {manaProd.length > 0 && (
             <div className={styles.statBlock}>
               <div className={styles.statLabel}>Mana Production</div>
+              <p className={styles.statDesc}>What colors of mana your lands can produce, based on color identity.</p>
               <div className={`${styles.cmcByColor} ${styles.fullWidth}`}>
                 {manaProd.map(({ key, count, pct, symbol, bg }) => (
                   <div key={key} className={styles.cmcRow}>

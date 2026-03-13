@@ -217,6 +217,13 @@
   gap: 12px;
 }
 
+.statDesc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.4;
+  margin-top: -4px;
+}
+
 .statLabel {
   font-size: 12px;
   font-weight: 600;
@@ -689,6 +696,20 @@
   color: var(--text-dim);
   min-width: 70px;
   text-align: right;
+}
+
+.compositionIndent {
+  padding-left: 12px;
+}
+
+.compositionIndent .compositionLabel {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.compositionIndent .compositionValue {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .compositionDivider {
