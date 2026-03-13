@@ -16,7 +16,7 @@ async function renderDetail(card = mockBolt, onClose = vi.fn()) {
   let result: ReturnType<typeof render>
   await act(async () => {
     result = render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <CardDetail card={card} onClose={onClose} />
       </MemoryRouter>,
     )

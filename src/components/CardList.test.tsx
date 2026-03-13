@@ -6,7 +6,7 @@ import { mockBolt, mockGoyf } from '../test/fixtures'
 
 function renderList(cards = [mockBolt, mockGoyf], opts?: { page?: number; total?: number }) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <CardList
         cards={cards}
         total={opts?.total ?? cards.length}
@@ -60,7 +60,7 @@ describe('CardList', () => {
   it('calls onPageChange when next clicked', () => {
     const onPageChange = vi.fn()
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <CardList
           cards={[mockBolt]}
           total={40}

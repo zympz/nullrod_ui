@@ -17,7 +17,7 @@ vi.mock('../api/symbology', () => ({
 
 function renderPage(initialPath = '/cards') {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }} initialEntries={[initialPath]}>
       <CardsPage />
     </MemoryRouter>,
   )

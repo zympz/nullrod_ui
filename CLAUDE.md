@@ -10,7 +10,7 @@ Primary use cases: combo building and deck building. Card search is a secondary 
 - **Vite** for dev/build
 - **React Router v6** for client-side routing
 - **CSS Modules** for component styles (no external UI framework)
-- **Vitest** + **Testing Library** for unit tests (85 tests)
+- **Vitest** + **Testing Library** for unit tests (102 tests, 16 test files)
 
 ## Dev
 
@@ -26,7 +26,7 @@ npx vitest run     # run all tests
 ```
 /              → /decks (redirect)
 /decks         — Deck list with Moxfield import (live)
-/decks/:id     — Full deck detail page (live)
+/decks/:deckId — Full deck detail with card preview, banner art, type-grouped mainboard (live)
 /combos        — Combo browser and creator (coming soon)
 /cards         — Card search and browser (live, URL params synced)
 /cards/:id     — Full card detail page by oracle UUID (live)
@@ -40,18 +40,20 @@ src/
     client.ts                 # Typed fetch wrapper for api.nullrod.com
     client.test.ts            # API client tests
     symbology.ts              # Mana symbol SVG map (memoized)
+    symbology.test.ts         # Symbology cache tests
   types/
     card.ts                   # OracleCard, ImageUrls, SearchParams, CardFace, etc.
-    deck.ts                   # Deck, DeckEntry, DeckSummary, DeckFormat (stubbed)
+    deck.ts                   # Deck, DeckCard, DeckSummary, DeckFormat, ImportDeckInput
     combo.ts                  # Combo, ComboCard, SpellbookCombo (stubbed)
   pages/
     CardsPage.tsx             # Card search with URL-synced params, grid/list toggle (live)
     CardPage.tsx              # Full card detail page (live)
-    DecksPage.tsx             # Deck builder stub (coming soon)
+    DecksPage.tsx             # Deck list with pagination and Moxfield import (live)
+    DeckPage.tsx              # Deck detail: banner, card preview, type-grouped mainboard (live)
     CombosPage.tsx            # Combo browser stub (coming soon)
   components/
     Nav.tsx                   # Top navigation
-    ManaSymbol.tsx            # ManaCost, OracleText inline symbol renderers
+    ManaSymbol.tsx            # ManaCost, OracleText inline symbol renderers (italic reminder text)
     ColorPips.tsx             # Color identity dots
     SearchFilters.tsx         # Filter panel (color, type, CMC, oracle text, keywords, legality)
     CardGrid.tsx              # Responsive grid + pagination
@@ -62,7 +64,8 @@ src/
     setup.ts                  # Vitest setup (jest-dom matchers)
     fixtures.ts               # Mock cards: mockBolt, mockGoyf, mockJace
   App.tsx                     # Router + layout shell
-  index.css                   # Global dark theme CSS variables
+  App.test.tsx                # App routing tests
+  index.css                   # Global dark theme CSS variables (Inter font)
 ```
 
 ## API — api.nullrod.com
@@ -85,7 +88,9 @@ Rate limits: 60 req/min (search), 300 req/min (all others).
 
 Card objects include `image_urls` with optional `normal` and `art_crop` signed CloudFront URLs.
 The `?view=list` param returns lightweight card data (no image_urls, power, toughness).
-Deck card objects use `image_url` (Moxfield CDN) and `card_url` (our API) instead of `image_urls`.
+Deck card objects have `image_url` (Moxfield CDN, often 404) and `card_url` (our API).
+DFC cards in decks have `mana_cost: null` — fetch front face mana cost from cards API via `searchCardByName`.
+Card images for deck view are fetched from the cards API (signed CloudFront URLs) and cached in-memory.
 
 Combo endpoints are stubbed in client.ts — update as they go live.
 
@@ -125,12 +130,14 @@ aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 
 ## Rules
 
+- **Always run `npx vitest run` before committing.** Do not commit if tests are failing.
 - When the user says "commit and deploy from local", do all of the following in sequence:
-  1. Stage and commit the changed files with a descriptive message
-  2. Run `npm run build` — fix any TS errors before continuing
-  3. `git push origin main`
-  4. Sync to S3 (assets with immutable cache, index.html with no-cache, everything else with 1hr cache)
-  5. Invalidate CloudFront cache
+  1. Run `npx vitest run` — fix any failures before continuing
+  2. Stage and commit the changed files with a descriptive message
+  3. Run `npm run build` — fix any TS errors before continuing
+  4. `git push origin main`
+  5. Sync to S3 (assets with immutable cache, index.html with no-cache, everything else with 1hr cache)
+  6. Invalidate CloudFront cache
 
 ## Agents
 
@@ -167,4 +174,7 @@ Agents have full context about the project's architecture, conventions, and know
 - Keep components focused — no god components
 - Image URLs may be empty (`{}`) while backfill runs — handle gracefully
 - Write tests for new components (vitest + @testing-library/react)
+- All source files must have corresponding test files
 - Search params sync to URL for shareable links
+- DFC card names: use `frontFace()` to strip back face from ` // ` separated names
+- Parenthesized oracle text renders in italics with inline mana symbols

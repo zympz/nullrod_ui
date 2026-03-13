@@ -18,7 +18,7 @@ vi.mock('../api/symbology', () => ({
 
 function renderPage(oracleId: string) {
   return render(
-    <MemoryRouter initialEntries={[`/cards/${oracleId}`]}>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }} initialEntries={[`/cards/${oracleId}`]}>
       <Routes>
         <Route path="/cards/:oracleId" element={<CardPage />} />
       </Routes>

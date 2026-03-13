@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import type { Deck, DeckCard } from '../types/deck'
 import type { OracleCard } from '../types/card'
 import { getDeck, searchCardByName } from '../api/client'
@@ -9,7 +9,6 @@ import styles from './DeckPage.module.css'
 
 export function DeckPage() {
   const { deckId } = useParams<{ deckId: string }>()
-  const navigate = useNavigate()
   const [deck, setDeck] = useState<Deck | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [dfcManaCosts, setDfcManaCosts] = useState<Map<string, string>>(new Map())
@@ -122,7 +121,7 @@ export function DeckPage() {
   if (error) {
     return (
       <div className={styles.page}>
-        <button className={styles.back} onClick={() => navigate('/decks')} type="button">&larr; Back to decks</button>
+
         <div className={styles.error}>{error}</div>
       </div>
     )
@@ -131,7 +130,7 @@ export function DeckPage() {
   if (!deck) {
     return (
       <div className={styles.page}>
-        <button className={styles.back} onClick={() => navigate('/decks')} type="button">&larr; Back to decks</button>
+
         <div className={styles.loading}>Loading deck&hellip;</div>
       </div>
     )
@@ -147,7 +146,7 @@ export function DeckPage() {
       {/* Full-width banner */}
       <div className={styles.banner} style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}>
         <div className={styles.bannerOverlay}>
-          <button className={styles.bannerBack} onClick={() => navigate('/decks')} type="button">&larr; Back to decks</button>
+
           <h1 className={styles.bannerName}>{deck.name}</h1>
           <div className={styles.bannerMeta}>
             <span className={styles.formatBadge}>{deck.format}</span>

@@ -6,7 +6,7 @@ import { mockBolt, mockGoyf } from '../test/fixtures'
 
 function renderTile(card = mockBolt, onClick = vi.fn()) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <CardTile card={card} onClick={onClick} />
     </MemoryRouter>,
   )

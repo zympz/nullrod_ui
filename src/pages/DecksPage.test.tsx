@@ -38,7 +38,7 @@ beforeEach(() => {
 async function renderDecks() {
   await act(async () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DecksPage />
       </MemoryRouter>,
     )
@@ -49,7 +49,7 @@ describe('DecksPage', () => {
   it('shows loading state initially', async () => {
     mockListDecks.mockReturnValue(new Promise(() => {})) // never resolves
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DecksPage />
       </MemoryRouter>,
     )

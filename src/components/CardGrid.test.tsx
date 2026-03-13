@@ -6,7 +6,7 @@ import { mockBolt, mockGoyf } from '../test/fixtures'
 
 function renderGrid(cards = [mockBolt, mockGoyf], opts?: { page?: number; total?: number }) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <CardGrid
         cards={cards}
         total={opts?.total ?? cards.length}
@@ -45,7 +45,7 @@ describe('CardGrid', () => {
   it('calls onPageChange', () => {
     const onPageChange = vi.fn()
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <CardGrid
           cards={[mockBolt]}
           total={40}

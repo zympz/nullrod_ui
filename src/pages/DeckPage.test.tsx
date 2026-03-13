@@ -74,7 +74,7 @@ beforeEach(() => {
 
 function renderDeckPage(deckId = 'deck-1') {
   return render(
-    <MemoryRouter initialEntries={[`/decks/${deckId}`]}>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }} initialEntries={[`/decks/${deckId}`]}>
       <Routes>
         <Route path="/decks/:deckId" element={<DeckPage />} />
       </Routes>
@@ -131,9 +131,4 @@ describe('DeckPage', () => {
     expect(screen.getByText('Deck not found')).toBeInTheDocument()
   })
 
-  it('has back to decks button', async () => {
-    mockGetDeck.mockResolvedValue(mockDeck)
-    await act(async () => { renderDeckPage() })
-    expect(screen.getByText(/Back to decks/)).toBeInTheDocument()
-  })
 })
