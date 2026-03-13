@@ -22,8 +22,8 @@ function renderGrid(cards = [mockBolt, mockGoyf], opts?: { page?: number; total?
 describe('CardGrid', () => {
   it('renders card tiles', () => {
     renderGrid()
-    expect(screen.getByText('Lightning Bolt')).toBeInTheDocument()
-    expect(screen.getByText('Tarmogoyf')).toBeInTheDocument()
+    expect(screen.getByAltText('Lightning Bolt')).toBeInTheDocument()
+    expect(screen.getByAltText('Tarmogoyf')).toBeInTheDocument()
   })
 
   it('shows empty state when no cards', () => {

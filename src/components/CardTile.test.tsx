@@ -13,23 +13,18 @@ function renderTile(card = mockBolt, onClick = vi.fn()) {
 }
 
 describe('CardTile', () => {
-  it('renders card name and type', () => {
-    renderTile()
-    expect(screen.getByText('Lightning Bolt')).toBeInTheDocument()
-    expect(screen.getByText('Instant')).toBeInTheDocument()
-  })
-
-  it('renders art_crop image when available', () => {
-    renderTile()
-    const img = screen.getByAltText('Lightning Bolt') as HTMLImageElement
-    expect(img.src).toContain('bolt-art.jpg')
-  })
-
-  it('falls back to normal image when art_crop missing', () => {
-    const card = { ...mockBolt, image_urls: { normal: 'https://example.com/normal.jpg' } }
+  it('renders card image with normal url', () => {
+    const card = { ...mockBolt, image_urls: { normal: 'https://example.com/normal.jpg', art_crop: 'https://example.com/art.jpg' } }
     renderTile(card)
     const img = screen.getByAltText('Lightning Bolt') as HTMLImageElement
     expect(img.src).toContain('normal.jpg')
+  })
+
+  it('falls back to art_crop when normal missing', () => {
+    const card = { ...mockBolt, image_urls: { art_crop: 'https://example.com/art.jpg' } }
+    renderTile(card)
+    const img = screen.getByAltText('Lightning Bolt') as HTMLImageElement
+    expect(img.src).toContain('art.jpg')
   })
 
   it('shows placeholder when no images', () => {
@@ -41,7 +36,7 @@ describe('CardTile', () => {
   it('calls onClick when clicked', async () => {
     const onClick = vi.fn()
     renderTile(mockGoyf, onClick)
-    screen.getByText('Tarmogoyf').closest('button')!.click()
+    screen.getByAltText('Tarmogoyf').closest('button')!.click()
     expect(onClick).toHaveBeenCalledWith(mockGoyf)
   })
 })

@@ -100,7 +100,6 @@ export function DeckPage() {
   const manaProd = getManaProduction(allMainCards)
   const deckSize = allMainCards.reduce((s, c) => s + c.quantity, 0)
   const manaCurve = getManaCurve(allMainCards)
-  const typeBreakdown = getTypeBreakdown(allMainCards)
   const deckAnalysis = getDeckAnalysis(allMainCards)
 
   return (
@@ -157,7 +156,7 @@ export function DeckPage() {
       )}
 
       {/* Deck Stats */}
-      {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} manaCurve={manaCurve} typeBreakdown={typeBreakdown} analysis={deckAnalysis} />}
+      {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} manaCurve={manaCurve} analysis={deckAnalysis} />}
 
       {/* Sample Hand */}
       {allMainCards.length >= 7 && <SampleHand cards={allMainCards} onCardClick={onCardClick} />}
@@ -402,33 +401,6 @@ function getManaCurve(cards: DeckCard[]) {
   return labels.map((l) => ({ label: l, count: buckets[l] ?? 0 }))
 }
 
-function getTypeBreakdown(cards: DeckCard[]) {
-  const types = [
-    { label: 'Creatures', match: (c: DeckCard) => c.type_line.includes('Creature') },
-    { label: 'Instants', match: (c: DeckCard) => c.type_line.includes('Instant') },
-    { label: 'Sorceries', match: (c: DeckCard) => c.type_line.includes('Sorcery') },
-    { label: 'Artifacts', match: (c: DeckCard) => c.type_line.includes('Artifact') && !c.type_line.includes('Creature') },
-    { label: 'Enchantments', match: (c: DeckCard) => c.type_line.includes('Enchantment') && !c.type_line.includes('Creature') },
-    { label: 'Planeswalkers', match: (c: DeckCard) => c.type_line.includes('Planeswalker') },
-    { label: 'Lands', match: (c: DeckCard) => c.type_line.includes('Land') },
-  ]
-  const used = new Set<number>()
-  const result: { label: string; count: number }[] = []
-  for (const type of types) {
-    let count = 0
-    cards.forEach((card, idx) => {
-      if (!used.has(idx) && type.match(card)) {
-        count += card.quantity
-        used.add(idx)
-      }
-    })
-    if (count > 0) result.push({ label: type.label, count })
-  }
-  const otherCount = cards.filter((_, idx) => !used.has(idx)).reduce((s, c) => s + c.quantity, 0)
-  if (otherCount > 0) result.push({ label: 'Other', count: otherCount })
-  return result
-}
-
 function getDeckAnalysis(cards: DeckCard[]) {
   const totalCards = cards.reduce((s, c) => s + c.quantity, 0)
   const lands = cards.filter((c) => c.type_line.includes('Land'))
@@ -563,18 +535,16 @@ function pAtLeastOne(deckSize: number, successes: number, drawn: number): number
 
 const TURNS = [1, 2, 3, 4, 5]
 
-function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, analysis }: {
+function DeckStats({ colorDist, manaProd, deckSize, manaCurve, analysis }: {
   colorDist: ReturnType<typeof getColorDistribution>
   manaProd: ReturnType<typeof getManaProduction>
   deckSize: number
   manaCurve: ReturnType<typeof getManaCurve>
-  typeBreakdown: ReturnType<typeof getTypeBreakdown>
   analysis: ReturnType<typeof getDeckAnalysis>
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const maxAvgCmc = Math.max(...colorDist.map((c) => c.avgCmc), 1)
   const maxCurveCount = Math.max(...manaCurve.map((b) => b.count), 1)
-  const maxTypeCount = Math.max(...typeBreakdown.map((t) => t.count), 1)
 
   return (
     <div className={styles.zone}>
@@ -634,27 +604,8 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
             </div>
           )}
 
-          {/* Type Breakdown */}
-          <div className={styles.statBlock}>
-            <div className={styles.statLabel}>Type Breakdown <span className={styles.infoIcon} title="How many cards of each type are in the deck.">i</span></div>
-            <div className={`${styles.cmcByColor} ${styles.wideBarGraph} ${styles.fullWidth}`}>
-              {typeBreakdown.map(({ label, count }) => (
-                <div key={label} className={styles.cmcRow}>
-                  <span className={styles.typeLabel}>{label}</span>
-                  <div className={styles.cmcTrack}>
-                    <div
-                      className={styles.cmcBarFill}
-                      style={{ width: `${(count / maxTypeCount) * 100}%`, backgroundColor: 'var(--accent)' }}
-                    />
-                  </div>
-                  <span className={styles.cmcValue}>{count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Deck Composition */}
-          <div className={styles.statBlock}>
+          <div className={`${styles.statBlock} ${styles.statSpanFull}`}>
             <div className={styles.statLabel}>Deck Composition <span className={styles.infoIcon} title="Land/spell ratio, card draw and removal density, and creature combat stats.">i</span></div>
             <div className={styles.compositionList}>
               <div className={styles.compositionRow}>
@@ -713,25 +664,39 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
             </div>
           </div>
 
-          {/* Color Analysis — merged color distribution + avg CMC */}
+          {/* Color Distribution */}
           <div className={styles.statBlock}>
-            <div className={styles.statLabel}>Color Analysis <span className={styles.infoIcon} title="Spell count per color and how expensive each color's spells are on average.">i</span></div>
-            <div className={styles.colorTable}>
-              <div className={styles.colorTableHeader}>
-                <span />
-                <span>Color</span>
-                <span>Spells</span>
-                <span>Avg CMC</span>
-              </div>
-              {colorDist.map(({ key, count, pct, label, symbol, avgCmc, bg }) => (
-                <div key={key} className={styles.colorTableRow}>
+            <div className={styles.statLabel}>Color Distribution <span className={styles.infoIcon} title="How many spells of each color are in the deck.">i</span></div>
+            <div className={`${styles.cmcByColor} ${styles.fullWidth}`}>
+              {colorDist.map(({ key, count, pct, symbol, bg }) => (
+                <div key={key} className={styles.cmcRow}>
                   <ManaCost cost={symbol} size={16} />
-                  <span className={styles.colorTableName}>{label}</span>
-                  <span className={styles.colorTableValue}>{count} <span className={styles.colorTablePct}>({pct}%)</span></span>
-                  <span className={styles.colorTableCmc}>
-                    <span className={styles.colorTableCmcBar} style={{ width: `${(avgCmc / maxAvgCmc) * 60}%`, backgroundColor: bg }} />
-                    {avgCmc.toFixed(2)}
-                  </span>
+                  <div className={styles.cmcTrack}>
+                    <div
+                      className={styles.cmcBarFill}
+                      style={{ width: `${pct}%`, backgroundColor: bg }}
+                    />
+                  </div>
+                  <span className={styles.cmcValue}>{count} ({pct}%)</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Avg CMC by Color */}
+          <div className={styles.statBlock}>
+            <div className={styles.statLabel}>Avg CMC by Color <span className={styles.infoIcon} title="Average mana value of spells for each color.">i</span></div>
+            <div className={`${styles.cmcByColor} ${styles.fullWidth}`}>
+              {colorDist.map(({ key, avgCmc, symbol, bg }) => (
+                <div key={key} className={styles.cmcRow}>
+                  <ManaCost cost={symbol} size={16} />
+                  <div className={styles.cmcTrack}>
+                    <div
+                      className={styles.cmcBarFill}
+                      style={{ width: `${(avgCmc / maxAvgCmc) * 100}%`, backgroundColor: bg }}
+                    />
+                  </div>
+                  <span className={styles.cmcValue}>{avgCmc.toFixed(2)}</span>
                 </div>
               ))}
             </div>

@@ -57,7 +57,7 @@ describe('CardsPage', () => {
     const input = screen.getByPlaceholderText('Search cards…')
     fireEvent.change(input, { target: { value: 'bolt' } })
     fireEvent.submit(input.closest('form')!)
-    expect(await screen.findByText('Lightning Bolt')).toBeInTheDocument()
+    expect(await screen.findByAltText('Lightning Bolt')).toBeInTheDocument()
   })
 
   it('shows error on search failure', async () => {
