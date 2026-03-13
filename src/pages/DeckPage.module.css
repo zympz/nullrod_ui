@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 20px;
   width: 98vw;
-  max-width: 1800px;
+  max-width: 1600px;
   position: relative;
   left: 50%;
   transform: translateX(-50%);
@@ -85,7 +85,94 @@
   font-size: 13px;
 }
 
-/* Header */
+/* Banner */
+.banner {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  background-color: var(--surface-2);
+  min-height: 180px;
+}
+
+.bannerOverlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 24px 40px;
+  min-height: 180px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+.bannerBack {
+  all: unset;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: color 0.15s;
+  width: fit-content;
+  position: absolute;
+  top: 16px;
+  left: 40px;
+}
+
+.bannerBack:hover {
+  color: #fff;
+}
+
+.bannerName {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.bannerMeta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bannerSource {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.bannerDescription {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+  max-width: 600px;
+}
+
+@media (max-width: 640px) {
+  .bannerOverlay {
+    padding: 16px 20px;
+    min-height: 140px;
+  }
+
+  .bannerBack {
+    left: 20px;
+    top: 12px;
+  }
+
+  .bannerName {
+    font-size: 24px;
+  }
+}
+
+/* Header (kept for non-banner states) */
 .header {
   display: flex;
   flex-direction: column;

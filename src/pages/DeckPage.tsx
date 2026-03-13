@@ -15,6 +15,7 @@ export function DeckPage() {
   const [dfcManaCosts, setDfcManaCosts] = useState<Map<string, string>>(new Map())
   const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
   const [hoveredImageUrl, setHoveredImageUrl] = useState<string | null>(null)
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const imageCache = useState(() => new Map<string, string>())[0]
 
   const fetchCardImage = useCallback((card: DeckCard) => {
@@ -66,11 +67,30 @@ export function DeckPage() {
     return () => { cancelled = true }
   }, [deckId])
 
-  // Show commander image by default
+  // Fetch banner art and default card preview
   useEffect(() => {
-    if (!deck || deck.commanders.length === 0) return
-    fetchCardImage(deck.commanders[0])
-  }, [deck, fetchCardImage])
+    if (!deck) return
+    let cancelled = false
+    const featuredCard = deck.commanders[0] ?? deck.mainboard[0]
+    if (!featuredCard) return
+    searchCardByName(frontFace(featuredCard.name))
+      .then((res) => {
+        if (cancelled) return
+        const match = res.results.find((c) => c.name === featuredCard.name || c.name.startsWith(frontFace(featuredCard.name) + ' // '))
+          ?? res.results.find((c) => c.name === frontFace(featuredCard.name))
+          ?? res.results[0]
+        if (!match) return
+        const artCrop = match.image_urls?.art_crop
+        if (artCrop) setBannerUrl(artCrop)
+        const normal = match.image_urls?.normal ?? artCrop ?? null
+        if (normal) {
+          imageCache.set(featuredCard.name, normal)
+          setHoveredImageUrl(normal)
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [deck, imageCache])
 
   // Fetch mana costs for DFC cards (decks API returns null for these)
   useEffect(() => {
@@ -132,7 +152,23 @@ export function DeckPage() {
 
   return (
     <div className={styles.page}>
-      <button className={styles.back} onClick={() => navigate('/decks')} type="button">&larr; Back to decks</button>
+      {/* Full-width banner */}
+      <div className={styles.banner} style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}>
+        <div className={styles.bannerOverlay}>
+          <button className={styles.bannerBack} onClick={() => navigate('/decks')} type="button">&larr; Back to decks</button>
+          <h1 className={styles.bannerName}>{deck.name}</h1>
+          <div className={styles.bannerMeta}>
+            <span className={styles.formatBadge}>{deck.format}</span>
+            <span className={styles.cardCount}>{deck.card_count} cards</span>
+            {deck.source_url && (
+              <span className={styles.bannerSource}>
+                Imported from <a href={deck.source_url} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>{deck.source ?? 'external source'}</a>
+              </span>
+            )}
+          </div>
+          {deck.description && <p className={styles.bannerDescription}>{deck.description}</p>}
+        </div>
+      </div>
 
       <div className={styles.deckLayout}>
         <div className={styles.previewPanel}>
@@ -144,21 +180,6 @@ export function DeckPage() {
         </div>
 
         <div className={styles.deckContent}>
-      <div className={styles.header}>
-        <div className={styles.headerTop}>
-          <h1 className={styles.name}>{deck.name}</h1>
-          <div className={styles.badges}>
-            <span className={styles.formatBadge}>{deck.format}</span>
-            <span className={styles.cardCount}>{deck.card_count} cards</span>
-          </div>
-        </div>
-        {deck.description && <p className={styles.description}>{deck.description}</p>}
-        {deck.source_url && (
-          <p className={styles.source}>
-            Imported from <a href={deck.source_url} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>{deck.source ?? 'external source'}</a>
-          </p>
-        )}
-      </div>
 
       {/* Mainboard grouped by type */}
       {(deck.commanders.length > 0 || deck.mainboard.length > 0) && (
