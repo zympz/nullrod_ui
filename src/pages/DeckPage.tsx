@@ -151,9 +151,9 @@ export function DeckPage() {
       {/* Other zones — flow inline */}
       {(deck.companions.length > 0 || deck.sideboard.length > 0 || deck.maybeboard.length > 0) && (
         <div className={styles.otherZones}>
-          {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} />}
-          {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} />}
-          {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} />}
+          {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
+          {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
+          {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
         </div>
       )}
 
@@ -302,7 +302,8 @@ function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHove
   )
 }
 
-function CardZone({ title, cards, onCardClick, onCardHover }: { title: string; cards: DeckCard[]; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void }) {
+function CardZone({ title, cards, onCardClick, onCardHover, defaultCollapsed = false }: { title: string; cards: DeckCard[]; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; defaultCollapsed?: boolean }) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed)
   if (cards.length === 0) return null
 
   const groups = groupByType(cards)
@@ -312,15 +313,18 @@ function CardZone({ title, cards, onCardClick, onCardHover }: { title: string; c
 
   return (
     <div className={styles.zone}>
-      <div className={styles.zoneHeader}>
+      <button type="button" className={styles.zoneHeaderBtn} onClick={() => setCollapsed(!collapsed)}>
+        <span className={styles.collapseIcon}>{collapsed ? '▸' : '▾'}</span>
         <span className={styles.sectionLabel}>{title}</span>
         <span className={styles.zoneCount}>({totalCards})</span>
-      </div>
-      <div className={styles.zoneFlow} style={{ columnCount: cols }}>
-        {groups.map((group) => (
-          <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} />
-        ))}
-      </div>
+      </button>
+      {!collapsed && (
+        <div className={styles.zoneFlow} style={{ columnCount: cols }}>
+          {groups.map((group) => (
+            <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -314,6 +314,25 @@
   gap: 8px;
 }
 
+.zoneHeaderBtn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.zoneHeaderBtn:hover {
+  color: var(--accent);
+}
+
+.collapseIcon {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 12px;
+}
+
 .zoneCount {
   font-size: 13px;
   color: var(--text-muted);
@@ -462,12 +481,12 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .typeGroupCount {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text);
   font-weight: 400;
 }
 
