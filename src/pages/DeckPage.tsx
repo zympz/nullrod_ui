@@ -559,8 +559,8 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
       </button>
       {!collapsed && (
         <div className={styles.statsGrid}>
-          {/* Mana Curve — full width */}
-          <div className={`${styles.statBlock} ${styles.statSpanFull}`}>
+          {/* Mana Curve */}
+          <div className={styles.statBlock}>
             <div className={styles.statLabel}>Mana Curve</div>
             <div className={styles.curveBar}>
               {manaCurve.map(({ label, count }) => (
@@ -578,10 +578,41 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
             </div>
           </div>
 
+          {/* Color Availability by Turn */}
+          {manaProd.length > 0 && (
+            <div className={styles.statBlock}>
+              <div className={styles.statLabel}>Color Availability by Turn</div>
+              <div className={styles.turnTable}>
+                <div className={styles.turnRow}>
+                  <span className={styles.turnHeader}>Turn</span>
+                  {manaProd.map(({ key, symbol }) => (
+                    <span key={key} className={styles.turnHeader}><ManaCost cost={symbol} size={16} /></span>
+                  ))}
+                </div>
+                {TURNS.map((turn) => {
+                  const drawn = 6 + turn
+                  return (
+                    <div key={turn} className={styles.turnRow}>
+                      <span className={styles.turnLabel}>T{turn}</span>
+                      {manaProd.map(({ key, count }) => {
+                        const pct = Math.round(pAtLeastOne(deckSize, count, drawn) * 100)
+                        return (
+                          <span key={key} className={styles.turnCell} style={{ opacity: 0.4 + 0.6 * (pct / 100) }}>
+                            {pct}%
+                          </span>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Type Breakdown */}
           <div className={styles.statBlock}>
             <div className={styles.statLabel}>Type Breakdown</div>
-            <div className={`${styles.cmcByColor} ${styles.wideBarGraph}`}>
+            <div className={`${styles.cmcByColor} ${styles.wideBarGraph} ${styles.fullWidth}`}>
               {typeBreakdown.map(({ label, count }) => (
                 <div key={label} className={styles.cmcRow}>
                   <span className={styles.typeLabel}>{label}</span>
@@ -678,7 +709,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
           {manaProd.length > 0 && (
             <div className={styles.statBlock}>
               <div className={styles.statLabel}>Mana Production</div>
-              <div className={styles.cmcByColor}>
+              <div className={`${styles.cmcByColor} ${styles.fullWidth}`}>
                 {manaProd.map(({ key, count, pct, symbol, bg }) => (
                   <div key={key} className={styles.cmcRow}>
                     <ManaCost cost={symbol} size={16} />
@@ -691,37 +722,6 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, typeBreakdown, an
                     <span className={styles.cmcValue}>{count} ({pct}%)</span>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Color Availability by Turn */}
-          {manaProd.length > 0 && (
-            <div className={`${styles.statBlock} ${styles.statSpanFull}`}>
-              <div className={styles.statLabel}>Color Availability by Turn</div>
-              <div className={styles.turnTable}>
-                <div className={styles.turnRow}>
-                  <span className={styles.turnHeader}>Turn</span>
-                  {manaProd.map(({ key, symbol }) => (
-                    <span key={key} className={styles.turnHeader}><ManaCost cost={symbol} size={16} /></span>
-                  ))}
-                </div>
-                {TURNS.map((turn) => {
-                  const drawn = 6 + turn
-                  return (
-                    <div key={turn} className={styles.turnRow}>
-                      <span className={styles.turnLabel}>T{turn}</span>
-                      {manaProd.map(({ key, count }) => {
-                        const pct = Math.round(pAtLeastOne(deckSize, count, drawn) * 100)
-                        return (
-                          <span key={key} className={styles.turnCell} style={{ opacity: 0.4 + 0.6 * (pct / 100) }}>
-                            {pct}%
-                          </span>
-                        )
-                      })}
-                    </div>
-                  )
-                })}
               </div>
             </div>
           )}

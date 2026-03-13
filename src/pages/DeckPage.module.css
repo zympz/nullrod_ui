@@ -350,6 +350,10 @@
   max-width: 400px;
 }
 
+.cmcByColor.fullWidth {
+  max-width: none;
+}
+
 .cmcRow {
   display: grid;
   grid-template-columns: 24px 1fr auto;
@@ -700,7 +704,6 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  max-width: 500px;
 }
 
 .turnRow {
