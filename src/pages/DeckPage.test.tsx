@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DeckPage } from './DeckPage'
@@ -116,6 +116,8 @@ describe('DeckPage', () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     await act(async () => { renderDeckPage() })
     expect(screen.getByText('Deck Stats')).toBeInTheDocument()
+    // Deck stats collapsed by default — expand to see content
+    fireEvent.click(screen.getByText('Deck Stats'))
     expect(screen.getByText(/Color Summary/)).toBeInTheDocument()
   })
 

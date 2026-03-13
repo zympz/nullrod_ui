@@ -542,7 +542,7 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, analysis }: {
   manaCurve: ReturnType<typeof getManaCurve>
   analysis: ReturnType<typeof getDeckAnalysis>
 }) {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const maxCurveCount = Math.max(...manaCurve.map((b) => b.count), 1)
 
   return (
@@ -668,17 +668,17 @@ function DeckStats({ colorDist, manaProd, deckSize, manaCurve, analysis }: {
             <div className={styles.statLabel}>Color Summary <span className={styles.infoIcon} title="Spell distribution, average mana value, and land mana sources per color.">i</span></div>
             <div className={styles.colorSummary}>
               <div className={styles.colorSummaryHeader}>
-                <span />
-                <span>Color</span>
-                <span>Spells</span>
-                <span>Avg CMC</span>
-                {manaProd.length > 0 && <span>Sources</span>}
+                <span className={styles.colorSummaryIcon} />
+                <span className={styles.colorSummaryName}>Color</span>
+                <span className={styles.colorSummaryHeaderCell}>Spells</span>
+                <span className={styles.colorSummaryHeaderCell}>Avg CMC</span>
+                {manaProd.length > 0 && <span className={styles.colorSummaryHeaderCell}>Sources</span>}
               </div>
               {colorDist.map(({ key, count, pct, label, symbol, avgCmc }) => {
                 const prod = manaProd.find((p) => p.key === key)
                 return (
                   <div key={key} className={styles.colorSummaryRow}>
-                    <ManaCost cost={symbol} size={16} />
+                    <div className={styles.colorSummaryIcon}><ManaCost cost={symbol} size={16} /></div>
                     <span className={styles.colorSummaryName}>{label}</span>
                     <span className={styles.colorSummaryVal}>{count} <span className={styles.colorSummaryPct}>({pct}%)</span></span>
                     <span className={styles.colorSummaryVal}>{avgCmc.toFixed(2)}</span>

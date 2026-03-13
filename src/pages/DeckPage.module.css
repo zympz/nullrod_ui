@@ -54,7 +54,7 @@
 .deckContent {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 32px;
   min-width: 0;
 }
 
@@ -313,45 +313,57 @@
 .colorSummary {
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 .colorSummaryHeader {
-  display: grid;
-  grid-template-columns: 24px 1fr repeat(3, auto);
-  gap: 12px;
-  padding: 0 0 8px;
-  border-bottom: 1px solid var(--border);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  background: var(--surface-2);
 }
 
 .colorSummaryRow {
-  display: grid;
-  grid-template-columns: 24px 1fr repeat(3, auto);
-  gap: 12px;
+  display: flex;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--border);
 }
 
-.colorSummaryRow:last-child {
-  border-bottom: none;
+.colorSummaryRow:hover {
+  background: var(--surface-2);
+}
+
+.colorSummaryIcon {
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
 }
 
 .colorSummaryName {
-  font-size: 13px;
+  flex: 1;
+  font-size: 12px;
   color: var(--text);
+  padding: 6px 8px;
+}
+
+.colorSummaryHeaderCell {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 8px;
 }
 
 .colorSummaryVal {
-  font-size: 13px;
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
-  text-align: right;
-  min-width: 60px;
+  padding: 6px 8px;
 }
 
 .colorSummaryPct {

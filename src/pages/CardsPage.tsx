@@ -8,7 +8,7 @@ import { CardList } from '../components/CardList'
 import { CardDetail } from '../components/CardDetail'
 import styles from './CardsPage.module.css'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 30
 
 type ViewMode = 'grid' | 'list'
 
