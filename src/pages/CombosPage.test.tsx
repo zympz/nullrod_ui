@@ -15,7 +15,6 @@ const mockCombo = {
   card_names: ['Sol Ring', 'Hullbreaker Horror'],
   produces: [{ name: 'Infinite colorless mana', quantity: 1 }],
   identity: 'U',
-  popularity: 289457,
   bracket_tag: 'E',
 }
 
@@ -53,11 +52,6 @@ describe('CombosPage', () => {
   it('shows bracket badge', async () => {
     renderPage()
     expect(await screen.findByText('Extra Spicy')).toBeInTheDocument()
-  })
-
-  it('shows popularity', async () => {
-    renderPage()
-    expect(await screen.findByText('289,457 decks')).toBeInTheDocument()
   })
 
   it('shows error on failure', async () => {

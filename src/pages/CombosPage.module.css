@@ -158,10 +158,6 @@
   color: var(--text-dim);
 }
 
-.popularity {
-  color: var(--text-muted);
-}
-
 .cardCount {
   color: var(--text-dim);
 }

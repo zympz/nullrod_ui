@@ -9,7 +9,6 @@ export interface ComboSummary {
   card_names: string[]
   produces: ComboProduces[]
   identity: string
-  popularity: number
   bracket_tag: string
 }
 
@@ -57,13 +56,6 @@ export interface Combo {
   easy_prerequisites: string
   notable_prerequisites: string
   identity: string
-  legalities: Record<string, boolean>
-  popularity: number
   bracket_tag: string
-  prices: {
-    tcgplayer: string
-    cardmarket: string
-    cardkingdom: string
-  }
   spoiler: boolean
 }

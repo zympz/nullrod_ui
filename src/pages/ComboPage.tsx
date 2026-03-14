@@ -6,26 +6,12 @@ import { getCombo } from '../api/client'
 import { ColorPips } from '../components/ColorPips'
 import styles from './ComboPage.module.css'
 
-const ZONE_LABELS: Record<string, string> = {
-  B: 'Battlefield',
-  H: 'Hand',
-  G: 'Graveyard',
-  L: 'Library',
-  E: 'Exile',
-  C: 'Command Zone',
-}
-
 const BRACKET_LABELS: Record<string, string> = {
   E: 'Extra Spicy',
   S: 'Spicy',
   R: 'Regular',
   P: 'Precon',
 }
-
-const LEGALITY_ORDER = [
-  'commander', 'legacy', 'vintage', 'modern', 'pioneer',
-  'standard', 'pauper', 'oathbreaker', 'brawl',
-] as const
 
 export function ComboPage() {
   const { comboId } = useParams<{ comboId: string }>()
@@ -77,7 +63,6 @@ export function ComboPage() {
           <span className={`${styles.bracketBadge} ${styles[`bracket_${combo.bracket_tag}`]}`}>
             {BRACKET_LABELS[combo.bracket_tag] ?? combo.bracket_tag}
           </span>
-          <span className={styles.popularity}>{combo.popularity.toLocaleString()} decks</span>
         </div>
       </div>
 
@@ -94,7 +79,7 @@ export function ComboPage() {
                   <div className={styles.cardImgEmpty}>{use.card.name}</div>
                 )}
                 <div className={styles.cardZone}>
-                  {use.zone_locations.map((z) => ZONE_LABELS[z] ?? z).join(', ')}
+                  {use.zone_locations.join(', ')}
                   {use.must_be_commander && ' (Commander)'}
                 </div>
               </div>
@@ -113,19 +98,35 @@ export function ComboPage() {
         </div>
 
         {/* Prerequisites */}
-        {combo.requires.length > 0 && (
+        {(combo.requires.length > 0 || combo.notable_prerequisites || combo.easy_prerequisites || combo.mana_needed) && (
           <div className={styles.section}>
             <div className={styles.sectionLabel}>Prerequisites</div>
-            <ul className={styles.prereqList}>
-              {combo.requires.map((req, i) => (
-                <li key={i} className={styles.prereq}>
-                  {req.name}
-                  <span className={styles.prereqZone}>
-                    ({req.zone_locations.map((z) => ZONE_LABELS[z] ?? z).join(', ')})
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {combo.requires.length > 0 && (
+              <ul className={styles.prereqList}>
+                {combo.requires.map((req, i) => (
+                  <li key={i} className={styles.prereq}>
+                    {req.name}
+                    <span className={styles.prereqZone}>
+                      ({req.zone_locations.join(', ')})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {combo.notable_prerequisites && (
+              <ul className={styles.prereqList}>
+                {combo.notable_prerequisites.split('\n').filter(Boolean).map((p, i) => (
+                  <li key={i} className={styles.prereq}>{p}</li>
+                ))}
+              </ul>
+            )}
+            {combo.easy_prerequisites && (
+              <ul className={styles.prereqList}>
+                {combo.easy_prerequisites.split('\n').filter(Boolean).map((p, i) => (
+                  <li key={i} className={styles.prereq}>{p}</li>
+                ))}
+              </ul>
+            )}
             {combo.mana_needed && (
               <div className={styles.manaCost}>Mana needed: {combo.mana_needed}</div>
             )}
@@ -141,34 +142,6 @@ export function ComboPage() {
             ))}
           </div>
         </div>
-
-        {/* Legalities */}
-        <div className={styles.section}>
-          <div className={styles.sectionLabel}>Legality</div>
-          <div className={styles.legalities}>
-            {LEGALITY_ORDER.map((fmt) => {
-              const legal = combo.legalities[fmt] ?? false
-              return (
-                <div key={fmt} className={`${styles.legalityRow} ${legal ? styles.legalYes : styles.legalNo}`}>
-                  <span className={styles.format}>{fmt}</span>
-                  <span className={styles.legalityStatus}>{legal ? 'legal' : 'not legal'}</span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Prices */}
-        {combo.prices && (
-          <div className={styles.section}>
-            <div className={styles.sectionLabel}>Prices</div>
-            <div className={styles.prices}>
-              {combo.prices.tcgplayer && <span className={styles.price}>TCGplayer: ${combo.prices.tcgplayer}</span>}
-              {combo.prices.cardkingdom && <span className={styles.price}>Card Kingdom: ${combo.prices.cardkingdom}</span>}
-              {combo.prices.cardmarket && <span className={styles.price}>Cardmarket: €{combo.prices.cardmarket}</span>}
-            </div>
-          </div>
-        )}
 
         {combo.notes && (
           <div className={styles.section}>

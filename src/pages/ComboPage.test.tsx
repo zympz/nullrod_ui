@@ -16,7 +16,7 @@ const mockCombo = {
     {
       card: { name: 'Hullbreaker Horror', oracle_id: 'abc', type_line: 'Creature', image_url: 'https://example.com/hull.jpg' },
       quantity: 1,
-      zone_locations: ['B'],
+      zone_locations: ['battlefield'],
       battlefield_card_state: '',
       exile_card_state: '',
       library_card_state: '',
@@ -26,7 +26,7 @@ const mockCombo = {
     {
       card: { name: 'Sol Ring', oracle_id: 'def', type_line: 'Artifact', image_url: 'https://example.com/sol.jpg' },
       quantity: 1,
-      zone_locations: ['B'],
+      zone_locations: ['battlefield'],
       battlefield_card_state: '',
       exile_card_state: '',
       library_card_state: '',
@@ -34,7 +34,7 @@ const mockCombo = {
       must_be_commander: false,
     },
   ],
-  requires: [{ name: 'A permanent that costs 0 or 1', scryfall_query: '', quantity: 1, zone_locations: ['H'] }],
+  requires: [{ name: 'A permanent that costs 0 or 1', scryfall_query: '', quantity: 1, zone_locations: ['hand'] }],
   produces: [{ name: 'Infinite colorless mana', quantity: 1 }, { name: 'Infinite storm count', quantity: 1 }],
   card_names: ['Hullbreaker Horror', 'Sol Ring'],
   description: 'Tap Sol Ring for mana.\nCast a cheap permanent.\nBounce Sol Ring with Hullbreaker Horror.',
@@ -44,10 +44,7 @@ const mockCombo = {
   easy_prerequisites: '',
   notable_prerequisites: '',
   identity: 'U',
-  legalities: { commander: true, legacy: false, vintage: true },
-  popularity: 289457,
   bracket_tag: 'E',
-  prices: { tcgplayer: '6.76', cardmarket: '2.87', cardkingdom: '10.78' },
   spoiler: false,
 }
 
@@ -77,7 +74,6 @@ describe('ComboPage', () => {
     await act(async () => { renderComboPage() })
     expect(screen.getByText('Hullbreaker Horror + Sol Ring')).toBeInTheDocument()
     expect(screen.getByText('Extra Spicy')).toBeInTheDocument()
-    expect(screen.getByText('289,457 decks')).toBeInTheDocument()
   })
 
   it('renders card images', async () => {
@@ -105,18 +101,6 @@ describe('ComboPage', () => {
     await act(async () => { renderComboPage() })
     expect(screen.getByText('Infinite colorless mana')).toBeInTheDocument()
     expect(screen.getByText('Infinite storm count')).toBeInTheDocument()
-  })
-
-  it('renders legalities', async () => {
-    mockGetCombo.mockResolvedValue(mockCombo)
-    await act(async () => { renderComboPage() })
-    expect(screen.getByText('commander')).toBeInTheDocument()
-  })
-
-  it('renders prices', async () => {
-    mockGetCombo.mockResolvedValue(mockCombo)
-    await act(async () => { renderComboPage() })
-    expect(screen.getByText('TCGplayer: $6.76')).toBeInTheDocument()
   })
 
   it('shows error on failure', async () => {

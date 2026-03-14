@@ -95,7 +95,6 @@ export function CombosPage() {
                 </div>
                 <div className={styles.comboMeta}>
                   <ColorPips colors={combo.identity.split('') as Color[]} size={14} />
-                  <span className={styles.popularity}>{combo.popularity.toLocaleString()} decks</span>
                   <span className={styles.cardCount}>{combo.card_names.length} cards</span>
                 </div>
               </Link>
