@@ -4,6 +4,7 @@ import type { Combo } from '../types/combo'
 import type { Color } from '../types/card'
 import { getCombo } from '../api/client'
 import { ColorPips } from '../components/ColorPips'
+import { ManaCost } from '../components/ManaSymbol'
 import styles from './ComboPage.module.css'
 
 const BRACKET_LABELS: Record<string, string> = {
@@ -128,7 +129,7 @@ export function ComboPage() {
               </ul>
             )}
             {combo.mana_needed && (
-              <div className={styles.manaCost}>Mana needed: {combo.mana_needed}</div>
+              <div className={styles.manaCost}>Mana needed: <ManaCost cost={combo.mana_needed} size={16} /></div>
             )}
           </div>
         )}
