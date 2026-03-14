@@ -4,7 +4,7 @@ import type { Combo } from '../types/combo'
 import type { Color } from '../types/card'
 import { getCombo } from '../api/client'
 import { ColorPips } from '../components/ColorPips'
-import { ManaCost } from '../components/ManaSymbol'
+import { ManaCost, OracleText } from '../components/ManaSymbol'
 import styles from './ComboPage.module.css'
 
 const BRACKET_LABELS: Record<string, string> = {
@@ -93,7 +93,7 @@ export function ComboPage() {
           <div className={styles.sectionLabel}>Steps</div>
           <ol className={styles.steps}>
             {steps.map((step, i) => (
-              <li key={i} className={styles.step}>{step}</li>
+              <li key={i} className={styles.step}><OracleText text={step} /></li>
             ))}
           </ol>
         </div>
@@ -117,14 +117,14 @@ export function ComboPage() {
             {combo.notable_prerequisites && (
               <ul className={styles.prereqList}>
                 {combo.notable_prerequisites.split('\n').filter(Boolean).map((p, i) => (
-                  <li key={i} className={styles.prereq}>{p}</li>
+                  <li key={i} className={styles.prereq}><OracleText text={p} /></li>
                 ))}
               </ul>
             )}
             {combo.easy_prerequisites && (
               <ul className={styles.prereqList}>
                 {combo.easy_prerequisites.split('\n').filter(Boolean).map((p, i) => (
-                  <li key={i} className={styles.prereq}>{p}</li>
+                  <li key={i} className={styles.prereq}><OracleText text={p} /></li>
                 ))}
               </ul>
             )}
@@ -147,7 +147,7 @@ export function ComboPage() {
         {combo.notes && (
           <div className={styles.section}>
             <div className={styles.sectionLabel}>Notes</div>
-            <p className={styles.notes}>{combo.notes}</p>
+            <p className={styles.notes}><OracleText text={combo.notes} /></p>
           </div>
         )}
       </div>
