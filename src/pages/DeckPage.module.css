@@ -494,6 +494,15 @@
   color: var(--accent);
 }
 
+.dfcBadge {
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 10px;
+  opacity: 0.45;
+  vertical-align: middle;
+  pointer-events: none;
+}
+
 .cardMana {
   display: flex;
   align-items: center;

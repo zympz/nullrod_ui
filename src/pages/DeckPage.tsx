@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import type { Deck, DeckCard, DeckFormat } from '../types/deck'
 import type { OracleCard } from '../types/card'
@@ -19,13 +19,35 @@ export function DeckPage() {
   const [prices, setPrices] = useState<Map<string, string | null> | null>(null)
   const [pricesLoading, setPricesLoading] = useState(false)
   const cardCache = useState(() => new Map<string, OracleCard>())[0]
+  const hoveredNameRef = useRef<string | null>(null)
 
   const onCardHover = useCallback((card: DeckCard | null) => {
-    if (!card || !card.image_url) return
-    setHoveredImageUrl(card.image_url)
+    if (!card) { hoveredNameRef.current = null; setHoveredCard(null); return }
+    hoveredNameRef.current = card.name
     setHoveredCard(card)
     setPreviewFace(0)
-  }, [])
+
+    const cached = cardCache.get(card.name)
+    if (cached) {
+      setHoveredImageUrl(cached.image_urls.normal ?? cached.image_urls.art_crop ?? card.image_url ?? null)
+      return
+    }
+
+    setHoveredImageUrl(card.image_url ?? null)
+    const targetName = card.name
+    searchCardByName(frontFace(card.name))
+      .then((res) => {
+        if (hoveredNameRef.current !== targetName) return
+        const match = res.results.find((c) => c.name === targetName || c.name.startsWith(frontFace(targetName) + ' // '))
+          ?? res.results.find((c) => c.name === frontFace(targetName))
+          ?? res.results[0]
+        if (match) {
+          cardCache.set(targetName, match)
+          setHoveredImageUrl(match.image_urls.normal ?? match.image_urls.art_crop ?? card.image_url ?? null)
+        }
+      })
+      .catch(() => {})
+  }, [cardCache])
 
   const onCardClick = useCallback((cardName: string) => {
     const cached = cardCache.get(cardName)
@@ -94,6 +116,7 @@ export function DeckPage() {
         cardCache.set(featuredCard.name, match)
         const artCrop = match.image_urls?.art_crop
         if (artCrop) setBannerUrl(artCrop)
+        setHoveredImageUrl(match.image_urls.normal ?? artCrop ?? null)
       })
       .catch(() => {})
     return () => { cancelled = true }
@@ -236,14 +259,10 @@ function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip, cardC
   const isDfc = hoveredCard != null && hoveredCard.name.includes(' // ')
   const otherFaceName = hoveredCard ? (previewFace === 0 ? backFace(hoveredCard.name) : frontFace(hoveredCard.name)) : null
 
-  let imgUrl = hoveredImageUrl
-  if (isDfc && hoveredCard) {
+  let imgUrl: string | null | undefined = hoveredImageUrl
+  if (isDfc && previewFace === 1 && hoveredCard) {
     const cached = cardCache.get(hoveredCard.name)
-    if (previewFace === 1) {
-      imgUrl = cached?.image_urls.back_normal ?? cached?.image_urls.back_art_crop ?? imgUrl
-    } else {
-      imgUrl = cached?.image_urls.normal ?? imgUrl
-    }
+    imgUrl = cached?.image_urls.back_normal ?? cached?.image_urls.back_art_crop ?? hoveredImageUrl
   }
 
   return (
@@ -318,10 +337,13 @@ function TypeGroupBlock({ group, onCardClick, onCardHover }: { group: { label: s
       </div>
       {group.cards.map((card) => {
         const mana = card.mana_cost ? frontFace(card.mana_cost) : null
+        const isDfc = card.name.includes(' // ')
         return (
           <div key={card.scryfall_id} className={styles.mainboardCard} onMouseEnter={() => onCardHover(card)} onMouseLeave={() => onCardHover(null)}>
             <span className={styles.cardQty}>{card.quantity}</span>
-            <button type="button" className={styles.cardNameLink} onClick={() => onCardClick(card.name)}>{frontFace(card.name)}</button>
+            <button type="button" className={styles.cardNameLink} onClick={() => onCardClick(card.name)}>
+              {frontFace(card.name)}{isDfc && <span className={styles.dfcBadge} title={backFace(card.name) ?? ''}>↻</span>}
+            </button>
             <span className={styles.cardMana}>
               {mana ? (
                 <ManaCost cost={mana} size={13} />
