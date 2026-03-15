@@ -244,18 +244,14 @@ export function CardPage() {
               </div>
               <div className={styles.printingsList}>
                 <div className={styles.printingsColHeader}>
-                  <span className={styles.printingSet}>Set</span>
-                  <span className={styles.printingMeta}>
-                    <span>Code</span>
-                    <span>Rarity</span>
-                    <span>#</span>
-                    <span>Year</span>
-                  </span>
-                  <span className={styles.printingPrices}>
-                    <span className={styles.printingPrice}><span className={styles.printingPriceLabel}>Normal</span></span>
-                    <span className={styles.printingPrice}><span className={styles.printingPriceLabel}>Foil</span></span>
-                    <span className={styles.printingPrice}><span className={styles.printingPriceLabel}>Etched</span></span>
-                  </span>
+                  <span>Set</span>
+                  <span>Code</span>
+                  <span>Rarity</span>
+                  <span>#</span>
+                  <span>Year</span>
+                  <span>Normal</span>
+                  <span>Foil</span>
+                  <span>Etched</span>
                 </div>
                 {printings.map((p) => {
                   const isActive = selectedPrinting?.scryfall_id === p.scryfall_id
@@ -270,14 +266,14 @@ export function CardPage() {
                       onMouseEnter={() => setHoveredPrinting(p)}
                       onMouseLeave={() => setHoveredPrinting(null)}
                     >
-                      <div className={styles.printingSet}>{p.set_name}</div>
-                      <div className={styles.printingMeta}>
-                        <span>{p.set_code.toUpperCase()}</span>
-                        <span className={styles.printingRarity} style={{ color: rarityColor }}>{p.rarity}</span>
-                        <span>#{p.collector_number}</span>
-                        <span>{year}</span>
-                      </div>
-                      <PrintingPrices prices={p.prices} />
+                      <span className={styles.printingSet}>{p.set_name}</span>
+                      <span>{p.set_code.toUpperCase()}</span>
+                      <span style={{ color: rarityColor }}>{p.rarity}</span>
+                      <span>#{p.collector_number}</span>
+                      <span>{year}</span>
+                      <span className={styles.printingPrice}>{p.prices.usd != null ? `$${p.prices.usd}` : ''}</span>
+                      <span className={styles.printingPrice}>{p.prices.usd_foil != null ? `$${p.prices.usd_foil}` : ''}</span>
+                      <span className={styles.printingPrice}>{p.prices.usd_etched != null ? `$${p.prices.usd_etched}` : ''}</span>
                     </button>
                   )
                 })}
@@ -345,22 +341,5 @@ function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean
         )}
       </div>
     </>
-  )
-}
-
-function PrintingPrices({ prices }: { prices: PrintingResponse['prices'] }) {
-  const slots = [
-    { key: 'usd', value: prices.usd },
-    { key: 'usd_foil', value: prices.usd_foil },
-    { key: 'usd_etched', value: prices.usd_etched },
-  ]
-  return (
-    <div className={styles.printingPrices}>
-      {slots.map(({ key, value }) => (
-        <span key={key} className={styles.printingPrice}>
-          {value != null ? `$${value}` : ''}
-        </span>
-      ))}
-    </div>
   )
 }
