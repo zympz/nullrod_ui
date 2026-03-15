@@ -34,7 +34,9 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
 
   const faces = card.card_faces
   const isDfc = faces != null && faces.length === 2
-  const imgUrl = card.image_urls.normal ?? card.image_urls.art_crop
+  const imgUrl = isDfc && activeFace === 1
+    ? (card.image_urls.back_normal ?? card.image_urls.back_art_crop ?? card.image_urls.normal ?? card.image_urls.art_crop)
+    : (card.image_urls.normal ?? card.image_urls.art_crop)
 
   return createPortal(
     <div className={styles.overlay} ref={overlayRef} onClick={handleOverlayClick}>

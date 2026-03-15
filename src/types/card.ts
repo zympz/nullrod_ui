@@ -70,6 +70,8 @@ export interface OracleCard {
 export interface ImageUrls {
   normal?: string
   art_crop?: string
+  back_normal?: string
+  back_art_crop?: string
 }
 
 export interface SearchResponse {

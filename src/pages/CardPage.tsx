@@ -58,11 +58,9 @@ export function CardPage() {
   const faces = card.card_faces
   const isDfc = faces != null && faces.length === 2
   const activePrinting = hoveredPrinting ?? selectedPrinting
-  const imgUrl =
-    activePrinting?.image_urls.normal ??
-    activePrinting?.image_urls.art_crop ??
-    card.image_urls.normal ??
-    card.image_urls.art_crop
+  const imgUrl = isDfc && activeFace === 1
+    ? (activePrinting?.image_urls.back_normal ?? activePrinting?.image_urls.back_art_crop ?? card.image_urls.back_normal ?? card.image_urls.back_art_crop ?? card.image_urls.normal ?? card.image_urls.art_crop)
+    : (activePrinting?.image_urls.normal ?? activePrinting?.image_urls.art_crop ?? card.image_urls.normal ?? card.image_urls.art_crop)
 
   return (
     <div className={styles.page}>

@@ -236,13 +236,13 @@ function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip, cardC
   const isDfc = hoveredCard != null && hoveredCard.name.includes(' // ')
   const otherFaceName = hoveredCard ? (previewFace === 0 ? backFace(hoveredCard.name) : frontFace(hoveredCard.name)) : null
 
-  // For DFCs on back face, try to get image from cards API cache
   let imgUrl = hoveredImageUrl
-  if (isDfc && previewFace === 1 && hoveredCard) {
+  if (isDfc && hoveredCard) {
     const cached = cardCache.get(hoveredCard.name)
-    if (cached?.image_urls?.normal) {
-      // API currently returns single image for DFCs — show it on both faces for now
-      imgUrl = cached.image_urls.normal
+    if (previewFace === 1) {
+      imgUrl = cached?.image_urls.back_normal ?? cached?.image_urls.back_art_crop ?? imgUrl
+    } else {
+      imgUrl = cached?.image_urls.normal ?? imgUrl
     }
   }
 
