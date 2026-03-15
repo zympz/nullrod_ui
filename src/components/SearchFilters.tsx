@@ -60,11 +60,6 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
     }))
   }
 
-  function clearLegality() {
-    setDraft((d) => ({ ...d, format: undefined }))
-    setLegalityFormat('')
-  }
-
   function apply() {
     onChange({ ...draft, page: 1 })
   }
@@ -179,25 +174,20 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
         {/* Legality / Format */}
         <div className={styles.group}>
           <label className={styles.label}>Format</label>
-          <div className={styles.row}>
-            <select
-              className={`${styles.select} ${styles.selectFull}`}
-              value={legalityFormat}
-              onChange={(e) => {
-                const f = e.target.value as Format | ''
-                setLegalityFormat(f)
-                setDraft((d) => ({ ...d, format: f || undefined }))
-              }}
-            >
-              <option value="">— none —</option>
-              {FORMATS.map((f) => (
-                <option key={f} value={f}>{f}</option>
-              ))}
-            </select>
-            {draft.format && (
-              <button className={styles.clearBtn} onClick={clearLegality} type="button">✕</button>
-            )}
-          </div>
+          <select
+            className={`${styles.select} ${styles.selectFull}`}
+            value={legalityFormat}
+            onChange={(e) => {
+              const f = e.target.value as Format | ''
+              setLegalityFormat(f)
+              setDraft((d) => ({ ...d, format: f || undefined }))
+            }}
+          >
+            <option value="">— none —</option>
+            {FORMATS.map((f) => (
+              <option key={f} value={f}>{f}</option>
+            ))}
+          </select>
         </div>
 
       </div>
