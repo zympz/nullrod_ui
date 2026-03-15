@@ -1,16 +1,12 @@
 import { useState } from 'react'
 import type { Color, ColorMode, Format, SearchParams } from '../types/card'
 import { ManaSymbol } from './ManaSymbol'
+import { FORMAT_ORDER } from '../constants'
 import styles from './SearchFilters.module.css'
 
 const COLORS: Color[] = ['W', 'U', 'B', 'R', 'G']
 
 type FilterColorMode = 'contains' | 'identity' | 'exact'
-
-const FORMATS: Format[] = [
-  'standard', 'pioneer', 'modern', 'legacy', 'vintage',
-  'commander', 'pauper', 'explorer', 'historic', 'timeless',
-]
 
 interface SearchFiltersProps {
   params: SearchParams
@@ -184,7 +180,7 @@ export function SearchFilters({ params, onChange }: SearchFiltersProps) {
             }}
           >
             <option value="">— none —</option>
-            {FORMATS.map((f) => (
+            {FORMAT_ORDER.map((f) => (
               <option key={f} value={f}>{f}</option>
             ))}
           </select>

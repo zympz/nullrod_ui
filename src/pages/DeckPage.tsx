@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import type { Deck, DeckCard } from '../types/deck'
+import type { Deck, DeckCard, DeckFormat } from '../types/deck'
 import type { OracleCard } from '../types/card'
 import { getDeck, searchCardByName } from '../api/client'
 import { ManaCost } from '../components/ManaSymbol'
@@ -37,6 +37,10 @@ export function DeckPage() {
       })
       .catch(() => {})
   }, [cardCache])
+
+  useEffect(() => {
+    cardCache.clear()
+  }, [deckId, cardCache])
 
   useEffect(() => {
     if (!deckId) return
@@ -146,7 +150,7 @@ export function DeckPage() {
               ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
             </span>
           </div>
-          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={deck.format === 'commander' || deck.format === 'brawl' || deck.format === 'oathbreaker' || deck.format === 'duel'} onCardClick={onCardClick} onCardHover={onCardHover} />
+          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={COMMANDER_FORMATS.includes(deck.format)} onCardClick={onCardClick} onCardHover={onCardHover} />
         </div>
       )}
 
@@ -214,6 +218,8 @@ function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip, cardC
     </div>
   )
 }
+
+const COMMANDER_FORMATS: DeckFormat[] = ['commander', 'brawl', 'oathbreaker', 'duel']
 
 const TYPE_GROUPS = [
   { label: 'Commander', match: (_: DeckCard) => false as boolean }, // placeholder, filled by commanders prop
@@ -346,29 +352,7 @@ function CardZone({ title, cards, onCardClick, onCardHover, defaultCollapsed = f
 }
 
 function groupByType(cards: DeckCard[]) {
-  const groups: { label: string; cards: DeckCard[] }[] = []
-  const used = new Set<number>()
-
-  for (const group of TYPE_GROUPS) {
-    if (group.label === 'Commander') continue
-    const matched: DeckCard[] = []
-    cards.forEach((card, idx) => {
-      if (!used.has(idx) && group.match(card)) {
-        matched.push(card)
-        used.add(idx)
-      }
-    })
-    if (matched.length > 0) {
-      groups.push({ label: group.label, cards: matched })
-    }
-  }
-
-  const other = cards.filter((_, idx) => !used.has(idx))
-  if (other.length > 0) {
-    groups.push({ label: 'Other', cards: other })
-  }
-
-  return groups
+  return groupMainboard([], cards)
 }
 
 const COLOR_META: Record<string, { label: string; symbol: string; bg: string }> = {
