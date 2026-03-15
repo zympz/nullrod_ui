@@ -399,9 +399,24 @@
   text-transform: capitalize;
 }
 
+.printingPrices {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+}
+
 .printingPrice {
-  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
+}
+
+.printingPriceLabel {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }

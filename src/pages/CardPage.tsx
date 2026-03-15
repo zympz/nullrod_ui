@@ -258,10 +258,8 @@ export function CardPage() {
                     <span className={styles.printingRarity} style={{ color: rarityColor }}>{p.rarity}</span>
                     <span>#{p.collector_number}</span>
                     <span>{year}</span>
-                    {p.prices.usd != null && (
-                      <span className={styles.printingPrice}>${p.prices.usd}</span>
-                    )}
                   </div>
+                  <PrintingPrices prices={p.prices} />
                 </button>
               )
             })}
@@ -326,5 +324,23 @@ function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean
         )}
       </div>
     </>
+  )
+}
+
+function PrintingPrices({ prices }: { prices: PrintingResponse['prices'] }) {
+  const entries: { label: string; value: string }[] = []
+  if (prices.usd != null) entries.push({ label: 'Normal', value: `$${prices.usd}` })
+  if (prices.usd_foil != null) entries.push({ label: 'Foil', value: `$${prices.usd_foil}` })
+  if (prices.usd_etched != null) entries.push({ label: 'Etched', value: `$${prices.usd_etched}` })
+  if (entries.length === 0) return null
+  return (
+    <div className={styles.printingPrices}>
+      {entries.map(({ label, value }) => (
+        <span key={label} className={styles.printingPrice}>
+          <span className={styles.printingPriceLabel}>{label}</span>
+          {value}
+        </span>
+      ))}
+    </div>
   )
 }

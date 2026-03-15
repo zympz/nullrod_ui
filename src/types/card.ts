@@ -120,7 +120,7 @@ export interface PrintingResponse {
   booster: boolean
   digital: boolean
   released_at: string | null
-  prices: { usd?: string | null; usd_foil?: string | null; eur?: string | null; tix?: string | null }
+  prices: { usd?: string | null; usd_foil?: string | null; usd_etched?: string | null; eur?: string | null; eur_foil?: string | null; tix?: string | null }
   image_urls: ImageUrls
 }
 
