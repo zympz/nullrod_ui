@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import type { Deck, DeckCard, DeckFormat } from '../types/deck'
 import type { OracleCard } from '../types/card'
-import { getDeck, searchCardByName } from '../api/client'
+import { getDeck, searchCardByName, getDeckCardPrices } from '../api/client'
 import { ManaCost } from '../components/ManaSymbol'
 import { CardDetail } from '../components/CardDetail'
 import styles from './DeckPage.module.css'
@@ -16,6 +16,8 @@ export function DeckPage() {
   const [hoveredCard, setHoveredCard] = useState<DeckCard | null>(null)
   const [previewFace, setPreviewFace] = useState(0)
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
+  const [prices, setPrices] = useState<Map<string, string | null> | null>(null)
+  const [pricesLoading, setPricesLoading] = useState(false)
   const cardCache = useState(() => new Map<string, OracleCard>())[0]
 
   const onCardHover = useCallback((card: DeckCard | null) => {
@@ -40,7 +42,21 @@ export function DeckPage() {
 
   useEffect(() => {
     cardCache.clear()
+    setPrices(null)
   }, [deckId, cardCache])
+
+  // Fetch prices for all cards in the deck
+  useEffect(() => {
+    if (!deck) return
+    let cancelled = false
+    setPrices(null)
+    setPricesLoading(true)
+    const allCards = [...deck.commanders, ...deck.mainboard, ...deck.sideboard, ...deck.companions, ...deck.maybeboard]
+    getDeckCardPrices(allCards)
+      .then((map) => { if (!cancelled) { setPrices(map); setPricesLoading(false) } })
+      .catch(() => { if (!cancelled) setPricesLoading(false) })
+    return () => { cancelled = true }
+  }, [deck])
 
   useEffect(() => {
     if (!deckId) return
@@ -102,6 +118,24 @@ export function DeckPage() {
     )
   }
 
+  // Deck price total
+  let deckTotal: number | null = null
+  let unpricedCount = 0
+  if (prices !== null) {
+    deckTotal = 0
+    for (const card of [...deck.commanders, ...deck.mainboard, ...deck.sideboard, ...deck.companions]) {
+      const usd = prices.get(card.scryfall_id)
+      if (usd != null) {
+        deckTotal += parseFloat(usd) * card.quantity
+      } else {
+        unpricedCount += card.quantity
+      }
+    }
+  }
+  const priceFormatted = deckTotal !== null
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deckTotal)
+    : null
+
   // Color distribution from mainboard + commanders
   const allMainCards = [...deck.commanders, ...deck.mainboard]
   const colorDist = getColorDistribution(allMainCards)
@@ -120,6 +154,15 @@ export function DeckPage() {
           <div className={styles.bannerMeta}>
             <span className={styles.formatBadge}>{deck.format}</span>
             <span className={styles.cardCount}>{deck.card_count} cards</span>
+            {pricesLoading && <span className={styles.priceLoading}>$—</span>}
+            {priceFormatted && (
+              <span
+                className={styles.priceBadge}
+                title={unpricedCount > 0 ? `${unpricedCount} card${unpricedCount !== 1 ? 's' : ''} without price data` : undefined}
+              >
+                {priceFormatted}{unpricedCount > 0 && <span className={styles.priceAsterisk}>*</span>}
+              </span>
+            )}
             {deck.source_url && (
               <span className={styles.bannerSource}>
                 Imported from <a href={deck.source_url} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>{deck.source ?? 'external source'}</a>

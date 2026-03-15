@@ -4,12 +4,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DeckPage } from './DeckPage'
 
 const mockGetDeck = vi.fn()
-
 const mockSearchCardByName = vi.fn()
+const mockGetDeckCardPrices = vi.fn()
 
 vi.mock('../api/client', () => ({
   getDeck: (...args: unknown[]) => mockGetDeck(...args),
   searchCardByName: (...args: unknown[]) => mockSearchCardByName(...args),
+  getDeckCardPrices: (...args: unknown[]) => mockGetDeckCardPrices(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
@@ -70,6 +71,7 @@ const mockDeck = {
 beforeEach(() => {
   vi.clearAllMocks()
   mockSearchCardByName.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
+  mockGetDeckCardPrices.mockResolvedValue(new Map())
 })
 
 function renderDeckPage(deckId = 'deck-1') {
@@ -146,6 +148,38 @@ describe('DeckPage', () => {
     mockGetDeck.mockRejectedValue(new Error('Deck not found'))
     await act(async () => { renderDeckPage() })
     expect(screen.getByText('Deck not found')).toBeInTheDocument()
+  })
+
+  it('shows price loading state while prices are fetching', async () => {
+    mockGetDeck.mockResolvedValue(mockDeck)
+    mockGetDeckCardPrices.mockReturnValue(new Promise(() => {}))
+    await act(async () => { renderDeckPage() })
+    expect(screen.getByText('$—')).toBeInTheDocument()
+  })
+
+  it('shows total price after prices load', async () => {
+    mockGetDeck.mockResolvedValue(mockDeck)
+    const priceMap = new Map([['cmd-1', '5.00'], ['sol-1', '2.00']])
+    mockGetDeckCardPrices.mockResolvedValue(priceMap)
+    await act(async () => { renderDeckPage() })
+    expect(screen.getByText('$7.00')).toBeInTheDocument()
+  })
+
+  it('shows asterisk and tooltip when some cards have no price', async () => {
+    mockGetDeck.mockResolvedValue(mockDeck)
+    const priceMap = new Map([['cmd-1', '5.00'], ['sol-1', null]])
+    mockGetDeckCardPrices.mockResolvedValue(priceMap)
+    await act(async () => { renderDeckPage() })
+    const badge = screen.getByTitle('1 card without price data')
+    expect(badge).toBeInTheDocument()
+  })
+
+  it('renders deck without crashing when price fetch fails', async () => {
+    mockGetDeck.mockResolvedValue(mockDeck)
+    mockGetDeckCardPrices.mockRejectedValue(new Error('network error'))
+    await act(async () => { renderDeckPage() })
+    expect(screen.getByText('Chatterfang Squirrels')).toBeInTheDocument()
+    expect(screen.queryByText('$—')).not.toBeInTheDocument()
   })
 
 })

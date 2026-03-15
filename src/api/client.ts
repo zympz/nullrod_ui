@@ -7,7 +7,7 @@ import type {
   PrintingsResponse,
   CardSymbol,
 } from '../types/card'
-import type { DeckListResponse, Deck, ImportDeckInput } from '../types/deck'
+import type { DeckListResponse, Deck, DeckCard, ImportDeckInput } from '../types/deck'
 import type { ComboListResponse, Combo } from '../types/combo'
 
 const BASE_URL = 'https://api.nullrod.com'
@@ -114,6 +114,27 @@ export function listDecks(params?: { page?: number; page_size?: number; format?:
 
 export function getDeck(id: string): Promise<Deck> {
   return request<Deck>(`/decks/${id}`)
+}
+
+export async function getDeckCardPrices(cards: DeckCard[]): Promise<Map<string, string | null>> {
+  const seen = new Set<string>()
+  const unique = cards.filter((c) => { if (seen.has(c.scryfall_id)) return false; seen.add(c.scryfall_id); return true })
+  const results = new Map<string, string | null>()
+
+  // Process in batches of 10 concurrent requests
+  for (let i = 0; i < unique.length; i += 10) {
+    const batch = unique.slice(i, i + 10)
+    await Promise.all(batch.map(async (card) => {
+      try {
+        const printing = await getCardByScryfall(card.scryfall_id)
+        results.set(card.scryfall_id, printing.prices.usd ?? null)
+      } catch {
+        results.set(card.scryfall_id, null)
+      }
+    }))
+  }
+
+  return results
 }
 
 export async function importDeck(input: ImportDeckInput): Promise<Deck> {

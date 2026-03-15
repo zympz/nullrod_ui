@@ -198,6 +198,34 @@
   padding: 3px 12px;
 }
 
+.priceBadge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 3px 12px;
+}
+
+.priceLoading {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 3px 12px;
+  opacity: 0.5;
+}
+
+.priceAsterisk {
+  font-size: 9px;
+  vertical-align: super;
+  margin-left: 1px;
+  opacity: 0.7;
+}
+
 .sourceLink {
   color: var(--accent);
   text-decoration: none;
