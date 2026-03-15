@@ -1,18 +1,29 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { CardPage } from './CardPage'
 import { mockBolt, mockGoyf } from '../test/fixtures'
 
 const mockGetCardById = vi.fn()
+const mockGetCardPrintings = vi.fn()
 
 vi.mock('../api/client', () => ({
   getCardById: (...args: unknown[]) => mockGetCardById(...args),
+  getCardPrintings: (...args: unknown[]) => mockGetCardPrintings(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
   loadSymbolMap: vi.fn(() => Promise.resolve(new Map())),
 }))
+
+const emptyPrintings = {
+  oracle_id: mockBolt.oracle_id,
+  results: [],
+  total: 0,
+  page: 1,
+  page_size: 100,
+}
 
 function renderPage(oracleId: string) {
   return render(
@@ -27,6 +38,8 @@ function renderPage(oracleId: string) {
 describe('CardPage', () => {
   beforeEach(() => {
     mockGetCardById.mockReset()
+    mockGetCardPrintings.mockReset()
+    mockGetCardPrintings.mockResolvedValue(emptyPrintings)
   })
 
   it('shows loading state initially', () => {
@@ -78,5 +91,116 @@ describe('CardPage', () => {
     renderPage(mockBolt.oracle_id)
     await screen.findByText('Lightning Bolt')
     expect(screen.getByText(/Back to search/)).toBeInTheDocument()
+  })
+
+  it('renders printings section when printings available', async () => {
+    mockGetCardById.mockResolvedValue(mockBolt)
+    mockGetCardPrintings.mockResolvedValue({
+      oracle_id: mockBolt.oracle_id,
+      results: [
+        {
+          scryfall_id: 'abc-123',
+          oracle_id: mockBolt.oracle_id,
+          set_code: 'tmp',
+          set_name: 'Tempest',
+          set_id: 'tmp-id',
+          set_type: 'expansion',
+          rarity: 'common',
+          collector_number: '164',
+          layout: 'normal',
+          frame: '1997',
+          border_color: 'black',
+          foil: false,
+          nonfoil: true,
+          full_art: false,
+          oversized: false,
+          textless: false,
+          booster: true,
+          digital: false,
+          released_at: '1997-10-14',
+          prices: { usd: '0.25', usd_foil: null, eur: null, tix: null },
+          image_urls: {},
+        },
+        {
+          scryfall_id: 'def-456',
+          oracle_id: mockBolt.oracle_id,
+          set_code: 'lea',
+          set_name: 'Limited Edition Alpha',
+          set_id: 'lea-id',
+          set_type: 'core',
+          rarity: 'common',
+          collector_number: '161',
+          layout: 'normal',
+          frame: '1993',
+          border_color: 'black',
+          foil: false,
+          nonfoil: true,
+          full_art: false,
+          oversized: false,
+          textless: false,
+          booster: true,
+          digital: false,
+          released_at: '1993-08-05',
+          prices: { usd: '150.00', usd_foil: null, eur: null, tix: null },
+          image_urls: {},
+        },
+      ],
+      total: 2,
+      page: 1,
+      page_size: 100,
+    })
+    renderPage(mockBolt.oracle_id)
+    await screen.findByText('Lightning Bolt')
+    expect(screen.getByText('Tempest')).toBeInTheDocument()
+    expect(screen.getByText('Limited Edition Alpha')).toBeInTheDocument()
+  })
+
+  it('clicking a printing updates the card image', async () => {
+    mockGetCardById.mockResolvedValue({
+      ...mockBolt,
+      image_urls: { normal: 'https://example.com/bolt-default.jpg' },
+    })
+    mockGetCardPrintings.mockResolvedValue({
+      oracle_id: mockBolt.oracle_id,
+      results: [
+        {
+          scryfall_id: 'abc-123',
+          oracle_id: mockBolt.oracle_id,
+          set_code: 'tmp',
+          set_name: 'Tempest',
+          set_id: 'tmp-id',
+          set_type: 'expansion',
+          rarity: 'common',
+          collector_number: '164',
+          layout: 'normal',
+          frame: '1997',
+          border_color: 'black',
+          foil: false,
+          nonfoil: true,
+          full_art: false,
+          oversized: false,
+          textless: false,
+          booster: true,
+          digital: false,
+          released_at: '1997-10-14',
+          prices: { usd: null, usd_foil: null, eur: null, tix: null },
+          image_urls: { normal: 'https://example.com/tempest.jpg' },
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 100,
+    })
+
+    renderPage(mockBolt.oracle_id)
+    await screen.findByText('Lightning Bolt')
+
+    const img = screen.getByRole('img', { name: 'Lightning Bolt' })
+    expect(img).toHaveAttribute('src', 'https://example.com/bolt-default.jpg')
+
+    const printingBtn = screen.getByText('Tempest').closest('button')!
+    await userEvent.click(printingBtn)
+
+    expect(img).toHaveAttribute('src', 'https://example.com/tempest.jpg')
   })
 })

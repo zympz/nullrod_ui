@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import type { OracleCard, CardFace } from '../types/card'
-import { getCardById } from '../api/client'
+import type { OracleCard, CardFace, PrintingResponse } from '../types/card'
+import { getCardById, getCardPrintings } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
 import { FORMAT_ORDER } from '../constants'
 import styles from './CardPage.module.css'
+
+const RARITY_COLORS: Record<string, string> = {
+  common: 'var(--text-dim)',
+  uncommon: '#94a3b8',
+  rare: '#eab308',
+  mythic: '#f97316',
+  special: '#a78bfa',
+  bonus: '#a78bfa',
+}
 
 export function CardPage() {
   const { oracleId } = useParams<{ oracleId: string }>()
@@ -12,15 +21,27 @@ export function CardPage() {
   const [card, setCard] = useState<OracleCard | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeFace, setActiveFace] = useState(0)
+  const [printings, setPrintings] = useState<PrintingResponse[] | null>(null)
+  const [selectedPrinting, setSelectedPrinting] = useState<PrintingResponse | null>(null)
 
   useEffect(() => {
     if (!oracleId) return
     let cancelled = false
     setCard(null)
     setError(null)
+    setPrintings(null)
+    setSelectedPrinting(null)
 
-    getCardById(oracleId)
-      .then((c) => { if (!cancelled) setCard(c) })
+    Promise.all([
+      getCardById(oracleId),
+      getCardPrintings(oracleId, { page_size: 100 }),
+    ])
+      .then(([c, p]) => {
+        if (!cancelled) {
+          setCard(c)
+          setPrintings(p.results)
+        }
+      })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load card')
       })
@@ -48,7 +69,11 @@ export function CardPage() {
   const faces = card.card_faces
   const isDfc = faces != null && faces.length === 2
   const currentFace = isDfc ? faces[activeFace] : null
-  const imgUrl = card.image_urls.normal ?? card.image_urls.art_crop
+  const imgUrl =
+    selectedPrinting?.image_urls.normal ??
+    selectedPrinting?.image_urls.art_crop ??
+    card.image_urls.normal ??
+    card.image_urls.art_crop
 
   return (
     <div className={styles.page}>
@@ -205,6 +230,44 @@ export function CardPage() {
           </div>
         </div>
       </div>
+
+      {/* Printings section */}
+      {printings != null && printings.length > 0 && (
+        <div className={styles.printingsSection}>
+          <div className={styles.printingsHeader}>
+            <div className={styles.sectionLabel}>Printings ({printings.length})</div>
+            {printings.length >= 100 && (
+              <span className={styles.printingsNote}>Showing first 100 printings</span>
+            )}
+          </div>
+          <div className={styles.printingsGrid}>
+            {printings.map((p) => {
+              const isActive = selectedPrinting?.scryfall_id === p.scryfall_id
+              const year = p.released_at.slice(0, 4)
+              const rarityColor = RARITY_COLORS[p.rarity] ?? 'var(--text-dim)'
+              return (
+                <button
+                  key={p.scryfall_id}
+                  type="button"
+                  className={`${styles.printing} ${isActive ? styles.printingActive : ''}`}
+                  onClick={() => setSelectedPrinting(isActive ? null : p)}
+                >
+                  <div className={styles.printingSet}>{p.set_name}</div>
+                  <div className={styles.printingMeta}>
+                    <span>{p.set_code.toUpperCase()}</span>
+                    <span className={styles.printingRarity} style={{ color: rarityColor }}>{p.rarity}</span>
+                    <span>#{p.collector_number}</span>
+                    <span>{year}</span>
+                    {p.prices.usd != null && (
+                      <span className={styles.printingPrice}>${p.prices.usd}</span>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

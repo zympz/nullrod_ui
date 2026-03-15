@@ -333,3 +333,75 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* ─── Printings ─────────────────────────────────────────────────────────────── */
+
+.printingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.printingsHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.printingsNote {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.printingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 6px;
+}
+
+.printing {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.printing:hover {
+  border-color: var(--border-hover, #3d4a5c);
+}
+
+.printingActive {
+  border-color: var(--accent);
+}
+
+.printingSet {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.printingMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.printingRarity {
+  text-transform: capitalize;
+}
+
+.printingPrice {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
