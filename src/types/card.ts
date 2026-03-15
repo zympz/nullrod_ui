@@ -119,8 +119,8 @@ export interface PrintingResponse {
   textless: boolean
   booster: boolean
   digital: boolean
-  released_at: string
-  prices: { usd: string | null; usd_foil: string | null; eur: string | null; tix: string | null }
+  released_at: string | null
+  prices: { usd?: string | null; usd_foil?: string | null; eur?: string | null; tix?: string | null }
   image_urls: ImageUrls
 }
 

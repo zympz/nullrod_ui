@@ -243,7 +243,7 @@ export function CardPage() {
           <div className={styles.printingsGrid}>
             {printings.map((p) => {
               const isActive = selectedPrinting?.scryfall_id === p.scryfall_id
-              const year = p.released_at.slice(0, 4)
+              const year = p.released_at?.slice(0, 4) ?? '—'
               const rarityColor = RARITY_COLORS[p.rarity] ?? 'var(--text-dim)'
               return (
                 <button
