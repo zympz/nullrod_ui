@@ -42,7 +42,7 @@ function urlToParams(sp: URLSearchParams): SearchParams {
   const cmin = sp.get('cmin'); if (cmin) p.cmc_min = parseFloat(cmin)
   const cmax = sp.get('cmax'); if (cmax) p.cmc_max = parseFloat(cmax)
   const kw = sp.get('kw'); if (kw) p.keywords = kw.split(',').map(s => s.trim()).filter(Boolean)
-  const fmt = sp.get('fmt'); if (fmt) p.format = fmt
+  const fmt = sp.get('fmt'); p.format = fmt ?? 'commander'
   const page = sp.get('page'); if (page) p.page = parseInt(page, 10)
   return p
 }
