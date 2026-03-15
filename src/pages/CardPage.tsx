@@ -23,6 +23,7 @@ export function CardPage() {
   const [activeFace, setActiveFace] = useState(0)
   const [printings, setPrintings] = useState<PrintingResponse[] | null>(null)
   const [selectedPrinting, setSelectedPrinting] = useState<PrintingResponse | null>(null)
+  const [hoveredPrinting, setHoveredPrinting] = useState<PrintingResponse | null>(null)
 
   useEffect(() => {
     if (!oracleId) return
@@ -69,9 +70,10 @@ export function CardPage() {
   const faces = card.card_faces
   const isDfc = faces != null && faces.length === 2
   const currentFace = isDfc ? faces[activeFace] : null
+  const activePrinting = hoveredPrinting ?? selectedPrinting
   const imgUrl =
-    selectedPrinting?.image_urls.normal ??
-    selectedPrinting?.image_urls.art_crop ??
+    activePrinting?.image_urls.normal ??
+    activePrinting?.image_urls.art_crop ??
     card.image_urls.normal ??
     card.image_urls.art_crop
 
@@ -241,6 +243,20 @@ export function CardPage() {
                 )}
               </div>
               <div className={styles.printingsList}>
+                <div className={styles.printingsColHeader}>
+                  <span className={styles.printingSet}>Set</span>
+                  <span className={styles.printingMeta}>
+                    <span>Code</span>
+                    <span>Rarity</span>
+                    <span>#</span>
+                    <span>Year</span>
+                  </span>
+                  <span className={styles.printingPrices}>
+                    <span className={styles.printingPrice}><span className={styles.printingPriceLabel}>Normal</span></span>
+                    <span className={styles.printingPrice}><span className={styles.printingPriceLabel}>Foil</span></span>
+                    <span className={styles.printingPrice}><span className={styles.printingPriceLabel}>Etched</span></span>
+                  </span>
+                </div>
                 {printings.map((p) => {
                   const isActive = selectedPrinting?.scryfall_id === p.scryfall_id
                   const year = p.released_at?.slice(0, 4) ?? '—'
@@ -251,6 +267,8 @@ export function CardPage() {
                       type="button"
                       className={`${styles.printing} ${isActive ? styles.printingActive : ''}`}
                       onClick={() => setSelectedPrinting(isActive ? null : p)}
+                      onMouseEnter={() => setHoveredPrinting(p)}
+                      onMouseLeave={() => setHoveredPrinting(null)}
                     >
                       <div className={styles.printingSet}>{p.set_name}</div>
                       <div className={styles.printingMeta}>
@@ -331,17 +349,16 @@ function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean
 }
 
 function PrintingPrices({ prices }: { prices: PrintingResponse['prices'] }) {
-  const entries: { label: string; value: string }[] = []
-  if (prices.usd != null) entries.push({ label: 'Normal', value: `$${prices.usd}` })
-  if (prices.usd_foil != null) entries.push({ label: 'Foil', value: `$${prices.usd_foil}` })
-  if (prices.usd_etched != null) entries.push({ label: 'Etched', value: `$${prices.usd_etched}` })
-  if (entries.length === 0) return null
+  const slots = [
+    { key: 'usd', value: prices.usd },
+    { key: 'usd_foil', value: prices.usd_foil },
+    { key: 'usd_etched', value: prices.usd_etched },
+  ]
   return (
     <div className={styles.printingPrices}>
-      {entries.map(({ label, value }) => (
-        <span key={label} className={styles.printingPrice}>
-          <span className={styles.printingPriceLabel}>{label}</span>
-          {value}
+      {slots.map(({ key, value }) => (
+        <span key={key} className={styles.printingPrice}>
+          {value != null ? `$${value}` : ''}
         </span>
       ))}
     </div>
