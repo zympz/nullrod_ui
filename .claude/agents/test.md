@@ -33,8 +33,8 @@ npm run build           # Must pass — strict TS catches unused imports/vars
 // Mock API client
 vi.mock('../api/client', () => ({
   searchCards: vi.fn(() => Promise.resolve({ results: [], total: 0, page: 1, page_size: 20 })),
-  getRulings: vi.fn(() => Promise.resolve({ rulings: [] })),
   getCardById: vi.fn(),
+  getDeckCardPrices: vi.fn(() => Promise.resolve(new Map())),
 }))
 
 // Mock symbology (prevents network calls for mana symbols)
@@ -47,26 +47,27 @@ const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 ```
 
-## Current Coverage (71 tests across 9 files)
+## Current Coverage (121 tests across 17 files)
 
 | File | Tests | Covers |
 |---|---|---|
-| `api/client.test.ts` | 8 | searchCards params, getCardById, getRulings, getSymbology, errors |
+| `api/client.test.ts` | 9 | searchCards params, getCardById, getCardByScryfall, getDeckCardPrices, getSymbology, errors |
+| `api/symbology.test.ts` | 3 | Symbol map load, caching, empty map |
 | `components/ManaSymbol.test.tsx` | 8 | ManaSymbol fallback/loaded, ManaCost split/empty, OracleText |
 | `components/CardDetail.test.tsx` | 12 | Rendering, images, legalities, stats, games, close, Escape, link |
-| `components/CardTile.test.tsx` | 5 | Name/type, art_crop, fallback, no image, onClick |
+| `components/CardTile.test.tsx` | 4 | Name/type, art_crop, fallback, no image, onClick |
 | `components/CardGrid.test.tsx` | 5 | Tiles, empty state, result count, pagination, onPageChange |
 | `components/CardList.test.tsx` | 8 | Links, types, CMC, empty, pagination, onPageChange, count |
 | `components/SearchFilters.test.tsx` | 9 | Color buttons, inputs, format, apply, submit, clear |
-| `pages/CardPage.test.tsx` | 7 | Loading, render, error, legalities, rulings, P/T, back |
+| `components/Nav.test.tsx` | 4 | Link rendering, active state |
+| `components/ColorPips.test.tsx` | 5 | Color dot rendering, sizes, empty |
+| `pages/CardPage.test.tsx` | 9 | Loading, render, error, legalities, rulings, P/T, back, printings, DFC |
 | `pages/CardsPage.test.tsx` | 9 | Welcome, search, results, error, filters, view toggle, URL params |
-
-## Untested (low priority)
-
-- `Nav.tsx`, `ColorPips.tsx` — simple presentational components
-- `DecksPage.tsx`, `CombosPage.tsx` — coming-soon stubs
-- `api/symbology.ts` — thin memoization wrapper
-- `App.tsx` — router wiring
+| `pages/DeckPage.test.tsx` | 15 | Loading, render, commanders, mainboard, stats, sample hand, source link, error, prices, DFC flip badge, hover, card click |
+| `pages/DecksPage.test.tsx` | 6 | Deck list, import, pagination |
+| `pages/CombosPage.test.tsx` | 6 | Combo list, color filter, pagination |
+| `pages/ComboPage.test.tsx` | 7 | Loading, render, error, steps, prerequisites, produces |
+| `App.test.tsx` | 2 | Route rendering |
 
 ## What to Test
 
@@ -82,3 +83,4 @@ vi.stubGlobal('fetch', mockFetch)
 - `getByText('1')` may match CMC values AND pagination — use `getAllByText`
 - React Router warnings about future flags are noise — ignore them
 - `act(...)` warnings for async state updates are expected in some tests
+- DeckPage tests need `mockGetDeckCardPrices` mock returning `new Map()` by default

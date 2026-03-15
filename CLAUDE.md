@@ -10,7 +10,7 @@ Primary use cases: combo building and deck building. Card search is a secondary 
 - **Vite** for dev/build
 - **React Router v6** for client-side routing
 - **CSS Modules** for component styles (no external UI framework)
-- **Vitest** + **Testing Library** for unit tests (102 tests, 16 test files)
+- **Vitest** + **Testing Library** for unit tests (121 tests, 17 test files)
 
 ## Dev
 
@@ -27,7 +27,8 @@ npx vitest run     # run all tests
 /              → /decks (redirect)
 /decks         — Deck list with Moxfield import (live)
 /decks/:deckId — Full deck detail with card preview, banner art, type-grouped mainboard (live)
-/combos        — Combo browser and creator (coming soon)
+/combos        — Combo browser with color identity filter (live)
+/combos/:id    — Full combo detail with cards, steps, prerequisites, results (live)
 /cards         — Card search and browser (live, URL params synced)
 /cards/:id     — Full card detail page by oracle UUID (live)
 ```
@@ -42,15 +43,17 @@ src/
     symbology.ts              # Mana symbol SVG map (memoized)
     symbology.test.ts         # Symbology cache tests
   types/
-    card.ts                   # OracleCard, ImageUrls, SearchParams, CardFace, etc.
+    card.ts                   # OracleCard, ImageUrls, SearchParams, CardFace, PrintingResponse, etc.
     deck.ts                   # Deck, DeckCard, DeckSummary, DeckFormat, ImportDeckInput
-    combo.ts                  # Combo, ComboCard, SpellbookCombo (stubbed)
+    combo.ts                  # Combo, ComboCard, ComboListResponse, ComboSummary
+  constants.ts                # BRACKET_LABELS, identityColors() helper
   pages/
     CardsPage.tsx             # Card search with URL-synced params, grid/list toggle (live)
-    CardPage.tsx              # Full card detail page (live)
+    CardPage.tsx              # Full card detail page with printings list (live)
     DecksPage.tsx             # Deck list with pagination and Moxfield import (live)
-    DeckPage.tsx              # Deck detail: banner, card preview, type-grouped mainboard (live)
-    CombosPage.tsx            # Combo browser stub (coming soon)
+    DeckPage.tsx              # Deck detail: banner, card preview, type-grouped mainboard, prices (live)
+    CombosPage.tsx            # Combo browser with color identity filter (live)
+    ComboPage.tsx             # Combo detail: cards, steps, prerequisites, results (live)
   components/
     Nav.tsx                   # Top navigation
     ManaSymbol.tsx            # ManaCost, OracleText inline symbol renderers (italic reminder text)
@@ -78,21 +81,22 @@ Rate limits: 60 req/min (search), 300 req/min (all others).
 
 | Endpoint | Description |
 |---|---|
-| `GET /cards` | Fuzzy search with filters (q, oracle_text, color, type, cmc_min, cmc_max, keywords, format, view, page) |
-| `GET /cards/{oracle_id}` | Get card by oracle UUID |
+| `GET /cards/search` | Fuzzy search with filters (q, oracle_text, color, type, cmc_min, cmc_max, keywords, format, view, page) |
+| `GET /cards/{oracle_id}` | Card by oracle UUID; `?include_printings=true` embeds printings array |
+| `GET /cards/{oracle_id}/printings` | All printings for a card (paginated) |
+| `GET /cards/scryfall/{scryfall_id}` | Printing by Scryfall ID — includes prices |
 | `GET /cards/symbols` | Mana symbol SVG URIs |
-| `GET /rulings/{oracle_id}` | Official rulings for a card |
 | `GET /decks` | List decks with pagination (page, page_size, format) |
 | `GET /decks/{id}` | Full deck detail by UUID (mainboard, sideboard, commanders, companions, maybeboard) |
 | `POST /decks/import` | Import deck from Moxfield URL or public ID |
+| `GET /combos` | List combos with pagination (identity, page, page_size) |
+| `GET /combos/{id}` | Full combo detail with uses, requires, produces, steps |
 
-Card objects include `image_urls` with optional `normal` and `art_crop` signed CloudFront URLs.
+Card objects include `image_urls` with optional `normal`, `art_crop` signed CloudFront URLs. DFC cards also have `back_normal` and `back_art_crop`.
 The `?view=list` param returns lightweight card data (no image_urls, power, toughness).
 Deck card objects have `image_url` (Moxfield CDN, often 404) and `card_url` (our API).
 DFC cards in decks have `mana_cost: null` — fetch front face mana cost from cards API via `searchCardByName`.
-Card images for deck view are fetched from the cards API (signed CloudFront URLs) and cached in-memory.
-
-Combo endpoints are stubbed in client.ts — update as they go live.
+Card images for deck view are fetched from the cards API (signed CloudFront URLs) and cached in-memory via `useRef`.
 
 ## Deploy
 

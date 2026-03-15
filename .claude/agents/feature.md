@@ -15,9 +15,10 @@ You build new features for nullrod-ui, a React + TypeScript frontend for a Magic
 src/
   api/client.ts          # Typed fetch wrapper — all API calls go here
   api/symbology.ts       # Mana symbol SVG map (memoized)
-  types/card.ts          # OracleCard, SearchParams, ImageUrls, etc.
-  types/deck.ts          # Deck, DeckEntry, DeckSummary (stubbed)
-  types/combo.ts         # Combo, ComboCard, SpellbookCombo (stubbed)
+  types/card.ts          # OracleCard, SearchParams, ImageUrls, CardFace, PrintingResponse, etc.
+  types/deck.ts          # Deck, DeckCard, DeckSummary, ImportDeckInput
+  types/combo.ts         # Combo, ComboSummary, ComboListResponse
+  constants.ts           # BRACKET_LABELS, identityColors() helper
   components/            # Focused, reusable UI components
   pages/                 # Route-level components
   test/fixtures.ts       # Shared mock data (mockBolt, mockGoyf, mockJace)
@@ -28,14 +29,18 @@ src/
 Base URL: `https://api.nullrod.com` — no auth, CORS open for GET.
 
 Live endpoints:
-- `GET /cards` — fuzzy search (q, color, type, cmc, keywords, format, view, page)
-- `GET /cards/{oracle_id}` — card by oracle UUID
+- `GET /cards/search` — fuzzy search (q, oracle_text, color, type, cmc_min, cmc_max, keywords, format, view, page)
+- `GET /cards/{oracle_id}` — card by oracle UUID; `?include_printings=true` embeds printings array
+- `GET /cards/{oracle_id}/printings` — all printings (paginated)
+- `GET /cards/scryfall/{scryfall_id}` — printing by Scryfall ID, includes prices
 - `GET /cards/symbols` — mana symbol SVGs
-- `GET /rulings/{oracle_id}` — official rulings
+- `GET /decks` — list decks (page, page_size, format)
+- `GET /decks/{id}` — full deck detail
+- `POST /decks/import` — import from Moxfield URL or public ID
+- `GET /combos` — list combos (identity, page, page_size)
+- `GET /combos/{id}` — full combo detail
 
-Card objects include `image_urls` with optional `normal` and `art_crop` signed CloudFront URLs. These may be empty — always handle gracefully.
-
-Deck and combo endpoints are stubbed in client.ts but not yet live on the API.
+Card objects include `image_urls` with optional `normal`, `art_crop` signed CloudFront URLs. DFC cards also have `back_normal` and `back_art_crop`. These may be empty — always handle gracefully.
 
 ## Rules
 
@@ -49,14 +54,22 @@ Deck and combo endpoints are stubbed in client.ts but not yet live on the API.
 
 ## Current State
 
-**Working features:**
-- Card search with grid/list toggle, advanced filters, pagination
-- Full card detail page (`/cards/:oracleId`) and modal
-- Mana symbol rendering, color identity, legalities, rulings
+All major features are live:
+- Card search with grid/list toggle, advanced filters, pagination (`/cards`)
+- Full card detail page with printings list (`/cards/:oracleId`)
+- Deck list with Moxfield import (`/decks`)
+- Deck detail with banner art, type-grouped mainboard, card preview panel, price totals (`/decks/:id`)
+- Combo browser with color identity filter (`/combos`)
+- Combo detail with cards, steps, prerequisites, produces (`/combos/:id`)
 
-**Coming soon (stubs exist):**
-- `/decks` — Deck builder (types in deck.ts, API stubs in client.ts)
-- `/combos` — Combo browser with Commander Spellbook import (types in combo.ts)
+## DFC Cards
+
+Double-faced cards have `card_faces` array and names like `"Front // Back"`. Use helpers from `src/types/card.ts`:
+- `frontFace(name)` — strips back face from name
+- `backFace(name)` — extracts back face name
+- `isDFC(card)` — checks if card has faces
+
+Images: front face uses `image_urls.normal`/`art_crop`; back face uses `image_urls.back_normal`/`back_art_crop`.
 
 ## Workflow
 
