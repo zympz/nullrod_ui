@@ -79,23 +79,25 @@ export function CardPage() {
     <div className={styles.page}>
       <button className={styles.back} onClick={() => navigate(-1)} type="button">&larr; Back to search</button>
 
-      <div className={styles.card}>
-        <div className={styles.layout}>
-          {/* Art panel */}
-          <div className={styles.artPanel}>
-            <div className={styles.artFrame}>
-              {imgUrl ? (
-                <img src={imgUrl} alt={card.name} className={styles.art} />
-              ) : (
-                <div className={styles.artEmpty}>No image</div>
-              )}
-            </div>
-            {isDfc && (
-              <button type="button" className={styles.flipBtn} onClick={() => setActiveFace(activeFace === 0 ? 1 : 0)}>
-                ↻ Flip to {faces[activeFace === 0 ? 1 : 0].name}
-              </button>
+      <div className={styles.layout}>
+        {/* Sticky art panel */}
+        <div className={styles.artPanel}>
+          <div className={styles.artFrame}>
+            {imgUrl ? (
+              <img src={imgUrl} alt={card.name} className={styles.art} />
+            ) : (
+              <div className={styles.artEmpty}>No image</div>
             )}
           </div>
+          {isDfc && (
+            <button type="button" className={styles.flipBtn} onClick={() => setActiveFace(activeFace === 0 ? 1 : 0)}>
+              ↻ Flip to {faces[activeFace === 0 ? 1 : 0].name}
+            </button>
+          )}
+        </div>
+
+        {/* Scrollable right column */}
+        <div className={styles.content}>
 
           {/* Info panel */}
           <div className={styles.infoPanel}>
@@ -228,44 +230,45 @@ export function CardPage() {
               </div>
             )}
           </div>
+
+          {/* Printings section */}
+          {printings != null && printings.length > 0 && (
+            <div className={styles.printingsSection}>
+              <div className={styles.printingsHeader}>
+                <div className={styles.sectionLabel}>Printings ({printings.length})</div>
+                {printings.length >= 100 && (
+                  <span className={styles.printingsNote}>Showing first 100 printings</span>
+                )}
+              </div>
+              <div className={styles.printingsList}>
+                {printings.map((p) => {
+                  const isActive = selectedPrinting?.scryfall_id === p.scryfall_id
+                  const year = p.released_at?.slice(0, 4) ?? '—'
+                  const rarityColor = RARITY_COLORS[p.rarity] ?? 'var(--text-dim)'
+                  return (
+                    <button
+                      key={p.scryfall_id}
+                      type="button"
+                      className={`${styles.printing} ${isActive ? styles.printingActive : ''}`}
+                      onClick={() => setSelectedPrinting(isActive ? null : p)}
+                    >
+                      <div className={styles.printingSet}>{p.set_name}</div>
+                      <div className={styles.printingMeta}>
+                        <span>{p.set_code.toUpperCase()}</span>
+                        <span className={styles.printingRarity} style={{ color: rarityColor }}>{p.rarity}</span>
+                        <span>#{p.collector_number}</span>
+                        <span>{year}</span>
+                      </div>
+                      <PrintingPrices prices={p.prices} />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
-
-      {/* Printings section */}
-      {printings != null && printings.length > 0 && (
-        <div className={styles.printingsSection}>
-          <div className={styles.printingsHeader}>
-            <div className={styles.sectionLabel}>Printings ({printings.length})</div>
-            {printings.length >= 100 && (
-              <span className={styles.printingsNote}>Showing first 100 printings</span>
-            )}
-          </div>
-          <div className={styles.printingsGrid}>
-            {printings.map((p) => {
-              const isActive = selectedPrinting?.scryfall_id === p.scryfall_id
-              const year = p.released_at?.slice(0, 4) ?? '—'
-              const rarityColor = RARITY_COLORS[p.rarity] ?? 'var(--text-dim)'
-              return (
-                <button
-                  key={p.scryfall_id}
-                  type="button"
-                  className={`${styles.printing} ${isActive ? styles.printingActive : ''}`}
-                  onClick={() => setSelectedPrinting(isActive ? null : p)}
-                >
-                  <div className={styles.printingSet}>{p.set_name}</div>
-                  <div className={styles.printingMeta}>
-                    <span>{p.set_code.toUpperCase()}</span>
-                    <span className={styles.printingRarity} style={{ color: rarityColor }}>{p.rarity}</span>
-                    <span>#{p.collector_number}</span>
-                    <span>{year}</span>
-                  </div>
-                  <PrintingPrices prices={p.prices} />
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

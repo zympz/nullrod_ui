@@ -2,6 +2,21 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 98vw;
+  max-width: 1600px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+  .page {
+    width: 100%;
+    left: 0;
+    transform: none;
+    padding: 0 12px 40px;
+  }
 }
 
 .back {
@@ -31,51 +46,49 @@
   font-size: 13px;
 }
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-}
+/* ─── Two-column layout ─────────────────────────────────────────────────────── */
 
 .layout {
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 0;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
 }
 
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
   }
+}
 
+/* ─── Sticky art panel ──────────────────────────────────────────────────────── */
+
+.artPanel {
+  position: sticky;
+  top: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
   .artPanel {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    max-width: 320px;
+    position: static;
+    max-width: 280px;
     margin: 0 auto;
-    padding: 20px;
     width: 100%;
   }
 }
 
-.artPanel {
-  border-right: 1px solid var(--border);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .artFrame {
-  border-radius: var(--radius);
+  border-radius: 12px;
   overflow: hidden;
   background: var(--surface-2);
   aspect-ratio: 488 / 680;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .art {
@@ -83,7 +96,7 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .artEmpty {
@@ -101,6 +114,7 @@
   font-weight: 600;
   transition: border-color 0.15s, color 0.15s;
   text-align: center;
+  width: 100%;
 }
 
 .flipBtn:hover {
@@ -108,11 +122,26 @@
   color: var(--accent);
 }
 
+/* ─── Right column ──────────────────────────────────────────────────────────── */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ─── Info panel ────────────────────────────────────────────────────────────── */
+
 .infoPanel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 28px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .header {
@@ -337,15 +366,19 @@
 /* ─── Printings ─────────────────────────────────────────────────────────────── */
 
 .printingsSection {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .printingsHeader {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
 }
 
 .printingsNote {
@@ -353,46 +386,59 @@
   color: var(--text-dim);
 }
 
-.printingsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 6px;
+.printingsList {
+  display: flex;
+  flex-direction: column;
 }
 
 .printing {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: background 0.12s;
   text-align: left;
   width: 100%;
 }
 
+.printing:last-child {
+  border-bottom: none;
+}
+
 .printing:hover {
-  border-color: var(--border-hover, #3d4a5c);
+  background: var(--surface-2);
 }
 
 .printingActive {
-  border-color: var(--accent);
+  background: rgba(99, 179, 237, 0.06);
+}
+
+.printingActive:hover {
+  background: rgba(99, 179, 237, 0.1);
 }
 
 .printingSet {
+  flex: 1;
+  min-width: 0;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .printingMeta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 11px;
   color: var(--text-dim);
+  flex-shrink: 0;
 }
 
 .printingRarity {
@@ -401,8 +447,8 @@
 
 .printingPrices {
   display: flex;
-  gap: 10px;
-  margin-top: 2px;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .printingPrice {
