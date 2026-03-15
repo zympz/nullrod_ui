@@ -131,7 +131,8 @@ aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 ## Rules
 
 - **Always run `npx vitest run` before committing.** Do not commit if tests are failing.
-- When the user says "commit and deploy from local", do all of the following in sequence:
+- **After completing any work, always commit and deploy from local automatically** (no need for the user to ask). Follow the deploy sequence below.
+- When deploying (either automatically after work or when user says "commit and deploy from local"), do all of the following in sequence:
   1. Run `npx vitest run` — fix any failures before continuing
   2. Stage and commit the changed files with a descriptive message
   3. Run `npm run build` — fix any TS errors before continuing
