@@ -1,18 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { Combo } from '../types/combo'
-import type { Color } from '../types/card'
 import { getCombo } from '../api/client'
 import { ColorPips } from '../components/ColorPips'
 import { ManaCost, OracleText } from '../components/ManaSymbol'
+import { BRACKET_LABELS, identityColors } from '../constants'
 import styles from './ComboPage.module.css'
-
-const BRACKET_LABELS: Record<string, string> = {
-  E: 'Extra Spicy',
-  S: 'Spicy',
-  R: 'Regular',
-  P: 'Precon',
-}
 
 export function ComboPage() {
   const { comboId } = useParams<{ comboId: string }>()
@@ -60,7 +53,7 @@ export function ComboPage() {
       <div className={styles.header}>
         <h1 className={styles.title}>{combo.card_names.join(' + ')}</h1>
         <div className={styles.headerMeta}>
-          <ColorPips colors={combo.identity.split('') as Color[]} size={18} />
+          <ColorPips colors={identityColors(combo.identity)} size={18} />
           <span className={`${styles.bracketBadge} ${styles[`bracket_${combo.bracket_tag}`]}`}>
             {BRACKET_LABELS[combo.bracket_tag] ?? combo.bracket_tag}
           </span>

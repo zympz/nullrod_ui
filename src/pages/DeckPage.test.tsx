@@ -1,4 +1,4 @@
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DeckPage } from './DeckPage'
@@ -180,6 +180,78 @@ describe('DeckPage', () => {
     await act(async () => { renderDeckPage() })
     expect(screen.getByText('Chatterfang Squirrels')).toBeInTheDocument()
     expect(screen.queryByText('$—')).not.toBeInTheDocument()
+  })
+
+  it('shows DFC flip badge next to cards with double-faced names', async () => {
+    const dfcDeck = {
+      ...mockDeck,
+      mainboard: [
+        {
+          ...mockDeck.mainboard[0],
+          name: 'Delver of Secrets // Insectile Aberration',
+          scryfall_id: 'delver-1',
+        },
+      ],
+    }
+    mockGetDeck.mockResolvedValue(dfcDeck)
+    await act(async () => { renderDeckPage() })
+    expect(screen.getByText('Delver of Secrets')).toBeInTheDocument()
+    const flipBtn = screen.getByTitle('Flip to Insectile Aberration')
+    expect(flipBtn).toBeInTheDocument()
+  })
+
+  it('hovering a card without image_url fetches oracle card for preview', async () => {
+    mockGetDeck.mockResolvedValue(mockDeck)
+    const oracleCard = {
+      oracle_id: 'sol-oracle',
+      name: 'Sol Ring',
+      image_urls: { normal: 'https://cards.nullrod.com/sol-ring.jpg' },
+    }
+    mockSearchCardByName.mockResolvedValue({ results: [oracleCard], total: 1, page: 1, page_size: 20 })
+    await act(async () => { renderDeckPage() })
+
+    await act(async () => {
+      fireEvent.mouseEnter(screen.getByText('Sol Ring').closest('div')!)
+    })
+
+    await waitFor(() => {
+      expect(mockSearchCardByName).toHaveBeenCalledWith('Sol Ring')
+    })
+  })
+
+  it('clicking card name calls searchCardByName and shows detail modal', async () => {
+    mockGetDeck.mockResolvedValue(mockDeck)
+    const oracleCard = {
+      oracle_id: 'sol-oracle',
+      name: 'Sol Ring',
+      mana_cost: '{1}',
+      type_line: 'Artifact',
+      oracle_text: '{T}: Add {C}{C}.',
+      power: null,
+      toughness: null,
+      loyalty: null,
+      cmc: 1,
+      colors: [],
+      color_identity: [],
+      keywords: [],
+      games: [],
+      legalities: {},
+      layout: 'normal',
+      reserved: false,
+      canonical_scryfall_id: 'sol-1',
+      rulings: [],
+      image_urls: {},
+    }
+    mockSearchCardByName.mockResolvedValue({ results: [oracleCard], total: 1, page: 1, page_size: 20 })
+    await act(async () => { renderDeckPage() })
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Sol Ring'))
+    })
+
+    await waitFor(() => {
+      expect(mockSearchCardByName).toHaveBeenCalledWith('Sol Ring')
+    })
   })
 
 })

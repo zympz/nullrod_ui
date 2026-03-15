@@ -18,7 +18,7 @@ export function DeckPage() {
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const [prices, setPrices] = useState<Map<string, string | null> | null>(null)
   const [pricesLoading, setPricesLoading] = useState(false)
-  const cardCache = useState(() => new Map<string, OracleCard>())[0]
+  const cardCache = useRef(new Map<string, OracleCard>()).current
   const hoveredNameRef = useRef<string | null>(null)
 
   const onCardHover = useCallback((card: DeckCard | null) => {
@@ -38,9 +38,7 @@ export function DeckPage() {
     searchCardByName(frontFace(card.name))
       .then((res) => {
         if (hoveredNameRef.current !== targetName) return
-        const match = res.results.find((c) => c.name === targetName || c.name.startsWith(frontFace(targetName) + ' // '))
-          ?? res.results.find((c) => c.name === frontFace(targetName))
-          ?? res.results[0]
+        const match = pickOracleCard(targetName, res.results)
         if (match) {
           cardCache.set(targetName, match)
           setHoveredImageUrl(match.image_urls.normal ?? match.image_urls.art_crop ?? card.image_url ?? null)
@@ -54,9 +52,7 @@ export function DeckPage() {
     if (cached) { setSelectedCard(cached); return }
     searchCardByName(frontFace(cardName))
       .then((res) => {
-        const card = res.results.find((c) => c.name === cardName || c.name.startsWith(frontFace(cardName) + ' // '))
-          ?? res.results.find((c) => c.name === frontFace(cardName))
-          ?? res.results[0]
+        const card = pickOracleCard(cardName, res.results)
         if (card) { cardCache.set(cardName, card); setSelectedCard(card) }
       })
       .catch(() => {})
@@ -76,9 +72,7 @@ export function DeckPage() {
     searchCardByName(frontFace(card.name))
       .then((res) => {
         if (hoveredNameRef.current !== targetName) return
-        const match = res.results.find((c) => c.name === targetName || c.name.startsWith(frontFace(targetName) + ' // '))
-          ?? res.results.find((c) => c.name === frontFace(targetName))
-          ?? res.results[0]
+        const match = pickOracleCard(targetName, res.results)
         if (match) {
           cardCache.set(targetName, match)
           setHoveredImageUrl(match.image_urls.back_normal ?? match.image_urls.back_art_crop ?? match.image_urls.normal ?? card.image_url ?? null)
@@ -134,9 +128,7 @@ export function DeckPage() {
     searchCardByName(frontFace(featuredCard.name))
       .then((res) => {
         if (cancelled) return
-        const match = res.results.find((c) => c.name === featuredCard.name || c.name.startsWith(frontFace(featuredCard.name) + ' // '))
-          ?? res.results.find((c) => c.name === frontFace(featuredCard.name))
-          ?? res.results[0]
+        const match = pickOracleCard(featuredCard.name, res.results)
         if (!match) return
         cardCache.set(featuredCard.name, match)
         const artCrop = match.image_urls?.art_crop
@@ -267,6 +259,13 @@ export function DeckPage() {
 function frontFace(value: string) {
   const idx = value.indexOf(' // ')
   return idx === -1 ? value : value.slice(0, idx)
+}
+
+/** Find the best matching oracle card for a deck card name from search results. */
+function pickOracleCard(name: string, results: OracleCard[]): OracleCard | undefined {
+  return results.find((c) => c.name === name || c.name.startsWith(frontFace(name) + ' // '))
+    ?? results.find((c) => c.name === frontFace(name))
+    ?? results[0]
 }
 
 function backFace(value: string) {

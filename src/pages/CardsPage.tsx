@@ -51,11 +51,16 @@ function urlToView(sp: URLSearchParams): ViewMode {
   return sp.get('view') === 'list' ? 'list' : 'grid'
 }
 
-function hasSearchCriteria(p: SearchParams): boolean {
+function hasFilters(p: SearchParams): boolean {
   return !!(
-    p.name || p.oracle_text || p.color?.length || p.color_identity?.length ||
-    p.type || p.cmc_min != null || p.cmc_max != null || p.keywords?.length || p.format
+    p.color?.length || p.color_identity?.length || p.type ||
+    p.cmc_min != null || p.cmc_max != null || p.keywords?.length ||
+    p.oracle_text || p.format
   )
+}
+
+function hasSearchCriteria(p: SearchParams): boolean {
+  return !!(p.name || hasFilters(p))
 }
 
 export function CardsPage() {
@@ -115,9 +120,7 @@ export function CardsPage() {
       setViewMode(view)
       if (hasSearchCriteria(p)) {
         runSearch(p, view)
-        if (!p.name && (p.color?.length || p.color_identity?.length || p.type || p.cmc_min != null || p.cmc_max != null || p.keywords?.length || p.oracle_text || p.format)) {
-          setShowFilters(true)
-        }
+        if (!p.name && hasFilters(p)) setShowFilters(true)
       }
     }
   }, [searchParams, searched, runSearch])
@@ -157,16 +160,7 @@ export function CardsPage() {
     }
   }
 
-  const hasFilters = !!(
-    params.color?.length ||
-    params.color_identity?.length ||
-    params.type ||
-    params.cmc_min != null ||
-    params.cmc_max != null ||
-    params.keywords?.length ||
-    params.oracle_text ||
-    params.format
-  )
+  const activeFilters = hasFilters(params)
 
   return (
     <div className={styles.page}>
@@ -188,11 +182,11 @@ export function CardsPage() {
           Search
         </button>
         <button
-          className={`${styles.filterToggle} ${showFilters || hasFilters ? styles.filterToggleActive : ''}`}
+          className={`${styles.filterToggle} ${showFilters || activeFilters ? styles.filterToggleActive : ''}`}
           type="button"
           onClick={() => setShowFilters((v) => !v)}
         >
-          Filters{hasFilters ? ' ·' : ''}
+          Filters{activeFilters ? ' ·' : ''}
         </button>
         <div className={styles.viewToggle}>
           <button

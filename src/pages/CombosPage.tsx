@@ -3,17 +3,10 @@ import { Link } from 'react-router-dom'
 import type { ComboSummary } from '../types/combo'
 import { listCombos } from '../api/client'
 import { ColorPips } from '../components/ColorPips'
-import type { Color } from '../types/card'
+import { BRACKET_LABELS, identityColors } from '../constants'
 import styles from './CombosPage.module.css'
 
 const PAGE_SIZE = 20
-
-const BRACKET_LABELS: Record<string, string> = {
-  E: 'Extra Spicy',
-  S: 'Spicy',
-  R: 'Regular',
-  P: 'Precon',
-}
 
 const IDENTITY_OPTIONS = ['', 'W', 'U', 'B', 'R', 'G', 'WU', 'UB', 'BR', 'RG', 'GW', 'WB', 'UR', 'BG', 'RW', 'GU'] as const
 
@@ -94,7 +87,7 @@ export function CombosPage() {
                   ))}
                 </div>
                 <div className={styles.comboMeta}>
-                  <ColorPips colors={combo.identity.split('') as Color[]} size={14} />
+                  <ColorPips colors={identityColors(combo.identity)} size={14} />
                   <span className={styles.cardCount}>{combo.card_names.length} cards</span>
                 </div>
               </Link>
