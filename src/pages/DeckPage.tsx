@@ -22,7 +22,7 @@ export function DeckPage() {
   const hoveredNameRef = useRef<string | null>(null)
 
   const onCardHover = useCallback((card: DeckCard | null) => {
-    if (!card) { hoveredNameRef.current = null; setHoveredCard(null); return }
+    if (!card) { hoveredNameRef.current = null; return }
     hoveredNameRef.current = card.name
     setHoveredCard(card)
     setPreviewFace(0)
@@ -58,6 +58,31 @@ export function DeckPage() {
           ?? res.results.find((c) => c.name === frontFace(cardName))
           ?? res.results[0]
         if (card) { cardCache.set(cardName, card); setSelectedCard(card) }
+      })
+      .catch(() => {})
+  }, [cardCache])
+
+  const onCardFlip = useCallback((card: DeckCard) => {
+    hoveredNameRef.current = card.name
+    setHoveredCard(card)
+    setPreviewFace(1)
+    const cached = cardCache.get(card.name)
+    if (cached) {
+      setHoveredImageUrl(cached.image_urls.back_normal ?? cached.image_urls.back_art_crop ?? cached.image_urls.normal ?? card.image_url ?? null)
+      return
+    }
+    setHoveredImageUrl(card.image_url ?? null)
+    const targetName = card.name
+    searchCardByName(frontFace(card.name))
+      .then((res) => {
+        if (hoveredNameRef.current !== targetName) return
+        const match = res.results.find((c) => c.name === targetName || c.name.startsWith(frontFace(targetName) + ' // '))
+          ?? res.results.find((c) => c.name === frontFace(targetName))
+          ?? res.results[0]
+        if (match) {
+          cardCache.set(targetName, match)
+          setHoveredImageUrl(match.image_urls.back_normal ?? match.image_urls.back_art_crop ?? match.image_urls.normal ?? card.image_url ?? null)
+        }
       })
       .catch(() => {})
   }, [cardCache])
@@ -216,14 +241,14 @@ export function DeckPage() {
               ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
             </span>
           </div>
-          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={COMMANDER_FORMATS.includes(deck.format)} onCardClick={onCardClick} onCardHover={onCardHover} />
+          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={COMMANDER_FORMATS.includes(deck.format)} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
         </div>
       )}
 
       {/* Other zones */}
-      {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
-      {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
-      {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} defaultCollapsed />}
+      {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+      {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+      {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
 
       {/* Deck Stats */}
       {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} manaCurve={manaCurve} analysis={deckAnalysis} />}
@@ -327,7 +352,7 @@ function groupMainboard(commanders: DeckCard[], cards: DeckCard[]) {
   return groups
 }
 
-function TypeGroupBlock({ group, onCardClick, onCardHover }: { group: { label: string; cards: DeckCard[] }; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void }) {
+function TypeGroupBlock({ group, onCardClick, onCardHover, onCardFlip }: { group: { label: string; cards: DeckCard[] }; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void }) {
   const total = group.cards.reduce((s, c) => s + c.quantity, 0)
   return (
     <div className={styles.typeGroup}>
@@ -341,9 +366,10 @@ function TypeGroupBlock({ group, onCardClick, onCardHover }: { group: { label: s
         return (
           <div key={card.scryfall_id} className={styles.mainboardCard} onMouseEnter={() => onCardHover(card)} onMouseLeave={() => onCardHover(null)}>
             <span className={styles.cardQty}>{card.quantity}</span>
-            <button type="button" className={styles.cardNameLink} onClick={() => onCardClick(card.name)}>
-              {frontFace(card.name)}{isDfc && <span className={styles.dfcBadge} title={backFace(card.name) ?? ''}>↻</span>}
-            </button>
+            <div className={styles.cardNameCell}>
+              <button type="button" className={styles.cardNameLink} onClick={() => onCardClick(card.name)}>{frontFace(card.name)}</button>
+              {isDfc && <button type="button" className={styles.dfcBadge} title={`Flip to ${backFace(card.name)}`} onClick={() => onCardFlip(card)}>↻</button>}
+            </div>
             <span className={styles.cardMana}>
               {mana ? (
                 <ManaCost cost={mana} size={13} />
@@ -358,7 +384,7 @@ function TypeGroupBlock({ group, onCardClick, onCardHover }: { group: { label: s
   )
 }
 
-function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHover }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void }) {
+function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHover, onCardFlip }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void }) {
   const groups = groupMainboard(commanders, cards)
   const lands = groups.find((g) => g.label === 'Lands')
   const nonLands = groups.filter((g) => g.label !== 'Lands')
@@ -369,11 +395,11 @@ function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHove
       <div className={styles.mainboardSplit}>
         <div className={styles.mainboardFlow}>
           {nonLands.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} />
+            <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
           ))}
         </div>
         <div className={styles.mainboardLands}>
-          <TypeGroupBlock group={lands} onCardClick={onCardClick} onCardHover={onCardHover} />
+          <TypeGroupBlock group={lands} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
         </div>
       </div>
     )
@@ -383,13 +409,13 @@ function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHove
   return (
     <div className={styles.mainboardFlowFull}>
       {groups.map((group) => (
-        <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} />
+        <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
       ))}
     </div>
   )
 }
 
-function CardZone({ title, cards, onCardClick, onCardHover, defaultCollapsed = false }: { title: string; cards: DeckCard[]; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; defaultCollapsed?: boolean }) {
+function CardZone({ title, cards, onCardClick, onCardHover, onCardFlip, defaultCollapsed = false }: { title: string; cards: DeckCard[]; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void; defaultCollapsed?: boolean }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
   if (cards.length === 0) return null
 
@@ -408,7 +434,7 @@ function CardZone({ title, cards, onCardClick, onCardHover, defaultCollapsed = f
       {!collapsed && (
         <div className={styles.zoneFlow} style={{ columnCount: cols }}>
           {groups.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} />
+            <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
           ))}
         </div>
       )}
