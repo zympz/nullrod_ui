@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import type { OracleCard, RulingsResponse, CardFace } from '../types/card'
-import { getRulings } from '../api/client'
+import type { OracleCard, CardFace } from '../types/card'
 import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
 import { FORMAT_ORDER } from '../constants'
 import styles from './CardDetail.module.css'
@@ -13,18 +12,8 @@ interface CardDetailProps {
 }
 
 export function CardDetail({ card, onClose }: CardDetailProps) {
-  const [rulings, setRulings] = useState<RulingsResponse | null>(null)
   const [activeFace, setActiveFace] = useState(0)
   const overlayRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    setRulings(null)
-    getRulings(card.oracle_id)
-      .then((r) => { if (!cancelled) setRulings(r) })
-      .catch(() => {}) // rulings are non-critical; section simply won't render
-    return () => { cancelled = true }
-  }, [card.oracle_id])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -188,11 +177,11 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
             </div>
 
             {/* Rulings */}
-            {rulings && rulings.rulings.length > 0 && (
+            {card.rulings.length > 0 && (
               <div className={styles.section}>
                 <div className={styles.sectionLabel}>Rulings</div>
                 <div className={styles.rulings}>
-                  {rulings.rulings.map((r, i) => (
+                  {card.rulings.map((r, i) => (
                     <div key={i} className={styles.ruling}>
                       <div className={styles.rulingDate}>{r.published_at}</div>
                       <div className={styles.rulingText}>{r.comment}</div>

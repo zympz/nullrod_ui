@@ -5,11 +5,9 @@ import { CardPage } from './CardPage'
 import { mockBolt, mockGoyf } from '../test/fixtures'
 
 const mockGetCardById = vi.fn()
-const mockGetRulings = vi.fn()
 
 vi.mock('../api/client', () => ({
   getCardById: (...args: unknown[]) => mockGetCardById(...args),
-  getRulings: (...args: unknown[]) => mockGetRulings(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
@@ -29,8 +27,6 @@ function renderPage(oracleId: string) {
 describe('CardPage', () => {
   beforeEach(() => {
     mockGetCardById.mockReset()
-    mockGetRulings.mockReset()
-    mockGetRulings.mockResolvedValue({ rulings: [] })
   })
 
   it('shows loading state initially', () => {
@@ -60,10 +56,11 @@ describe('CardPage', () => {
   })
 
   it('renders rulings when available', async () => {
-    mockGetCardById.mockResolvedValue(mockBolt)
-    mockGetRulings.mockResolvedValue({
-      rulings: [{ published_at: '2024-01-01', comment: 'Test ruling' }],
-    })
+    const cardWithRuling = {
+      ...mockBolt,
+      rulings: [{ oracle_id: mockBolt.oracle_id, source: 'wotc', published_at: '2024-01-01', comment: 'Test ruling' }],
+    }
+    mockGetCardById.mockResolvedValue(cardWithRuling)
     renderPage(mockBolt.oracle_id)
     expect(await screen.findByText('Test ruling')).toBeInTheDocument()
   })

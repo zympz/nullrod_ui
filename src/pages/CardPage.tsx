@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import type { OracleCard, RulingsResponse, CardFace } from '../types/card'
-import { getCardById, getRulings } from '../api/client'
+import type { OracleCard, CardFace } from '../types/card'
+import { getCardById } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
 import { FORMAT_ORDER } from '../constants'
 import styles from './CardPage.module.css'
@@ -10,7 +10,6 @@ export function CardPage() {
   const { oracleId } = useParams<{ oracleId: string }>()
   const navigate = useNavigate()
   const [card, setCard] = useState<OracleCard | null>(null)
-  const [rulings, setRulings] = useState<RulingsResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeFace, setActiveFace] = useState(0)
 
@@ -18,17 +17,10 @@ export function CardPage() {
     if (!oracleId) return
     let cancelled = false
     setCard(null)
-    setRulings(null)
     setError(null)
 
     getCardById(oracleId)
-      .then((c) => {
-        if (cancelled) return
-        setCard(c)
-        getRulings(c.oracle_id)
-          .then((r) => { if (!cancelled) setRulings(r) })
-          .catch(() => {}) // rulings are non-critical
-      })
+      .then((c) => { if (!cancelled) setCard(c) })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load card')
       })
@@ -197,11 +189,11 @@ export function CardPage() {
             </div>
 
             {/* Rulings */}
-            {rulings && rulings.rulings.length > 0 && (
+            {card.rulings.length > 0 && (
               <div className={styles.section}>
                 <div className={styles.sectionLabel}>Rulings</div>
                 <div className={styles.rulings}>
-                  {rulings.rulings.map((r, i) => (
+                  {card.rulings.map((r, i) => (
                     <div key={i} className={styles.ruling}>
                       <div className={styles.rulingDate}>{r.published_at}</div>
                       <div className={styles.rulingText}>{r.comment}</div>

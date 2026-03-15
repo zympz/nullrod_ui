@@ -4,9 +4,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { CardDetail } from './CardDetail'
 import { mockBolt, mockGoyf, mockJace } from '../test/fixtures'
 
-vi.mock('../api/client', () => ({
-  getRulings: vi.fn(() => Promise.resolve({ rulings: [] })),
-}))
+vi.mock('../api/client', () => ({}))
 
 vi.mock('../api/symbology', () => ({
   loadSymbolMap: vi.fn(() => Promise.resolve(new Map())),

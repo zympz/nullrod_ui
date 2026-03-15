@@ -1,4 +1,4 @@
-import type { OracleCard } from '../types/card'
+import type { OracleCard, CardListItem } from '../types/card'
 
 export const mockBolt: OracleCard = {
   oracle_id: '4457ed35-7c10-48c8-9776-456485fdf070',
@@ -33,6 +33,7 @@ export const mockBolt: OracleCard = {
   games: ['paper', 'mtgo'],
   card_faces: null,
   canonical_scryfall_id: 'f29ba16f-c8fb-42fe-aabf-87089cb214a7',
+  rulings: [],
   image_urls: {
     normal: 'https://example.com/bolt-normal.jpg',
     art_crop: 'https://example.com/bolt-art.jpg',
@@ -72,6 +73,7 @@ export const mockGoyf: OracleCard = {
   games: ['paper', 'mtgo', 'arena'],
   card_faces: null,
   canonical_scryfall_id: '73d1e820-3714-4800-a220-5e4d5cfbfb7e',
+  rulings: [],
   image_urls: {
     normal: 'https://example.com/goyf-normal.jpg',
     art_crop: 'https://example.com/goyf-art.jpg',
@@ -111,7 +113,36 @@ export const mockJace: OracleCard = {
   games: ['paper', 'mtgo'],
   card_faces: null,
   canonical_scryfall_id: 'ddd-eee-fff',
+  rulings: [],
   image_urls: {
     normal: 'https://example.com/jace-normal.jpg',
   },
+}
+
+export const mockBoltListItem: CardListItem = {
+  oracle_id: mockBolt.oracle_id,
+  name: 'Lightning Bolt',
+  mana_cost: '{R}',
+  cmc: 1,
+  type_line: 'Instant',
+  colors: ['R'],
+  color_identity: ['R'],
+  keywords: [],
+  legal_formats: ['modern', 'legacy', 'vintage', 'commander', 'pauper', 'timeless'],
+  layout: 'normal',
+  art_crop: 'https://example.com/bolt-art.jpg',
+}
+
+export const mockGoyfListItem: CardListItem = {
+  oracle_id: mockGoyf.oracle_id,
+  name: 'Tarmogoyf',
+  mana_cost: '{1}{G}',
+  cmc: 2,
+  type_line: 'Creature — Lhurgoyf',
+  colors: ['G'],
+  color_identity: ['G'],
+  keywords: [],
+  legal_formats: ['modern', 'legacy', 'vintage', 'commander', 'historic', 'timeless'],
+  layout: 'normal',
+  art_crop: 'https://example.com/goyf-art.jpg',
 }

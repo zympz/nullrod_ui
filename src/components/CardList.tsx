@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import type { OracleCard } from '../types/card'
+import type { CardListItem } from '../types/card'
 import { ManaCost } from './ManaSymbol'
 import styles from './CardList.module.css'
 
 interface CardListProps {
-  cards: OracleCard[]
+  cards: CardListItem[]
   total: number
   page: number
   pageSize: number

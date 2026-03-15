@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { searchCards, getCardById, getRulings, getSymbology } from './client'
+import { searchCards, searchCardsList, getCardById, getCardByScryfall, getCardPrintings, getSymbology } from './client'
 import { mockBolt } from '../test/fixtures'
 
 const mockFetch = vi.fn()
@@ -20,11 +20,11 @@ describe('client', () => {
   })
 
   describe('searchCards', () => {
-    it('calls /cards with query params', async () => {
+    it('calls /cards/search with query params', async () => {
       mockFetch.mockReturnValue(jsonResponse({ results: [], total: 0, page: 1, page_size: 20 }))
       await searchCards({ name: 'bolt', page: 1 })
       const url = new URL(mockFetch.mock.calls[0][0])
-      expect(url.pathname).toBe('/cards')
+      expect(url.pathname).toBe('/cards/search')
       expect(url.searchParams.get('q')).toBe('bolt')
     })
 
@@ -42,11 +42,14 @@ describe('client', () => {
       expect(url.searchParams.has('q')).toBe(false)
       expect(url.searchParams.has('type')).toBe(false)
     })
+  })
 
-    it('passes view param', async () => {
+  describe('searchCardsList', () => {
+    it('calls /cards/search with view=list', async () => {
       mockFetch.mockReturnValue(jsonResponse({ results: [], total: 0, page: 1, page_size: 20 }))
-      await searchCards({ page: 1, view: 'list' })
+      await searchCardsList({ page: 1 })
       const url = new URL(mockFetch.mock.calls[0][0])
+      expect(url.pathname).toBe('/cards/search')
       expect(url.searchParams.get('view')).toBe('list')
     })
   })
@@ -60,11 +63,19 @@ describe('client', () => {
     })
   })
 
-  describe('getRulings', () => {
-    it('calls /rulings/{oracleId}', async () => {
-      mockFetch.mockReturnValue(jsonResponse({ rulings: [] }))
-      await getRulings('abc-123')
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/rulings/abc-123'))
+  describe('getCardByScryfall', () => {
+    it('calls /cards/scryfall/{scryfallId}', async () => {
+      mockFetch.mockReturnValue(jsonResponse({}))
+      await getCardByScryfall('scryfall-uuid')
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/cards/scryfall/scryfall-uuid'))
+    })
+  })
+
+  describe('getCardPrintings', () => {
+    it('calls /cards/{oracleId}/printings', async () => {
+      mockFetch.mockReturnValue(jsonResponse({ oracle_id: 'abc-123', results: [], total: 0, page: 1, page_size: 20 }))
+      await getCardPrintings('abc-123')
+      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/cards/abc-123/printings'))
     })
   })
 

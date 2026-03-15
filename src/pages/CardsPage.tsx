@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import type { Color, ColorMode, OracleCard, SearchParams } from '../types/card'
-import { searchCards } from '../api/client'
+import type { Color, ColorMode, OracleCard, CardListItem, SearchParams } from '../types/card'
+import { searchCards, searchCardsList } from '../api/client'
 import { SearchFilters } from '../components/SearchFilters'
 import { CardGrid } from '../components/CardGrid'
 import { CardList } from '../components/CardList'
@@ -66,23 +66,33 @@ export function CardsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>(urlToView(searchParams))
   const [showFilters, setShowFilters] = useState(false)
   const [results, setResults] = useState<OracleCard[]>([])
+  const [listItems, setListItems] = useState<CardListItem[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
   const [searched, setSearched] = useState(false)
 
-  const runSearch = useCallback(async (p: SearchParams) => {
+  const runSearch = useCallback(async (p: SearchParams, view: ViewMode) => {
     setLoading(true)
     setError(null)
     try {
-      const res = await searchCards(p)
-      setResults(res.results)
-      setTotal(res.total)
+      if (view === 'list') {
+        const res = await searchCardsList(p)
+        setListItems(res.results)
+        setResults([])
+        setTotal(res.total)
+      } else {
+        const res = await searchCards(p)
+        setResults(res.results)
+        setListItems([])
+        setTotal(res.total)
+      }
       setSearched(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Search failed')
       setResults([])
+      setListItems([])
       setTotal(0)
     } finally {
       setLoading(false)
@@ -101,10 +111,10 @@ export function CardsPage() {
       const p = urlToParams(searchParams)
       setParams(p)
       setQuery(p.name ?? '')
-      setViewMode(urlToView(searchParams))
+      const view = urlToView(searchParams)
+      setViewMode(view)
       if (hasSearchCriteria(p)) {
-        const view = urlToView(searchParams)
-        runSearch(view === 'list' ? { ...p, view: 'list' } : p)
+        runSearch(p, view)
         if (!p.name && (p.color?.length || p.color_identity?.length || p.type || p.cmc_min != null || p.cmc_max != null || p.keywords?.length || p.oracle_text || p.format)) {
           setShowFilters(true)
         }
@@ -118,33 +128,32 @@ export function CardsPage() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    const next = { ...params, name: query || undefined, page: 1, view: viewMode === 'list' ? 'list' as const : undefined }
+    const next = { ...params, name: query || undefined, page: 1 }
     setParams(next)
     updateUrl(next, viewMode)
-    runSearch(next)
+    runSearch(next, viewMode)
   }
 
   function handleParamsChange(next: SearchParams) {
-    const merged = { ...next, name: query || undefined, view: viewMode === 'list' ? 'list' as const : undefined }
+    const merged = { ...next, name: query || undefined }
     setParams(merged)
     updateUrl(merged, viewMode)
-    runSearch(merged)
+    runSearch(merged, viewMode)
   }
 
   function handlePageChange(page: number) {
-    const next = { ...params, page, view: viewMode === 'list' ? 'list' as const : undefined }
+    const next = { ...params, page }
     setParams(next)
     updateUrl(next, viewMode)
-    runSearch(next)
+    runSearch(next, viewMode)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function handleViewChange(view: ViewMode) {
     setViewMode(view)
     if (searched) {
-      const next = { ...params, view: view === 'list' ? 'list' as const : undefined }
-      updateUrl(next, view)
-      runSearch(next)
+      updateUrl(params, view)
+      runSearch(params, view)
     }
   }
 
@@ -234,7 +243,7 @@ export function CardsPage() {
 
       {!loading && searched && viewMode === 'list' && (
         <CardList
-          cards={results}
+          cards={listItems}
           total={total}
           page={params.page ?? 1}
           pageSize={params.page_size ?? PAGE_SIZE}

@@ -5,10 +5,11 @@ import { CardsPage } from './CardsPage'
 import { mockBolt, mockGoyf } from '../test/fixtures'
 
 const mockSearchCards = vi.fn()
+const mockSearchCardsList = vi.fn()
 
 vi.mock('../api/client', () => ({
   searchCards: (...args: unknown[]) => mockSearchCards(...args),
-  getRulings: vi.fn(() => Promise.resolve({ rulings: [] })),
+  searchCardsList: (...args: unknown[]) => mockSearchCardsList(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
@@ -26,7 +27,9 @@ function renderPage(initialPath = '/cards') {
 describe('CardsPage', () => {
   beforeEach(() => {
     mockSearchCards.mockReset()
+    mockSearchCardsList.mockReset()
     mockSearchCards.mockResolvedValue({ results: [mockBolt, mockGoyf], total: 2, page: 1, page_size: 20 })
+    mockSearchCardsList.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
   })
 
   it('shows welcome message initially', () => {

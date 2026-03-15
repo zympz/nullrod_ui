@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { CardList } from './CardList'
-import { mockBolt, mockGoyf } from '../test/fixtures'
+import { mockBoltListItem, mockGoyfListItem } from '../test/fixtures'
 
-function renderList(cards = [mockBolt, mockGoyf], opts?: { page?: number; total?: number }) {
+function renderList(cards = [mockBoltListItem, mockGoyfListItem], opts?: { page?: number; total?: number }) {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <CardList
@@ -23,7 +23,7 @@ describe('CardList', () => {
   it('renders card names as links', () => {
     renderList()
     const bolt = screen.getByText('Lightning Bolt')
-    expect(bolt.closest('a')).toHaveAttribute('href', `/cards/${mockBolt.oracle_id}`)
+    expect(bolt.closest('a')).toHaveAttribute('href', `/cards/${mockBoltListItem.oracle_id}`)
     expect(screen.getByText('Tarmogoyf')).toBeInTheDocument()
   })
 
@@ -46,14 +46,14 @@ describe('CardList', () => {
   })
 
   it('shows pagination when multiple pages', () => {
-    renderList([mockBolt], { total: 40, page: 1 })
+    renderList([mockBoltListItem], { total: 40, page: 1 })
     expect(screen.getByText('1 / 2')).toBeInTheDocument()
     expect(screen.getByText('← Prev')).toBeDisabled()
     expect(screen.getByText('Next →')).not.toBeDisabled()
   })
 
   it('hides pagination when single page', () => {
-    renderList([mockBolt], { total: 1 })
+    renderList([mockBoltListItem], { total: 1 })
     expect(screen.queryByText('← Prev')).not.toBeInTheDocument()
   })
 
@@ -62,7 +62,7 @@ describe('CardList', () => {
     render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <CardList
-          cards={[mockBolt]}
+          cards={[mockBoltListItem]}
           total={40}
           page={1}
           pageSize={20}
@@ -76,7 +76,7 @@ describe('CardList', () => {
   })
 
   it('shows result count', () => {
-    renderList([mockBolt, mockGoyf], { total: 2 })
+    renderList([mockBoltListItem, mockGoyfListItem], { total: 2 })
     expect(screen.getByText('2 cards — page 1 of 1')).toBeInTheDocument()
   })
 })

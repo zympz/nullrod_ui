@@ -2,7 +2,9 @@ import type {
   OracleCard,
   SearchParams,
   SearchResponse,
-  RulingsResponse,
+  SearchListResponse,
+  PrintingResponse,
+  PrintingsResponse,
   CardSymbol,
 } from '../types/card'
 import type { DeckListResponse, Deck, ImportDeckInput } from '../types/deck'
@@ -36,7 +38,7 @@ async function request<T>(
 }
 
 export function searchCards(params: SearchParams): Promise<SearchResponse> {
-  return request<SearchResponse>('/cards', {
+  return request<SearchResponse>('/cards/search', {
     q: params.name,
     oracle_text: params.oracle_text,
     color: params.color,
@@ -48,9 +50,35 @@ export function searchCards(params: SearchParams): Promise<SearchResponse> {
     cmc_max: params.cmc_max,
     keywords: params.keywords,
     format: params.format,
-    view: params.view,
+    include_non_legal: params.include_non_legal,
+    include_extras: params.include_extras,
+    order: params.order,
+    dir: params.dir,
     page: params.page,
     page_size: params.page_size,
+  })
+}
+
+export function searchCardsList(params: SearchParams): Promise<SearchListResponse> {
+  return request<SearchListResponse>('/cards/search', {
+    q: params.name,
+    oracle_text: params.oracle_text,
+    color: params.color,
+    color_mode: params.color_mode,
+    color_identity: params.color_identity,
+    color_identity_mode: params.color_identity_mode,
+    type: params.type,
+    cmc_min: params.cmc_min,
+    cmc_max: params.cmc_max,
+    keywords: params.keywords,
+    format: params.format,
+    include_non_legal: params.include_non_legal,
+    include_extras: params.include_extras,
+    order: params.order,
+    dir: params.dir,
+    page: params.page,
+    page_size: params.page_size,
+    view: 'list',
   })
 }
 
@@ -58,13 +86,20 @@ export function getCardById(oracleId: string): Promise<OracleCard> {
   return request<OracleCard>(`/cards/${oracleId}`)
 }
 
+// Exact name match — uses `name` param for precise lookup
 export function searchCardByName(name: string): Promise<SearchResponse> {
-  return request<SearchResponse>('/cards', { q: name })
+  return request<SearchResponse>('/cards/search', { name })
 }
 
+export function getCardPrintings(
+  oracleId: string,
+  params?: { page?: number; page_size?: number },
+): Promise<PrintingsResponse> {
+  return request<PrintingsResponse>(`/cards/${oracleId}/printings`, params as Record<string, number | undefined>)
+}
 
-export function getRulings(oracleId: string): Promise<RulingsResponse> {
-  return request<RulingsResponse>(`/rulings/${oracleId}`)
+export function getCardByScryfall(scryfallId: string): Promise<PrintingResponse> {
+  return request<PrintingResponse>(`/cards/scryfall/${scryfallId}`)
 }
 
 export function getSymbology(): Promise<CardSymbol[]> {
