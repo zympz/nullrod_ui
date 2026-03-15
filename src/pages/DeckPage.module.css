@@ -579,12 +579,20 @@
 
 .mainboardCard {
   display: grid;
-  grid-template-columns: 20px 1fr auto;
+  grid-template-columns: 20px 1fr auto auto;
   gap: 4px;
   padding: 3px 0;
   font-size: 13px;
   color: var(--text);
   align-items: center;
+}
+
+.cardPrice {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
 }
 
 .mainboardCard:hover {

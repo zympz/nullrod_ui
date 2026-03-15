@@ -6,24 +6,14 @@ import { CardPage } from './CardPage'
 import { mockBolt, mockGoyf } from '../test/fixtures'
 
 const mockGetCardById = vi.fn()
-const mockGetCardPrintings = vi.fn()
 
 vi.mock('../api/client', () => ({
   getCardById: (...args: unknown[]) => mockGetCardById(...args),
-  getCardPrintings: (...args: unknown[]) => mockGetCardPrintings(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
   loadSymbolMap: vi.fn(() => Promise.resolve(new Map())),
 }))
-
-const emptyPrintings = {
-  oracle_id: mockBolt.oracle_id,
-  results: [],
-  total: 0,
-  page: 1,
-  page_size: 100,
-}
 
 function renderPage(oracleId: string) {
   return render(
@@ -38,8 +28,6 @@ function renderPage(oracleId: string) {
 describe('CardPage', () => {
   beforeEach(() => {
     mockGetCardById.mockReset()
-    mockGetCardPrintings.mockReset()
-    mockGetCardPrintings.mockResolvedValue(emptyPrintings)
   })
 
   it('shows loading state initially', () => {
@@ -94,10 +82,9 @@ describe('CardPage', () => {
   })
 
   it('renders printings section when printings available', async () => {
-    mockGetCardById.mockResolvedValue(mockBolt)
-    mockGetCardPrintings.mockResolvedValue({
-      oracle_id: mockBolt.oracle_id,
-      results: [
+    mockGetCardById.mockResolvedValue({
+      ...mockBolt,
+      printings: [
         {
           scryfall_id: 'abc-123',
           oracle_id: mockBolt.oracle_id,
@@ -145,9 +132,6 @@ describe('CardPage', () => {
           image_urls: {},
         },
       ],
-      total: 2,
-      page: 1,
-      page_size: 100,
     })
     renderPage(mockBolt.oracle_id)
     await screen.findByText('Lightning Bolt')
@@ -159,10 +143,7 @@ describe('CardPage', () => {
     mockGetCardById.mockResolvedValue({
       ...mockBolt,
       image_urls: { normal: 'https://example.com/bolt-default.jpg' },
-    })
-    mockGetCardPrintings.mockResolvedValue({
-      oracle_id: mockBolt.oracle_id,
-      results: [
+      printings: [
         {
           scryfall_id: 'abc-123',
           oracle_id: mockBolt.oracle_id,
@@ -187,9 +168,6 @@ describe('CardPage', () => {
           image_urls: { normal: 'https://example.com/tempest.jpg' },
         },
       ],
-      total: 1,
-      page: 1,
-      page_size: 100,
     })
 
     renderPage(mockBolt.oracle_id)

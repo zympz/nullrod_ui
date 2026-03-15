@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { OracleCard, CardFace, PrintingResponse } from '../types/card'
-import { getCardById, getCardPrintings } from '../api/client'
+import { getCardById } from '../api/client'
 import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
 import { FORMAT_ORDER } from '../constants'
 import styles from './CardPage.module.css'
@@ -21,7 +21,6 @@ export function CardPage() {
   const [card, setCard] = useState<OracleCard | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeFace, setActiveFace] = useState(0)
-  const [printings, setPrintings] = useState<PrintingResponse[] | null>(null)
   const [selectedPrinting, setSelectedPrinting] = useState<PrintingResponse | null>(null)
   const [hoveredPrinting, setHoveredPrinting] = useState<PrintingResponse | null>(null)
 
@@ -30,22 +29,11 @@ export function CardPage() {
     let cancelled = false
     setCard(null)
     setError(null)
-    setPrintings(null)
     setSelectedPrinting(null)
 
-    Promise.all([
-      getCardById(oracleId),
-      getCardPrintings(oracleId, { page_size: 100 }),
-    ])
-      .then(([c, p]) => {
-        if (!cancelled) {
-          setCard(c)
-          setPrintings(p.results)
-        }
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load card')
-      })
+    getCardById(oracleId, { include_printings: true })
+      .then((c) => { if (!cancelled) setCard(c) })
+      .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load card') })
     return () => { cancelled = true }
   }, [oracleId])
 
@@ -198,11 +186,11 @@ export function CardPage() {
           </div>
 
           {/* Printings section */}
-          {printings != null && printings.length > 0 && (
+          {card.printings != null && card.printings.length > 0 && (
             <div className={styles.printingsSection}>
               <div className={styles.printingsHeader}>
-                <div className={styles.sectionLabel}>Printings ({printings.length})</div>
-                {printings.length >= 100 && (
+                <div className={styles.sectionLabel}>Printings ({card.printings.length})</div>
+                {card.printings.length >= 100 && (
                   <span className={styles.printingsNote}>Showing first 100 printings</span>
                 )}
               </div>
@@ -217,7 +205,7 @@ export function CardPage() {
                   <span>Foil</span>
                   <span>Etched</span>
                 </div>
-                {printings.map((p) => {
+                {card.printings.map((p) => {
                   const isActive = selectedPrinting?.scryfall_id === p.scryfall_id
                   const year = p.released_at?.slice(0, 4) ?? '—'
                   const rarityColor = RARITY_COLORS[p.rarity] ?? 'var(--text-dim)'

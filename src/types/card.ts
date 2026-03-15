@@ -64,6 +64,7 @@ export interface OracleCard {
   canonical_scryfall_id: string
   rulings: Ruling[]
   image_urls: ImageUrls
+  printings?: PrintingResponse[] | null
 }
 
 export interface ImageUrls {

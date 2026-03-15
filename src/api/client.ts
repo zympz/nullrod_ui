@@ -82,8 +82,8 @@ export function searchCardsList(params: SearchParams): Promise<SearchListRespons
   })
 }
 
-export function getCardById(oracleId: string): Promise<OracleCard> {
-  return request<OracleCard>(`/cards/${oracleId}`)
+export function getCardById(oracleId: string, options?: { include_printings?: boolean }): Promise<OracleCard> {
+  return request<OracleCard>(`/cards/${oracleId}`, options as Record<string, boolean | undefined>)
 }
 
 // Exact name match — uses `name` param for precise lookup
