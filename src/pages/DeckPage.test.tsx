@@ -44,7 +44,7 @@ const mockDeck = {
       set_code: 'mh2',
       set_name: 'Modern Horizons 2',
       card_url: 'https://api.nullrod.com/cards?name=Chatterfang',
-      image_urls: { normal: 'https://example.com/chatterfang.webp' },
+      image_urls: { front: 'https://example.com/chatterfang.webp' },
       prices: { usd: '5.00', usd_foil: null, usd_etched: null, eur: null, eur_foil: null, tix: null },
       foil: false,
     },
@@ -208,16 +208,16 @@ describe('DeckPage', () => {
     expect(flipBtn).toBeInTheDocument()
   })
 
-  it('hovering a card fetches image via searchCardByName', async () => {
+  it('hovering a card does not call searchCardByName', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
-    mockSearchCardByName.mockResolvedValue({ results: [], total: 0 })
     await act(async () => { renderDeckPage() })
 
+    mockSearchCardByName.mockClear()
     await act(async () => {
       fireEvent.mouseEnter(screen.getByText('Sol Ring').closest('div')!)
     })
 
-    expect(mockSearchCardByName).toHaveBeenCalledWith('Sol Ring')
+    expect(mockSearchCardByName).not.toHaveBeenCalled()
   })
 
   it('clicking card name calls searchCardByName and shows detail modal', async () => {

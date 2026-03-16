@@ -26,23 +26,8 @@ export function DeckPage() {
     if (!card) return
     setHoveredCard(card)
     setPreviewFace(0)
-    const cached = cardCache.get(card.name)
-    if (cached) {
-      setHoveredImageUrl(cached.image_urls.normal ?? cached.image_urls.art_crop ?? null)
-      return
-    }
-    setHoveredImageUrl(null)
-    const targetName = card.name
-    searchCardByName(frontFace(card.name))
-      .then((res) => {
-        const match = pickOracleCard(targetName, res.results)
-        if (match) {
-          cardCache.set(targetName, match)
-          setHoveredImageUrl(match.image_urls.normal ?? match.image_urls.art_crop ?? null)
-        }
-      })
-      .catch(() => {})
-  }, [cardCache])
+    setHoveredImageUrl(card.image_urls.front ?? null)
+  }, [])
 
   const onCardClick = useCallback((cardName: string) => {
     const cached = cardCache.get(cardName)
@@ -58,23 +43,8 @@ export function DeckPage() {
   const onCardFlip = useCallback((card: DeckCard) => {
     setHoveredCard(card)
     setPreviewFace(1)
-    const cached = cardCache.get(card.name)
-    if (cached) {
-      setHoveredImageUrl(cached.image_urls.back_normal ?? cached.image_urls.back_art_crop ?? cached.image_urls.normal ?? card.image_urls.back_normal ?? card.image_urls.normal ?? null)
-      return
-    }
-    setHoveredImageUrl(null)
-    const targetName = card.name
-    searchCardByName(frontFace(card.name))
-      .then((res) => {
-        const match = pickOracleCard(targetName, res.results)
-        if (match) {
-          cardCache.set(targetName, match)
-          setHoveredImageUrl(match.image_urls.back_normal ?? match.image_urls.back_art_crop ?? match.image_urls.normal ?? card.image_urls.back_normal ?? card.image_urls.normal ?? null)
-        }
-      })
-      .catch(() => {})
-  }, [cardCache])
+    setHoveredImageUrl(card.image_urls.back ?? card.image_urls.front ?? null)
+  }, [])
 
   useEffect(() => {
     cardCache.clear()
@@ -90,7 +60,9 @@ export function DeckPage() {
       .then((d) => {
         if (cancelled) return
         setDeck(d)
-        // Preview will be set by the banner useEffect via searchCardByName
+        // Set initial preview from featured card
+        const featured = d.commanders[0] ?? d.mainboard[0]
+        if (featured?.image_urls.front) setHoveredImageUrl(featured.image_urls.front)
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load deck')
@@ -190,7 +162,6 @@ export function DeckPage() {
           hoveredImageUrl={hoveredImageUrl}
           previewFace={previewFace}
           onFlip={() => setPreviewFace(previewFace === 0 ? 1 : 0)}
-          cardCache={cardCache}
         />
 
         <div className={styles.deckContent}>
@@ -259,21 +230,18 @@ function backFace(value: string) {
   return idx === -1 ? null : value.slice(idx + 4)
 }
 
-function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip, cardCache }: {
+function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip }: {
   hoveredCard: DeckCard | null
   hoveredImageUrl: string | null
   previewFace: number
   onFlip: () => void
-  cardCache: Map<string, OracleCard>
 }) {
   const isDfc = hoveredCard != null && hoveredCard.name.includes(' // ')
   const otherFaceName = hoveredCard ? (previewFace === 0 ? backFace(hoveredCard.name) : frontFace(hoveredCard.name)) : null
 
-  let imgUrl: string | null | undefined = hoveredImageUrl
-  if (isDfc && previewFace === 1 && hoveredCard) {
-    const cached = cardCache.get(hoveredCard.name)
-    imgUrl = cached?.image_urls.back_normal ?? cached?.image_urls.back_art_crop ?? hoveredImageUrl
-  }
+  const imgUrl = isDfc && previewFace === 1 && hoveredCard
+    ? (hoveredCard.image_urls.back ?? hoveredImageUrl)
+    : hoveredImageUrl
 
   const usd = hoveredCard?.prices?.usd
   const priceDisplay = usd != null
@@ -636,8 +604,8 @@ function SampleHand({ cards, onCardClick }: { cards: DeckCard[]; onCardClick: (n
                 onClick={() => onCardClick(card.name)}
                 title={card.name}
               >
-                {(card.image_urls.normal ?? card.image_urls.art_crop) ? (
-                  <img src={card.image_urls.normal ?? card.image_urls.art_crop} alt={card.name} className={styles.sampleCardImg} />
+                {card.image_urls.front ? (
+                  <img src={card.image_urls.front} alt={card.name} className={styles.sampleCardImg} />
                 ) : (
                   <div className={styles.sampleCardPlaceholder}>{frontFace(card.name)}</div>
                 )}
