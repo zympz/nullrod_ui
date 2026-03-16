@@ -243,12 +243,22 @@ function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip, cardC
     imgUrl = cached?.image_urls.back_normal ?? cached?.image_urls.back_art_crop ?? hoveredImageUrl
   }
 
+  const usd = hoveredCard?.prices?.usd
+  const priceDisplay = usd != null
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(parseFloat(usd))
+    : null
+
   return (
     <div className={styles.previewPanel}>
       {imgUrl ? (
         <img src={imgUrl} alt="Card preview" className={styles.previewImage} />
       ) : (
         <div className={styles.previewEmpty}>Hover a card to preview</div>
+      )}
+      {hoveredCard && (
+        <div className={styles.previewMeta}>
+          <span className={styles.previewPrice}>{priceDisplay ?? '—'}</span>
+        </div>
       )}
       {isDfc && otherFaceName && (
         <button type="button" className={styles.flipBtn} onClick={onFlip}>

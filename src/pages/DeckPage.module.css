@@ -51,6 +51,20 @@
   font-size: 12px;
 }
 
+.previewMeta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0 2px;
+}
+
+.previewPrice {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .flipBtn {
   background: var(--surface-2);
   border: 1px solid var(--border);
