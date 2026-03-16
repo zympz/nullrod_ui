@@ -5,17 +5,17 @@ import { DeckPage } from './DeckPage'
 
 const mockGetDeck = vi.fn()
 const mockSearchCardByName = vi.fn()
-const mockGetDeckCardPrices = vi.fn()
 
 vi.mock('../api/client', () => ({
   getDeck: (...args: unknown[]) => mockGetDeck(...args),
   searchCardByName: (...args: unknown[]) => mockSearchCardByName(...args),
-  getDeckCardPrices: (...args: unknown[]) => mockGetDeckCardPrices(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
   loadSymbolMap: vi.fn(() => Promise.resolve(new Map())),
 }))
+
+const mockPrices = { usd: null, usd_foil: null, usd_etched: null, eur: null, eur_foil: null, tix: null }
 
 const mockDeck = {
   id: 'deck-1',
@@ -25,6 +25,7 @@ const mockDeck = {
   description: 'A squirrel tribal deck',
   source: 'moxfield',
   source_url: 'https://moxfield.com/decks/abc123',
+  color_identity: ['B', 'G'],
   commanders: [
     {
       quantity: 1,
@@ -38,9 +39,13 @@ const mockDeck = {
       cmc: 3,
       colors: ['G'],
       color_identity: ['B', 'G'],
+      oracle_id: 'chatterfang-oracle',
       scryfall_id: 'cmd-1',
+      set_code: 'mh2',
+      set_name: 'Modern Horizons 2',
       card_url: 'https://api.nullrod.com/cards?name=Chatterfang',
       image_url: 'https://example.com/chatterfang.webp',
+      prices: { usd: '5.00', usd_foil: null, usd_etched: null, eur: null, eur_foil: null, tix: null },
     },
   ],
   companions: [],
@@ -57,9 +62,13 @@ const mockDeck = {
       cmc: 1,
       colors: [],
       color_identity: [],
+      oracle_id: 'sol-ring-oracle',
       scryfall_id: 'sol-1',
+      set_code: 'lea',
+      set_name: 'Limited Edition Alpha',
       card_url: 'https://api.nullrod.com/cards?name=Sol%20Ring',
       image_url: null,
+      prices: { usd: '1.00', usd_foil: null, usd_etched: null, eur: null, eur_foil: null, tix: null },
     },
   ],
   sideboard: [],
@@ -71,7 +80,6 @@ const mockDeck = {
 beforeEach(() => {
   vi.clearAllMocks()
   mockSearchCardByName.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
-  mockGetDeckCardPrices.mockResolvedValue(new Map())
 })
 
 function renderDeckPage(deckId = 'deck-1') {
@@ -150,36 +158,34 @@ describe('DeckPage', () => {
     expect(screen.getByText('Deck not found')).toBeInTheDocument()
   })
 
-  it('shows price loading state while prices are fetching', async () => {
+  it('shows total price from embedded deck card prices', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
-    mockGetDeckCardPrices.mockReturnValue(new Promise(() => {}))
     await act(async () => { renderDeckPage() })
-    expect(screen.getByText('$—')).toBeInTheDocument()
-  })
-
-  it('shows total price after prices load', async () => {
-    mockGetDeck.mockResolvedValue(mockDeck)
-    const priceMap = new Map([['cmd-1', '5.00'], ['sol-1', '2.00']])
-    mockGetDeckCardPrices.mockResolvedValue(priceMap)
-    await act(async () => { renderDeckPage() })
-    expect(screen.getByText('$7.00')).toBeInTheDocument()
+    // commander $5.00 + sol ring $1.00 = $6.00
+    expect(screen.getByText('$6.00')).toBeInTheDocument()
   })
 
   it('shows asterisk and tooltip when some cards have no price', async () => {
-    mockGetDeck.mockResolvedValue(mockDeck)
-    const priceMap = new Map([['cmd-1', '5.00'], ['sol-1', null]])
-    mockGetDeckCardPrices.mockResolvedValue(priceMap)
+    const deckWithUnpriced = {
+      ...mockDeck,
+      mainboard: [
+        {
+          ...mockDeck.mainboard[0],
+          prices: { ...mockPrices, usd: null },
+        },
+      ],
+    }
+    mockGetDeck.mockResolvedValue(deckWithUnpriced)
     await act(async () => { renderDeckPage() })
     const badge = screen.getByTitle('1 card without price data')
     expect(badge).toBeInTheDocument()
   })
 
-  it('renders deck without crashing when price fetch fails', async () => {
+  it('renders price from embedded data when cards have prices', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
-    mockGetDeckCardPrices.mockRejectedValue(new Error('network error'))
     await act(async () => { renderDeckPage() })
+    expect(screen.getByText('$6.00')).toBeInTheDocument()
     expect(screen.getByText('Chatterfang Squirrels')).toBeInTheDocument()
-    expect(screen.queryByText('$—')).not.toBeInTheDocument()
   })
 
   it('shows DFC flip badge next to cards with double-faced names', async () => {
@@ -200,23 +206,15 @@ describe('DeckPage', () => {
     expect(flipBtn).toBeInTheDocument()
   })
 
-  it('hovering a card without image_url fetches oracle card for preview', async () => {
+  it('hovering a card does not call searchCardByName', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
-    const oracleCard = {
-      oracle_id: 'sol-oracle',
-      name: 'Sol Ring',
-      image_urls: { normal: 'https://cards.nullrod.com/sol-ring.jpg' },
-    }
-    mockSearchCardByName.mockResolvedValue({ results: [oracleCard], total: 1, page: 1, page_size: 20 })
     await act(async () => { renderDeckPage() })
 
     await act(async () => {
       fireEvent.mouseEnter(screen.getByText('Sol Ring').closest('div')!)
     })
 
-    await waitFor(() => {
-      expect(mockSearchCardByName).toHaveBeenCalledWith('Sol Ring')
-    })
+    expect(mockSearchCardByName).not.toHaveBeenCalledWith('Sol Ring')
   })
 
   it('clicking card name calls searchCardByName and shows detail modal', async () => {

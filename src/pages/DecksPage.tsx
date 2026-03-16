@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import type { DeckSummary } from '../types/deck'
 import { listDecks, importDeck } from '../api/client'
+import { ColorPips } from '../components/ColorPips'
+import { identityColors } from '../constants'
 import styles from './DecksPage.module.css'
 
 const PAGE_SIZE = 20
@@ -124,7 +126,7 @@ export function DecksPage() {
               <span>Name</span>
               <span>Format</span>
               <span>Commander</span>
-              <span>Cards</span>
+              <span>Colors</span>
             </div>
             {decks.map((deck) => (
               <div key={deck.id} className={styles.listRow}>
@@ -137,7 +139,7 @@ export function DecksPage() {
                 <span className={styles.colCommanders}>
                   {deck.commanders.join(', ') || '—'}
                 </span>
-                <span className={styles.colCount}>{deck.card_count}</span>
+                <span className={styles.colColors}><ColorPips colors={identityColors(deck.color_identity.join(''))} size={12} /></span>
               </div>
             ))}
           </div>

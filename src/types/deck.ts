@@ -5,6 +5,15 @@ export type DeckFormat =
   | 'vintage' | 'pauper' | 'explorer' | 'historic' | 'timeless'
   | 'brawl' | 'oathbreaker' | 'gladiator' | 'premodern' | 'duel'
 
+export interface DeckCardPrices {
+  usd: string | null
+  usd_foil: string | null
+  usd_etched: string | null
+  eur: string | null
+  eur_foil: string | null
+  tix: string | null
+}
+
 export interface DeckCard {
   quantity: number
   name: string
@@ -17,9 +26,13 @@ export interface DeckCard {
   cmc: number
   colors: Color[]
   color_identity: Color[]
+  oracle_id: string
   scryfall_id: string
+  set_code: string
+  set_name: string
   card_url: string
   image_url: string | null
+  prices: DeckCardPrices
 }
 
 export interface DeckSummary {
@@ -28,8 +41,7 @@ export interface DeckSummary {
   name: string
   format: DeckFormat
   commanders: string[]
-  card_count: number
-  cmc_curve: Record<string, number>
+  color_identity: Color[]
 }
 
 export interface DeckListResponse {
@@ -54,6 +66,7 @@ export interface Deck {
   maybeboard: DeckCard[]
   card_count: number
   cmc_curve: Record<string, number>
+  color_identity: Color[]
 }
 
 export interface ImportDeckInput {

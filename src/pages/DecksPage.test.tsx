@@ -27,8 +27,7 @@ const mockDeckSummary = {
   name: 'Chatterfang Squirrels',
   format: 'commander',
   commanders: ['Chatterfang, Squirrel General'],
-  card_count: 100,
-  cmc_curve: { '1': 10, '2': 15, '3': 8 },
+  color_identity: ['B', 'G'],
 }
 
 beforeEach(() => {
@@ -66,7 +65,18 @@ describe('DecksPage', () => {
     await renderDecks()
     expect(screen.getByText('Chatterfang Squirrels')).toBeInTheDocument()
     expect(screen.getByText('commander')).toBeInTheDocument()
-    expect(screen.getByText('100')).toBeInTheDocument()
+  })
+
+  it('renders color identity pips for each deck', async () => {
+    mockListDecks.mockResolvedValue({
+      results: [mockDeckSummary],
+      total: 1,
+      page: 1,
+      page_size: 20,
+    })
+    await renderDecks()
+    // Colors column header should be present
+    expect(screen.getByText('Colors')).toBeInTheDocument()
   })
 
   it('shows empty state when no decks', async () => {
