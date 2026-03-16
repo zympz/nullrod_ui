@@ -113,7 +113,7 @@ export function DeckPage() {
   let deckTotal = 0
   let unpricedCount = 0
   for (const card of [...deck.commanders, ...deck.mainboard, ...deck.sideboard, ...deck.companions]) {
-    const usd = card.prices?.usd
+    const usd = cardPrice(card)
     if (usd != null) {
       deckTotal += parseFloat(usd) * card.quantity
     } else {
@@ -225,6 +225,10 @@ function pickOracleCard(name: string, results: OracleCard[]): OracleCard | undef
     ?? results[0]
 }
 
+function cardPrice(card: DeckCard): string | null {
+  return (card.foil ? card.prices?.usd_foil : null) ?? card.prices?.usd ?? null
+}
+
 function backFace(value: string) {
   const idx = value.indexOf(' // ')
   return idx === -1 ? null : value.slice(idx + 4)
@@ -243,7 +247,7 @@ function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip }: {
     ? (hoveredCard.image_urls.back ?? hoveredImageUrl)
     : hoveredImageUrl
 
-  const usd = hoveredCard?.prices?.usd
+  const usd = hoveredCard ? cardPrice(hoveredCard) : null
   const priceDisplay = usd != null
     ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(parseFloat(usd))
     : null
@@ -319,8 +323,8 @@ function sortCards(cards: DeckCard[], mode: SortMode): DeckCard[] {
   return [...cards].sort((a, b) => {
     if (mode === 'name') return frontFace(a.name).localeCompare(frontFace(b.name))
     if (mode === 'price') {
-      const pa = parseFloat(a.prices?.usd ?? '-1')
-      const pb = parseFloat(b.prices?.usd ?? '-1')
+      const pa = parseFloat(cardPrice(a) ?? '-1')
+      const pb = parseFloat(cardPrice(b) ?? '-1')
       return pb - pa
     }
     return a.cmc - b.cmc
@@ -339,7 +343,7 @@ function TypeGroupBlock({ group, sortMode, showPrices, onCardClick, onCardHover,
       {sorted.map((card) => {
         const mana = card.mana_cost ? frontFace(card.mana_cost) : null
         const isDfc = card.name.includes(' // ')
-        const usd = card.prices?.usd
+        const usd = cardPrice(card)
         return (
           <div key={card.scryfall_id} className={styles.mainboardCard} onMouseEnter={() => onCardHover(card)} onMouseLeave={() => onCardHover(null)}>
             <span className={styles.cardQty}>{card.quantity}</span>
