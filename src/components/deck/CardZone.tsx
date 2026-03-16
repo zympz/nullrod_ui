@@ -10,7 +10,7 @@ interface CardZoneProps {
   cards: DeckCard[]
   sortMode: SortMode
   showPrices: boolean
-  onCardClick: (name: string) => void
+  onCardClick: (card: DeckCard) => void
   onCardHover: (card: DeckCard | null) => void
   onCardFlip: (card: DeckCard) => void
   defaultCollapsed?: boolean

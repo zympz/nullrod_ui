@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import type { Deck, DeckCard } from '../types/deck'
 import type { OracleCard } from '../types/card'
-import { getDeck, searchCardByName } from '../api/client'
+import { getDeck, getCardById, searchCardByName } from '../api/client'
 import { CardDetail } from '../components/CardDetail'
 import { PreviewPanel } from '../components/deck/PreviewPanel'
 import { MainboardGrid } from '../components/deck/MainboardGrid'
@@ -38,14 +38,16 @@ export function DeckPage() {
     setHoveredImageUrl(card.image_urls.front ?? null)
   }, [])
 
-  const onCardClick = useCallback((cardName: string) => {
-    const cached = cardCache.get(cardName)
-    if (cached) { setSelectedCard(cached); return }
-    searchCardByName(frontFace(cardName))
-      .then((res) => {
-        const card = pickOracleCard(cardName, res.results)
-        if (card) { cardCache.set(cardName, card); setSelectedCard(card) }
-      })
+  const onCardClick = useCallback((deckCard: DeckCard) => {
+    const withDeckArt = (oracle: OracleCard): OracleCard =>
+      deckCard.image_urls.front || deckCard.image_urls.back
+        ? { ...oracle, image_urls: { normal: deckCard.image_urls.front, back_normal: deckCard.image_urls.back, art_crop: deckCard.image_urls.front, back_art_crop: deckCard.image_urls.back } }
+        : oracle
+
+    const cached = cardCache.get(deckCard.oracle_id)
+    if (cached) { setSelectedCard(withDeckArt(cached)); return }
+    getCardById(deckCard.oracle_id)
+      .then((oracle) => { cardCache.set(deckCard.oracle_id, oracle); setSelectedCard(withDeckArt(oracle)) })
       .catch(() => {})
   }, [cardCache])
 

@@ -6,7 +6,7 @@ import styles from '../../pages/DeckPage.module.css'
 
 interface SampleHandProps {
   cards: DeckCard[]
-  onCardClick: (name: string) => void
+  onCardClick: (card: DeckCard) => void
 }
 
 export function SampleHand({ cards, onCardClick }: SampleHandProps) {
@@ -30,7 +30,7 @@ export function SampleHand({ cards, onCardClick }: SampleHandProps) {
                 key={`${card.scryfall_id}-${i}`}
                 type="button"
                 className={styles.sampleCard}
-                onClick={() => onCardClick(card.name)}
+                onClick={() => onCardClick(card)}
                 title={card.name}
               >
                 {card.image_urls.front ? (

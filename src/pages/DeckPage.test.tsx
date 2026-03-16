@@ -4,10 +4,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DeckPage } from './DeckPage'
 
 const mockGetDeck = vi.fn()
+const mockGetCardById = vi.fn()
 const mockSearchCardByName = vi.fn()
 
 vi.mock('../api/client', () => ({
   getDeck: (...args: unknown[]) => mockGetDeck(...args),
+  getCardById: (...args: unknown[]) => mockGetCardById(...args),
   searchCardByName: (...args: unknown[]) => mockSearchCardByName(...args),
 }))
 
@@ -82,6 +84,7 @@ const mockDeck = {
 beforeEach(() => {
   vi.clearAllMocks()
   mockSearchCardByName.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
+  mockGetCardById.mockResolvedValue(null)
 })
 
 function renderDeckPage(deckId = 'deck-1') {
@@ -220,10 +223,10 @@ describe('DeckPage', () => {
     expect(mockSearchCardByName).not.toHaveBeenCalled()
   })
 
-  it('clicking card name calls searchCardByName and shows detail modal', async () => {
+  it('clicking card name calls getCardById with oracle_id and shows detail modal', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     const oracleCard = {
-      oracle_id: 'sol-oracle',
+      oracle_id: 'sol-ring-oracle',
       name: 'Sol Ring',
       mana_cost: '{1}',
       type_line: 'Artifact',
@@ -243,7 +246,7 @@ describe('DeckPage', () => {
       rulings: [],
       image_urls: {},
     }
-    mockSearchCardByName.mockResolvedValue({ results: [oracleCard], total: 1, page: 1, page_size: 20 })
+    mockGetCardById.mockResolvedValue(oracleCard)
     await act(async () => { renderDeckPage() })
 
     await act(async () => {
@@ -251,7 +254,7 @@ describe('DeckPage', () => {
     })
 
     await waitFor(() => {
-      expect(mockSearchCardByName).toHaveBeenCalledWith('Sol Ring')
+      expect(mockGetCardById).toHaveBeenCalledWith('sol-ring-oracle')
     })
   })
 
