@@ -7,6 +7,8 @@ import { ManaCost } from '../components/ManaSymbol'
 import { CardDetail } from '../components/CardDetail'
 import styles from './DeckPage.module.css'
 
+type SortMode = 'cmc' | 'name' | 'price'
+
 export function DeckPage() {
   const { deckId } = useParams<{ deckId: string }>()
   const [deck, setDeck] = useState<Deck | null>(null)
@@ -16,6 +18,7 @@ export function DeckPage() {
   const [hoveredCard, setHoveredCard] = useState<DeckCard | null>(null)
   const [previewFace, setPreviewFace] = useState(0)
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
+  const [sortMode, setSortMode] = useState<SortMode>('cmc')
   const cardCache = useRef(new Map<string, OracleCard>()).current
 
   const onCardHover = useCallback((card: DeckCard | null) => {
@@ -178,6 +181,17 @@ export function DeckPage() {
 
         <div className={styles.deckContent}>
 
+      <div className={styles.deckControls}>
+        <label className={styles.sortLabel}>
+          Sort
+          <select className={styles.sortSelect} value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
+            <option value="cmc">Mana Value</option>
+            <option value="name">Name</option>
+            <option value="price">Price</option>
+          </select>
+        </label>
+      </div>
+
       {/* Mainboard grouped by type */}
       {(deck.commanders.length > 0 || deck.mainboard.length > 0) && (
         <div className={styles.zone}>
@@ -187,14 +201,14 @@ export function DeckPage() {
               ({deck.commanders.reduce((s, c) => s + c.quantity, 0) + deck.mainboard.reduce((s, c) => s + c.quantity, 0)})
             </span>
           </div>
-          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={COMMANDER_FORMATS.includes(deck.format)} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+          <MainboardGrid commanders={deck.commanders} cards={deck.mainboard} isCommander={COMMANDER_FORMATS.includes(deck.format)} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
         </div>
       )}
 
       {/* Other zones */}
-      {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
-      {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
-      {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+      {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+      {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+      {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
 
       {/* Deck Stats */}
       {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} manaCurve={manaCurve} analysis={deckAnalysis} />}
@@ -315,15 +329,28 @@ function groupMainboard(commanders: DeckCard[], cards: DeckCard[]) {
   return groups
 }
 
-function TypeGroupBlock({ group, onCardClick, onCardHover, onCardFlip }: { group: { label: string; cards: DeckCard[] }; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void }) {
+function sortCards(cards: DeckCard[], mode: SortMode): DeckCard[] {
+  return [...cards].sort((a, b) => {
+    if (mode === 'name') return frontFace(a.name).localeCompare(frontFace(b.name))
+    if (mode === 'price') {
+      const pa = parseFloat(a.prices?.usd ?? '-1')
+      const pb = parseFloat(b.prices?.usd ?? '-1')
+      return pb - pa
+    }
+    return a.cmc - b.cmc
+  })
+}
+
+function TypeGroupBlock({ group, sortMode, onCardClick, onCardHover, onCardFlip }: { group: { label: string; cards: DeckCard[] }; sortMode: SortMode; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void }) {
   const total = group.cards.reduce((s, c) => s + c.quantity, 0)
+  const sorted = sortCards(group.cards, sortMode)
   return (
     <div className={styles.typeGroup}>
       <div className={styles.typeGroupHeader}>
         <span className={styles.typeGroupLabel}>{group.label}</span>
         <span className={styles.typeGroupCount}>({total})</span>
       </div>
-      {group.cards.map((card) => {
+      {sorted.map((card) => {
         const mana = card.mana_cost ? frontFace(card.mana_cost) : null
         const isDfc = card.name.includes(' // ')
         return (
@@ -347,7 +374,7 @@ function TypeGroupBlock({ group, onCardClick, onCardHover, onCardFlip }: { group
   )
 }
 
-function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHover, onCardFlip }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void }) {
+function MainboardGrid({ commanders, cards, isCommander, sortMode, onCardClick, onCardHover, onCardFlip }: { commanders: DeckCard[]; cards: DeckCard[]; isCommander: boolean; sortMode: SortMode; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void }) {
   const groups = groupMainboard(commanders, cards)
   const lands = groups.find((g) => g.label === 'Lands')
   const nonLands = groups.filter((g) => g.label !== 'Lands')
@@ -358,11 +385,11 @@ function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHove
       <div className={styles.mainboardSplit}>
         <div className={styles.mainboardFlow}>
           {nonLands.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+            <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
           ))}
         </div>
         <div className={styles.mainboardLands}>
-          <TypeGroupBlock group={lands} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+          <TypeGroupBlock group={lands} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
         </div>
       </div>
     )
@@ -372,13 +399,13 @@ function MainboardGrid({ commanders, cards, isCommander, onCardClick, onCardHove
   return (
     <div className={styles.mainboardFlowFull}>
       {groups.map((group) => (
-        <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+        <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
       ))}
     </div>
   )
 }
 
-function CardZone({ title, cards, onCardClick, onCardHover, onCardFlip, defaultCollapsed = false }: { title: string; cards: DeckCard[]; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void; defaultCollapsed?: boolean }) {
+function CardZone({ title, cards, sortMode, onCardClick, onCardHover, onCardFlip, defaultCollapsed = false }: { title: string; cards: DeckCard[]; sortMode: SortMode; onCardClick: (name: string) => void; onCardHover: (card: DeckCard | null) => void; onCardFlip: (card: DeckCard) => void; defaultCollapsed?: boolean }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
   if (cards.length === 0) return null
 
@@ -397,7 +424,7 @@ function CardZone({ title, cards, onCardClick, onCardHover, onCardFlip, defaultC
       {!collapsed && (
         <div className={styles.zoneFlow} style={{ columnCount: cols }}>
           {groups.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+            <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
           ))}
         </div>
       )}

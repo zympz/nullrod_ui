@@ -90,6 +90,40 @@
   min-width: 0;
 }
 
+.deckControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sortLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sortSelect {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+.sortSelect:focus {
+  border-color: var(--accent);
+}
+
 @media (max-width: 900px) {
   .deckLayout {
     grid-template-columns: 1fr;
