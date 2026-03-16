@@ -208,15 +208,16 @@ describe('DeckPage', () => {
     expect(flipBtn).toBeInTheDocument()
   })
 
-  it('hovering a card does not call searchCardByName', async () => {
+  it('hovering a card fetches image via searchCardByName', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
+    mockSearchCardByName.mockResolvedValue({ results: [], total: 0 })
     await act(async () => { renderDeckPage() })
 
     await act(async () => {
       fireEvent.mouseEnter(screen.getByText('Sol Ring').closest('div')!)
     })
 
-    expect(mockSearchCardByName).not.toHaveBeenCalledWith('Sol Ring')
+    expect(mockSearchCardByName).toHaveBeenCalledWith('Sol Ring')
   })
 
   it('clicking card name calls searchCardByName and shows detail modal', async () => {

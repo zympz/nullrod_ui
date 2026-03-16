@@ -26,8 +26,23 @@ export function DeckPage() {
     if (!card) return
     setHoveredCard(card)
     setPreviewFace(0)
-    setHoveredImageUrl(card.image_urls.normal ?? card.image_urls.art_crop ?? null)
-  }, [])
+    const cached = cardCache.get(card.name)
+    if (cached) {
+      setHoveredImageUrl(cached.image_urls.normal ?? cached.image_urls.art_crop ?? null)
+      return
+    }
+    setHoveredImageUrl(null)
+    const targetName = card.name
+    searchCardByName(frontFace(card.name))
+      .then((res) => {
+        const match = pickOracleCard(targetName, res.results)
+        if (match) {
+          cardCache.set(targetName, match)
+          setHoveredImageUrl(match.image_urls.normal ?? match.image_urls.art_crop ?? null)
+        }
+      })
+      .catch(() => {})
+  }, [cardCache])
 
   const onCardClick = useCallback((cardName: string) => {
     const cached = cardCache.get(cardName)
@@ -48,7 +63,7 @@ export function DeckPage() {
       setHoveredImageUrl(cached.image_urls.back_normal ?? cached.image_urls.back_art_crop ?? cached.image_urls.normal ?? card.image_urls.back_normal ?? card.image_urls.normal ?? null)
       return
     }
-    setHoveredImageUrl(card.image_urls.back_normal ?? card.image_urls.normal ?? card.image_urls.art_crop ?? null)
+    setHoveredImageUrl(null)
     const targetName = card.name
     searchCardByName(frontFace(card.name))
       .then((res) => {
@@ -75,10 +90,7 @@ export function DeckPage() {
       .then((d) => {
         if (cancelled) return
         setDeck(d)
-        // Set default preview from featured card
-        const featured = d.commanders[0] ?? d.mainboard[0]
-        const featuredUrl = featured?.image_urls.normal ?? featured?.image_urls.art_crop
-        if (featuredUrl) setHoveredImageUrl(featuredUrl)
+        // Preview will be set by the banner useEffect via searchCardByName
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load deck')
