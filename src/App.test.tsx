@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import App from './App'
 
@@ -20,8 +20,8 @@ describe('App', () => {
     expect(screen.getByText('Cards')).toBeInTheDocument()
   })
 
-  it('redirects / to /decks', () => {
+  it('redirects / to /decks', async () => {
     render(<App />)
-    expect(screen.getByText('DecksPage')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('DecksPage')).toBeInTheDocument())
   })
 })

@@ -12,6 +12,12 @@
   }
 }
 
+.pageLoading {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--text-dim);
+}
+
 .footer {
   margin-top: auto;
   border-top: 1px solid var(--border);

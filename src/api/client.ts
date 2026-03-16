@@ -37,8 +37,8 @@ async function request<T>(
   return res.json() as Promise<T>
 }
 
-export function searchCards(params: SearchParams): Promise<SearchResponse> {
-  return request<SearchResponse>('/cards/search', {
+function searchParamsToQuery(params: SearchParams) {
+  return {
     q: params.name,
     oracle_text: params.oracle_text,
     color: params.color,
@@ -56,30 +56,15 @@ export function searchCards(params: SearchParams): Promise<SearchResponse> {
     dir: params.dir,
     page: params.page,
     page_size: params.page_size,
-  })
+  }
+}
+
+export function searchCards(params: SearchParams): Promise<SearchResponse> {
+  return request<SearchResponse>('/cards/search', searchParamsToQuery(params))
 }
 
 export function searchCardsList(params: SearchParams): Promise<SearchListResponse> {
-  return request<SearchListResponse>('/cards/search', {
-    q: params.name,
-    oracle_text: params.oracle_text,
-    color: params.color,
-    color_mode: params.color_mode,
-    color_identity: params.color_identity,
-    color_identity_mode: params.color_identity_mode,
-    type: params.type,
-    cmc_min: params.cmc_min,
-    cmc_max: params.cmc_max,
-    keywords: params.keywords,
-    format: params.format,
-    include_non_legal: params.include_non_legal,
-    include_extras: params.include_extras,
-    order: params.order,
-    dir: params.dir,
-    page: params.page,
-    page_size: params.page_size,
-    view: 'list',
-  })
+  return request<SearchListResponse>('/cards/search', { ...searchParamsToQuery(params), view: 'list' })
 }
 
 export function getCardById(oracleId: string, options?: { include_printings?: boolean }): Promise<OracleCard> {

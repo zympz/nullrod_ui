@@ -1,27 +1,31 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Nav } from './components/Nav'
-import { CardsPage } from './pages/CardsPage'
-import { CardPage } from './pages/CardPage'
-import { DecksPage } from './pages/DecksPage'
-import { DeckPage } from './pages/DeckPage'
-import { CombosPage } from './pages/CombosPage'
-import { ComboPage } from './pages/ComboPage'
 import styles from './App.module.css'
+
+const DecksPage = lazy(() => import('./pages/DecksPage').then((m) => ({ default: m.DecksPage })))
+const DeckPage = lazy(() => import('./pages/DeckPage').then((m) => ({ default: m.DeckPage })))
+const CombosPage = lazy(() => import('./pages/CombosPage').then((m) => ({ default: m.CombosPage })))
+const ComboPage = lazy(() => import('./pages/ComboPage').then((m) => ({ default: m.ComboPage })))
+const CardsPage = lazy(() => import('./pages/CardsPage').then((m) => ({ default: m.CardsPage })))
+const CardPage = lazy(() => import('./pages/CardPage').then((m) => ({ default: m.CardPage })))
 
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Nav />
       <main className={styles.main}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/decks" replace />} />
-          <Route path="/decks" element={<DecksPage />} />
-          <Route path="/decks/:deckId" element={<DeckPage />} />
-          <Route path="/combos" element={<CombosPage />} />
-          <Route path="/combos/:comboId" element={<ComboPage />} />
-          <Route path="/cards" element={<CardsPage />} />
-          <Route path="/cards/:oracleId" element={<CardPage />} />
-        </Routes>
+        <Suspense fallback={<div className={styles.pageLoading}>Loading…</div>}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/decks" replace />} />
+            <Route path="/decks" element={<DecksPage />} />
+            <Route path="/decks/:deckId" element={<DeckPage />} />
+            <Route path="/combos" element={<CombosPage />} />
+            <Route path="/combos/:comboId" element={<ComboPage />} />
+            <Route path="/cards" element={<CardsPage />} />
+            <Route path="/cards/:oracleId" element={<CardPage />} />
+          </Routes>
+        </Suspense>
       </main>
       <footer className={styles.footer}>
         <p>
