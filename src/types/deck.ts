@@ -33,6 +33,7 @@ export interface DeckCard {
   card_url: string
   image_urls: ImageUrls
   prices: DeckCardPrices
+  foil: boolean
 }
 
 export interface DeckSummary {
