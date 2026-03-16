@@ -26,7 +26,7 @@ export function DeckPage() {
     if (!card) return
     setHoveredCard(card)
     setPreviewFace(0)
-    setHoveredImageUrl(card.image_url ?? null)
+    setHoveredImageUrl(card.image_urls.normal ?? card.image_urls.art_crop ?? null)
   }, [])
 
   const onCardClick = useCallback((cardName: string) => {
@@ -45,17 +45,17 @@ export function DeckPage() {
     setPreviewFace(1)
     const cached = cardCache.get(card.name)
     if (cached) {
-      setHoveredImageUrl(cached.image_urls.back_normal ?? cached.image_urls.back_art_crop ?? cached.image_urls.normal ?? card.image_url ?? null)
+      setHoveredImageUrl(cached.image_urls.back_normal ?? cached.image_urls.back_art_crop ?? cached.image_urls.normal ?? card.image_urls.back_normal ?? card.image_urls.normal ?? null)
       return
     }
-    setHoveredImageUrl(card.image_url ?? null)
+    setHoveredImageUrl(card.image_urls.back_normal ?? card.image_urls.normal ?? card.image_urls.art_crop ?? null)
     const targetName = card.name
     searchCardByName(frontFace(card.name))
       .then((res) => {
         const match = pickOracleCard(targetName, res.results)
         if (match) {
           cardCache.set(targetName, match)
-          setHoveredImageUrl(match.image_urls.back_normal ?? match.image_urls.back_art_crop ?? match.image_urls.normal ?? card.image_url ?? null)
+          setHoveredImageUrl(match.image_urls.back_normal ?? match.image_urls.back_art_crop ?? match.image_urls.normal ?? card.image_urls.back_normal ?? card.image_urls.normal ?? null)
         }
       })
       .catch(() => {})
@@ -77,7 +77,8 @@ export function DeckPage() {
         setDeck(d)
         // Set default preview from featured card
         const featured = d.commanders[0] ?? d.mainboard[0]
-        if (featured?.image_url) setHoveredImageUrl(featured.image_url)
+        const featuredUrl = featured?.image_urls.normal ?? featured?.image_urls.art_crop
+        if (featuredUrl) setHoveredImageUrl(featuredUrl)
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load deck')
@@ -623,8 +624,8 @@ function SampleHand({ cards, onCardClick }: { cards: DeckCard[]; onCardClick: (n
                 onClick={() => onCardClick(card.name)}
                 title={card.name}
               >
-                {card.image_url ? (
-                  <img src={card.image_url} alt={card.name} className={styles.sampleCardImg} />
+                {(card.image_urls.normal ?? card.image_urls.art_crop) ? (
+                  <img src={card.image_urls.normal ?? card.image_urls.art_crop} alt={card.name} className={styles.sampleCardImg} />
                 ) : (
                   <div className={styles.sampleCardPlaceholder}>{frontFace(card.name)}</div>
                 )}

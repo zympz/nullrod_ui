@@ -1,4 +1,4 @@
-import type { Color } from './card'
+import type { Color, ImageUrls } from './card'
 
 export type DeckFormat =
   | 'commander' | 'standard' | 'pioneer' | 'modern' | 'legacy'
@@ -31,7 +31,7 @@ export interface DeckCard {
   set_code: string
   set_name: string
   card_url: string
-  image_url: string | null
+  image_urls: ImageUrls
   prices: DeckCardPrices
 }
 
