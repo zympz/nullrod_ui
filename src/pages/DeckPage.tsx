@@ -53,11 +53,13 @@ export function DeckPage() {
   }, [cardCache])
 
   const onCardFlip = useCallback((card: DeckCard) => {
+    const isSameCard = hoveredCard?.scryfall_id === card.scryfall_id
+    const newFace = isSameCard && previewFace === 1 ? 0 : 1
     setHoveredCard(card)
-    setPreviewFace(1)
+    setPreviewFace(newFace)
     setPreviewFrontUrl(card.image_urls.front ?? null)
     setPreviewBackUrl(card.image_urls.back ?? null)
-  }, [])
+  }, [hoveredCard, previewFace])
 
   useEffect(() => { cardCache.clear() }, [deckId, cardCache])
 
