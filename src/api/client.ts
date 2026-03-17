@@ -7,7 +7,7 @@ import type {
   PrintingsResponse,
   CardSymbol,
 } from '../types/card'
-import type { DeckListResponse, Deck, ImportDeckInput } from '../types/deck'
+import type { DeckListResponse, Deck, DeckCardPrices, ImportDeckInput } from '../types/deck'
 import type { ComboListResponse, Combo } from '../types/combo'
 
 const BASE_URL = 'https://api.nullrod.com'
@@ -101,6 +101,17 @@ export function getDeck(id: string): Promise<Deck> {
   return request<Deck>(`/decks/${id}`)
 }
 
+
+export async function fetchBatchPrices(scryfallIds: string[]): Promise<Map<string, DeckCardPrices>> {
+  const res = await fetch(`${BASE_URL}/cards/prices/batch`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scryfall_ids: scryfallIds }),
+  })
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
+  const data = await res.json() as { prices: Record<string, DeckCardPrices> }
+  return new Map(Object.entries(data.prices))
+}
 
 export async function importDeck(input: ImportDeckInput): Promise<Deck> {
   const res = await fetch(`${BASE_URL}/decks/import`, {

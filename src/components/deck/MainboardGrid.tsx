@@ -1,4 +1,4 @@
-import type { DeckCard } from '../../types/deck'
+import type { DeckCard, DeckCardPrices } from '../../types/deck'
 import type { SortMode } from '../../utils/deckUtils'
 import { groupMainboard } from '../../utils/deckUtils'
 import { TypeGroupBlock } from './TypeGroupBlock'
@@ -10,12 +10,13 @@ interface MainboardGridProps {
   isCommander: boolean
   sortMode: SortMode
   showPrices: boolean
+  pricesMap: Map<string, DeckCardPrices>
   onCardClick: (card: DeckCard) => void
   onCardHover: (card: DeckCard | null) => void
   onCardFlip: (card: DeckCard) => void
 }
 
-export function MainboardGrid({ commanders, cards, isCommander, sortMode, showPrices, onCardClick, onCardHover, onCardFlip }: MainboardGridProps) {
+export function MainboardGrid({ commanders, cards, isCommander, sortMode, showPrices, pricesMap, onCardClick, onCardHover, onCardFlip }: MainboardGridProps) {
   const groups = groupMainboard(commanders, cards)
   const lands = groups.find((g) => g.label === 'Lands')
   const nonLands = groups.filter((g) => g.label !== 'Lands')
@@ -25,11 +26,11 @@ export function MainboardGrid({ commanders, cards, isCommander, sortMode, showPr
       <div className={styles.mainboardSplit}>
         <div className={styles.mainboardFlow}>
           {nonLands.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} showPrices={showPrices} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+            <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} showPrices={showPrices} pricesMap={pricesMap} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
           ))}
         </div>
         <div className={styles.mainboardLands}>
-          <TypeGroupBlock group={lands} sortMode={sortMode} showPrices={showPrices} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+          <TypeGroupBlock group={lands} sortMode={sortMode} showPrices={showPrices} pricesMap={pricesMap} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
         </div>
       </div>
     )
@@ -38,7 +39,7 @@ export function MainboardGrid({ commanders, cards, isCommander, sortMode, showPr
   return (
     <div className={styles.mainboardFlowFull}>
       {groups.map((group) => (
-        <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} showPrices={showPrices} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+        <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} showPrices={showPrices} pricesMap={pricesMap} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
       ))}
     </div>
   )

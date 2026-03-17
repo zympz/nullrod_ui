@@ -1,4 +1,4 @@
-import type { DeckCard } from '../../types/deck'
+import type { DeckCard, DeckCardPrices } from '../../types/deck'
 import { cardPrice } from '../../utils/deckUtils'
 import { frontFace, backFace } from '../../utils/cardName'
 import styles from '../../pages/DeckPage.module.css'
@@ -7,10 +7,11 @@ interface PreviewPanelProps {
   hoveredCard: DeckCard | null
   hoveredImageUrl: string | null
   previewFace: number
+  pricesMap: Map<string, DeckCardPrices>
   onFlip: () => void
 }
 
-export function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip }: PreviewPanelProps) {
+export function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, pricesMap, onFlip }: PreviewPanelProps) {
   const isDfc = hoveredCard != null && hoveredCard.name.includes(' // ')
   const otherFaceName = hoveredCard ? (previewFace === 0 ? backFace(hoveredCard.name) : frontFace(hoveredCard.name)) : null
 
@@ -18,7 +19,7 @@ export function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, onFlip
     ? (hoveredCard.image_urls.back ?? hoveredImageUrl)
     : hoveredImageUrl
 
-  const usd = hoveredCard ? cardPrice(hoveredCard) : null
+  const usd = hoveredCard ? cardPrice(hoveredCard, pricesMap) : null
   const priceDisplay = usd != null
     ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(parseFloat(usd))
     : null

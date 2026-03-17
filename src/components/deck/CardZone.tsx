@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { DeckCard } from '../../types/deck'
+import type { DeckCard, DeckCardPrices } from '../../types/deck'
 import type { SortMode } from '../../utils/deckUtils'
 import { groupByType } from '../../utils/deckUtils'
 import { TypeGroupBlock } from './TypeGroupBlock'
@@ -10,13 +10,14 @@ interface CardZoneProps {
   cards: DeckCard[]
   sortMode: SortMode
   showPrices: boolean
+  pricesMap: Map<string, DeckCardPrices>
   onCardClick: (card: DeckCard) => void
   onCardHover: (card: DeckCard | null) => void
   onCardFlip: (card: DeckCard) => void
   defaultCollapsed?: boolean
 }
 
-export function CardZone({ title, cards, sortMode, showPrices, onCardClick, onCardHover, onCardFlip, defaultCollapsed = false }: CardZoneProps) {
+export function CardZone({ title, cards, sortMode, showPrices, pricesMap, onCardClick, onCardHover, onCardFlip, defaultCollapsed = false }: CardZoneProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
   if (cards.length === 0) return null
 
@@ -34,7 +35,7 @@ export function CardZone({ title, cards, sortMode, showPrices, onCardClick, onCa
       {!collapsed && (
         <div className={styles.zoneFlow} style={{ columnCount: cols }}>
           {groups.map((group) => (
-            <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} showPrices={showPrices} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
+            <TypeGroupBlock key={group.label} group={group} sortMode={sortMode} showPrices={showPrices} pricesMap={pricesMap} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} />
           ))}
         </div>
       )}

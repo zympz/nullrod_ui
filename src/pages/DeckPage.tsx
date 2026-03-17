@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import type { Deck, DeckCard } from '../types/deck'
+import type { Deck, DeckCard, DeckCardPrices } from '../types/deck'
 import type { OracleCard } from '../types/card'
-import { getDeck, getCardById, searchCardByName } from '../api/client'
+import { getDeck, getCardById, searchCardByName, fetchBatchPrices } from '../api/client'
 import { CardDetail } from '../components/CardDetail'
 import { PreviewPanel } from '../components/deck/PreviewPanel'
 import { MainboardGrid } from '../components/deck/MainboardGrid'
@@ -29,6 +29,7 @@ export function DeckPage() {
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const [sortMode, setSortMode] = useState<SortMode>('cmc')
   const [showPrices, setShowPrices] = useState(false)
+  const [pricesMap, setPricesMap] = useState<Map<string, DeckCardPrices>>(new Map())
   const cardCache = useRef(new Map<string, OracleCard>()).current
 
   const onCardHover = useCallback((card: DeckCard | null) => {
@@ -75,6 +76,18 @@ export function DeckPage() {
     return () => { cancelled = true }
   }, [deckId])
 
+  // Fetch live prices for all deck cards via batch API
+  useEffect(() => {
+    if (!deck) return
+    let cancelled = false
+    const allCards = [...deck.commanders, ...deck.mainboard, ...deck.sideboard, ...deck.companions, ...deck.maybeboard]
+    const ids = [...new Set(allCards.map((c) => c.scryfall_id))]
+    fetchBatchPrices(ids)
+      .then((map) => { if (!cancelled) setPricesMap(map) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [deck])
+
   // Fetch banner art_crop for featured card
   useEffect(() => {
     if (!deck) return
@@ -103,12 +116,12 @@ export function DeckPage() {
   const { deckTotal, unpricedCount } = useMemo(() => {
     let total = 0, unpriced = 0
     for (const card of deck ? [...deck.commanders, ...deck.mainboard, ...deck.sideboard, ...deck.companions] : []) {
-      const usd = cardPrice(card)
+      const usd = cardPrice(card, pricesMap)
       if (usd != null) total += parseFloat(usd) * card.quantity
       else unpriced += card.quantity
     }
     return { deckTotal: total, unpricedCount: unpriced }
-  }, [deck])
+  }, [deck, pricesMap])
   const colorDist = useMemo(() => getColorDistribution(allMainCards), [allMainCards])
   const manaProd = useMemo(() => getManaProduction(allMainCards), [allMainCards])
   const deckSize = useMemo(() => allMainCards.reduce((s, c) => s + c.quantity, 0), [allMainCards])
@@ -150,6 +163,7 @@ export function DeckPage() {
           hoveredCard={hoveredCard}
           hoveredImageUrl={hoveredImageUrl}
           previewFace={previewFace}
+          pricesMap={pricesMap}
           onFlip={() => setPreviewFace(previewFace === 0 ? 1 : 0)}
         />
 
@@ -183,6 +197,7 @@ export function DeckPage() {
                 isCommander={isCommander}
                 sortMode={sortMode}
                 showPrices={showPrices}
+                pricesMap={pricesMap}
                 onCardClick={onCardClick}
                 onCardHover={onCardHover}
                 onCardFlip={onCardFlip}
@@ -190,9 +205,9 @@ export function DeckPage() {
             </div>
           )}
 
-          {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} sortMode={sortMode} showPrices={showPrices} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
-          {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} sortMode={sortMode} showPrices={showPrices} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
-          {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} sortMode={sortMode} showPrices={showPrices} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+          {deck.companions.length > 0 && <CardZone title="Companion" cards={deck.companions} sortMode={sortMode} showPrices={showPrices} pricesMap={pricesMap} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+          {deck.sideboard.length > 0 && <CardZone title="Sideboard" cards={deck.sideboard} sortMode={sortMode} showPrices={showPrices} pricesMap={pricesMap} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
+          {deck.maybeboard.length > 0 && <CardZone title="Maybeboard" cards={deck.maybeboard} sortMode={sortMode} showPrices={showPrices} pricesMap={pricesMap} onCardClick={onCardClick} onCardHover={onCardHover} onCardFlip={onCardFlip} defaultCollapsed />}
 
           {colorDist.length > 0 && <DeckStats colorDist={colorDist} manaProd={manaProd} deckSize={deckSize} manaCurve={manaCurve} analysis={deckAnalysis} />}
           {allMainCards.length >= 7 && <SampleHand cards={allMainCards} onCardClick={onCardClick} />}

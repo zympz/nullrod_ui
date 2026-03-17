@@ -6,11 +6,13 @@ import { DeckPage } from './DeckPage'
 const mockGetDeck = vi.fn()
 const mockGetCardById = vi.fn()
 const mockSearchCardByName = vi.fn()
+const mockFetchBatchPrices = vi.fn()
 
 vi.mock('../api/client', () => ({
   getDeck: (...args: unknown[]) => mockGetDeck(...args),
   getCardById: (...args: unknown[]) => mockGetCardById(...args),
   searchCardByName: (...args: unknown[]) => mockSearchCardByName(...args),
+  fetchBatchPrices: (...args: unknown[]) => mockFetchBatchPrices(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
@@ -85,6 +87,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockSearchCardByName.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
   mockGetCardById.mockResolvedValue(null)
+  mockFetchBatchPrices.mockResolvedValue(new Map())
 })
 
 function renderDeckPage(deckId = 'deck-1') {

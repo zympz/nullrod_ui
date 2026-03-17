@@ -1,4 +1,4 @@
-import type { DeckCard, DeckFormat } from '../types/deck'
+import type { DeckCard, DeckCardPrices, DeckFormat } from '../types/deck'
 import type { OracleCard } from '../types/card'
 import { frontFace } from './cardName'
 
@@ -28,8 +28,9 @@ export const COLOR_META: Record<string, { label: string; symbol: string; bg: str
 
 export const COLOR_ORDER = ['W', 'U', 'B', 'R', 'G', 'C']
 
-export function cardPrice(card: DeckCard): string | null {
-  return (card.foil ? card.prices?.usd_foil : null) ?? card.prices?.usd ?? null
+export function cardPrice(card: DeckCard, pricesMap?: Map<string, DeckCardPrices>): string | null {
+  const prices = pricesMap?.get(card.scryfall_id) ?? card.prices
+  return (card.foil ? prices?.usd_foil : null) ?? prices?.usd ?? null
 }
 
 export function groupMainboard(commanders: DeckCard[], cards: DeckCard[]): { label: string; cards: DeckCard[] }[] {

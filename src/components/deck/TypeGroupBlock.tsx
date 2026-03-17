@@ -1,4 +1,4 @@
-import type { DeckCard } from '../../types/deck'
+import type { DeckCard, DeckCardPrices } from '../../types/deck'
 import type { SortMode } from '../../utils/deckUtils'
 import { cardPrice, sortCards } from '../../utils/deckUtils'
 import { frontFace, backFace } from '../../utils/cardName'
@@ -9,12 +9,13 @@ interface TypeGroupBlockProps {
   group: { label: string; cards: DeckCard[] }
   sortMode: SortMode
   showPrices: boolean
+  pricesMap: Map<string, DeckCardPrices>
   onCardClick: (card: DeckCard) => void
   onCardHover: (card: DeckCard | null) => void
   onCardFlip: (card: DeckCard) => void
 }
 
-export function TypeGroupBlock({ group, sortMode, showPrices, onCardClick, onCardHover, onCardFlip }: TypeGroupBlockProps) {
+export function TypeGroupBlock({ group, sortMode, showPrices, pricesMap, onCardClick, onCardHover, onCardFlip }: TypeGroupBlockProps) {
   const total = group.cards.reduce((s, c) => s + c.quantity, 0)
   const sorted = sortCards(group.cards, sortMode)
   return (
@@ -26,7 +27,7 @@ export function TypeGroupBlock({ group, sortMode, showPrices, onCardClick, onCar
       {sorted.map((card) => {
         const mana = card.mana_cost ? frontFace(card.mana_cost) : null
         const isDfc = card.name.includes(' // ')
-        const usd = cardPrice(card)
+        const usd = cardPrice(card, pricesMap)
         return (
           <div key={card.scryfall_id} className={styles.mainboardCard} onMouseEnter={() => onCardHover(card)} onMouseLeave={() => onCardHover(null)}>
             <span className={styles.cardQty}>{card.quantity}</span>
