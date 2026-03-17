@@ -214,7 +214,7 @@ describe('DeckPage', () => {
     expect(flipBtn).toBeInTheDocument()
   })
 
-  it('hovering a card does not call searchCardByName', async () => {
+  it('hovering a card with no image_urls fetches via getCardByScryfall', async () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     await act(async () => { renderDeckPage() })
 
@@ -223,7 +223,8 @@ describe('DeckPage', () => {
       fireEvent.mouseEnter(screen.getByText('Sol Ring').closest('div')!)
     })
 
-    expect(mockGetCardByScryfall).not.toHaveBeenCalled()
+    // Sol Ring has empty image_urls in the fixture, so a fetch is triggered
+    expect(mockGetCardByScryfall).toHaveBeenCalledWith('sol-1')
   })
 
   it('clicking card name calls getCardById with oracle_id and shows detail modal', async () => {
