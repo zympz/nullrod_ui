@@ -5,19 +5,18 @@ import styles from '../../pages/DeckPage.module.css'
 
 interface PreviewPanelProps {
   hoveredCard: DeckCard | null
-  hoveredImageUrl: string | null
+  previewFrontUrl: string | null
+  previewBackUrl: string | null
   previewFace: number
   pricesMap: Map<string, DeckCardPrices>
   onFlip: () => void
 }
 
-export function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, pricesMap, onFlip }: PreviewPanelProps) {
+export function PreviewPanel({ hoveredCard, previewFrontUrl, previewBackUrl, previewFace, pricesMap, onFlip }: PreviewPanelProps) {
   const isDfc = hoveredCard != null && hoveredCard.name.includes(' // ')
   const otherFaceName = hoveredCard ? (previewFace === 0 ? backFace(hoveredCard.name) : frontFace(hoveredCard.name)) : null
 
-  const imgUrl = isDfc && previewFace === 1 && hoveredCard
-    ? (hoveredCard.image_urls.back ?? hoveredImageUrl)
-    : hoveredImageUrl
+  const imgUrl = isDfc && previewFace === 1 ? (previewBackUrl ?? previewFrontUrl) : previewFrontUrl
 
   const usd = hoveredCard ? cardPrice(hoveredCard, pricesMap) : null
   const priceDisplay = usd != null

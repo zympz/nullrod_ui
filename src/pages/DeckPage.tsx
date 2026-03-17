@@ -23,7 +23,8 @@ export function DeckPage() {
   const [deck, setDeck] = useState<Deck | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<OracleCard | null>(null)
-  const [hoveredImageUrl, setHoveredImageUrl] = useState<string | null>(null)
+  const [previewFrontUrl, setPreviewFrontUrl] = useState<string | null>(null)
+  const [previewBackUrl, setPreviewBackUrl] = useState<string | null>(null)
   const [hoveredCard, setHoveredCard] = useState<DeckCard | null>(null)
   const [previewFace, setPreviewFace] = useState(0)
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
@@ -36,7 +37,8 @@ export function DeckPage() {
     if (!card) return
     setHoveredCard(card)
     setPreviewFace(0)
-    setHoveredImageUrl(card.image_urls.front ?? null)
+    setPreviewFrontUrl(card.image_urls.front ?? null)
+    setPreviewBackUrl(card.image_urls.back ?? null)
   }, [])
 
   const onCardClick = useCallback((deckCard: DeckCard) => {
@@ -55,7 +57,8 @@ export function DeckPage() {
   const onCardFlip = useCallback((card: DeckCard) => {
     setHoveredCard(card)
     setPreviewFace(1)
-    setHoveredImageUrl(card.image_urls.front ?? null)
+    setPreviewFrontUrl(card.image_urls.front ?? null)
+    setPreviewBackUrl(card.image_urls.back ?? null)
   }, [])
 
   useEffect(() => { cardCache.clear() }, [deckId, cardCache])
@@ -70,7 +73,8 @@ export function DeckPage() {
         if (cancelled) return
         setDeck(d)
         const featured = d.commanders[0] ?? d.mainboard[0]
-        if (featured?.image_urls.front) setHoveredImageUrl(featured.image_urls.front)
+        if (featured?.image_urls.front) setPreviewFrontUrl(featured.image_urls.front)
+        if (featured?.image_urls.back) setPreviewBackUrl(featured.image_urls.back)
       })
       .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load deck') })
     return () => { cancelled = true }
@@ -102,7 +106,7 @@ export function DeckPage() {
         cardCache.set(featuredCard.name, match)
         const artCrop = match.image_urls?.art_crop
         if (artCrop) setBannerUrl(artCrop)
-        setHoveredImageUrl(match.image_urls.normal ?? artCrop ?? null)
+        setPreviewFrontUrl(match.image_urls.normal ?? artCrop ?? null)
       })
       .catch(() => {})
     return () => { cancelled = true }
@@ -161,7 +165,8 @@ export function DeckPage() {
       <div className={styles.deckLayout}>
         <PreviewPanel
           hoveredCard={hoveredCard}
-          hoveredImageUrl={hoveredImageUrl}
+          previewFrontUrl={previewFrontUrl}
+          previewBackUrl={previewBackUrl}
           previewFace={previewFace}
           pricesMap={pricesMap}
           onFlip={() => setPreviewFace(previewFace === 0 ? 1 : 0)}
