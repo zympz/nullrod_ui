@@ -55,7 +55,7 @@ export function DeckPage() {
   const onCardFlip = useCallback((card: DeckCard) => {
     setHoveredCard(card)
     setPreviewFace(1)
-    setHoveredImageUrl(card.image_urls.back ?? card.image_urls.front ?? null)
+    setHoveredImageUrl(card.image_urls.front ?? null)
   }, [])
 
   useEffect(() => { cardCache.clear() }, [deckId, cardCache])

@@ -15,8 +15,8 @@ export function PreviewPanel({ hoveredCard, hoveredImageUrl, previewFace, prices
   const isDfc = hoveredCard != null && hoveredCard.name.includes(' // ')
   const otherFaceName = hoveredCard ? (previewFace === 0 ? backFace(hoveredCard.name) : frontFace(hoveredCard.name)) : null
 
-  const imgUrl = isDfc && hoveredCard
-    ? (previewFace === 0 ? (hoveredCard.image_urls.front ?? hoveredImageUrl) : (hoveredCard.image_urls.back ?? hoveredCard.image_urls.front ?? hoveredImageUrl))
+  const imgUrl = isDfc && previewFace === 1 && hoveredCard
+    ? (hoveredCard.image_urls.back ?? hoveredImageUrl)
     : hoveredImageUrl
 
   const usd = hoveredCard ? cardPrice(hoveredCard, pricesMap) : null
