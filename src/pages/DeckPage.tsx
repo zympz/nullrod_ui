@@ -30,44 +30,14 @@ export function DeckPage() {
   const [showPrices, setShowPrices] = useState(false)
   const [pricesMap, setPricesMap] = useState<Map<string, DeckCardPrices>>(new Map())
   const cardCache = useRef(new Map<string, OracleCard>()).current
-  const imageCache = useRef(new Map<string, { front?: string; back?: string }>()).current
-  const hoveredIdRef = useRef<string | null>(null)
 
   const onCardHover = useCallback((card: DeckCard | null) => {
     if (!card) return
-    hoveredIdRef.current = card.scryfall_id
     setHoveredCard(card)
     setPreviewFace(0)
-
-    const cached = imageCache.get(card.scryfall_id)
-    if (cached) {
-      setPreviewFrontUrl(cached.front ?? null)
-      setPreviewBackUrl(cached.back ?? null)
-      return
-    }
-
-    if (card.image_urls.front) {
-      setPreviewFrontUrl(card.image_urls.front)
-      setPreviewBackUrl(card.image_urls.back ?? null)
-      imageCache.set(card.scryfall_id, { front: card.image_urls.front, back: card.image_urls.back })
-      return
-    }
-
-    // No image from deck API — fetch from cards API
-    setPreviewFrontUrl(null)
-    setPreviewBackUrl(null)
-    getCardByScryfall(card.scryfall_id)
-      .then((printing) => {
-        const front = printing.image_urls?.normal ?? printing.image_urls?.art_crop
-        const back = printing.image_urls?.back_normal ?? printing.image_urls?.back_art_crop
-        imageCache.set(card.scryfall_id, { front, back })
-        if (hoveredIdRef.current === card.scryfall_id) {
-          setPreviewFrontUrl(front ?? null)
-          setPreviewBackUrl(back ?? null)
-        }
-      })
-      .catch(() => {})
-  }, [imageCache])
+    setPreviewFrontUrl(card.image_urls.front ?? null)
+    setPreviewBackUrl(card.image_urls.back ?? null)
+  }, [])
 
   const onCardClick = useCallback((deckCard: DeckCard) => {
     const withDeckArt = (oracle: OracleCard): OracleCard =>
@@ -87,12 +57,11 @@ export function DeckPage() {
     const newFace = isSameCard && previewFace === 1 ? 0 : 1
     setHoveredCard(card)
     setPreviewFace(newFace)
-    const cached = imageCache.get(card.scryfall_id)
-    setPreviewFrontUrl((cached?.front ?? card.image_urls.front) ?? null)
-    setPreviewBackUrl((cached?.back ?? card.image_urls.back) ?? null)
-  }, [hoveredCard, previewFace, imageCache])
+    setPreviewFrontUrl(card.image_urls.front ?? null)
+    setPreviewBackUrl(card.image_urls.back ?? null)
+  }, [hoveredCard, previewFace])
 
-  useEffect(() => { cardCache.clear(); imageCache.clear() }, [deckId, cardCache, imageCache])
+  useEffect(() => { cardCache.clear() }, [deckId, cardCache])
 
   useEffect(() => {
     if (!deckId) return
