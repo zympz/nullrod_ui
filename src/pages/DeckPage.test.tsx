@@ -5,13 +5,13 @@ import { DeckPage } from './DeckPage'
 
 const mockGetDeck = vi.fn()
 const mockGetCardById = vi.fn()
-const mockSearchCardByName = vi.fn()
+const mockGetCardByScryfall = vi.fn()
 const mockFetchBatchPrices = vi.fn()
 
 vi.mock('../api/client', () => ({
   getDeck: (...args: unknown[]) => mockGetDeck(...args),
   getCardById: (...args: unknown[]) => mockGetCardById(...args),
-  searchCardByName: (...args: unknown[]) => mockSearchCardByName(...args),
+  getCardByScryfall: (...args: unknown[]) => mockGetCardByScryfall(...args),
   fetchBatchPrices: (...args: unknown[]) => mockFetchBatchPrices(...args),
 }))
 
@@ -85,7 +85,7 @@ const mockDeck = {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockSearchCardByName.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
+  mockGetCardByScryfall.mockResolvedValue({ image_urls: {} })
   mockGetCardById.mockResolvedValue(null)
   mockFetchBatchPrices.mockResolvedValue(new Map())
 })
@@ -218,12 +218,12 @@ describe('DeckPage', () => {
     mockGetDeck.mockResolvedValue(mockDeck)
     await act(async () => { renderDeckPage() })
 
-    mockSearchCardByName.mockClear()
+    mockGetCardByScryfall.mockClear()
     await act(async () => {
       fireEvent.mouseEnter(screen.getByText('Sol Ring').closest('div')!)
     })
 
-    expect(mockSearchCardByName).not.toHaveBeenCalled()
+    expect(mockGetCardByScryfall).not.toHaveBeenCalled()
   })
 
   it('clicking card name calls getCardById with oracle_id and shows detail modal', async () => {

@@ -2,18 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import type { Deck, DeckCard, DeckCardPrices } from '../types/deck'
 import type { OracleCard } from '../types/card'
-import { getDeck, getCardById, searchCardByName, fetchBatchPrices } from '../api/client'
+import { getDeck, getCardById, getCardByScryfall, fetchBatchPrices } from '../api/client'
 import { CardDetail } from '../components/CardDetail'
 import { PreviewPanel } from '../components/deck/PreviewPanel'
 import { MainboardGrid } from '../components/deck/MainboardGrid'
 import { CardZone } from '../components/deck/CardZone'
 import { DeckStats } from '../components/deck/DeckStats'
 import { SampleHand } from '../components/deck/SampleHand'
-import { frontFace } from '../utils/cardName'
 import {
   COMMANDER_FORMATS, cardPrice,
   getColorDistribution, getManaProduction, getManaCurve, getDeckAnalysis,
-  pickOracleCard,
 } from '../utils/deckUtils'
 import type { SortMode } from '../utils/deckUtils'
 import styles from './DeckPage.module.css'
@@ -95,25 +93,25 @@ export function DeckPage() {
     return () => { cancelled = true }
   }, [deck])
 
-  // Fetch banner art_crop for featured card
+  // Fetch banner + preview image for the featured card via scryfall endpoint (has real image URLs)
   useEffect(() => {
     if (!deck) return
     let cancelled = false
-    const featuredCard = deck.commanders[0] ?? deck.mainboard[0]
-    if (!featuredCard) return
-    searchCardByName(frontFace(featuredCard.name))
-      .then((res) => {
+    const featured = deck.commanders[0] ?? deck.mainboard[0]
+    if (!featured) return
+    getCardByScryfall(featured.scryfall_id)
+      .then((printing) => {
         if (cancelled) return
-        const match = pickOracleCard(featuredCard.name, res.results)
-        if (!match) return
-        cardCache.set(featuredCard.name, match)
-        const artCrop = match.image_urls?.art_crop
+        const artCrop = printing.image_urls?.art_crop
         if (artCrop) setBannerUrl(artCrop)
-        setPreviewFrontUrl(match.image_urls.normal ?? artCrop ?? null)
+        const frontUrl = printing.image_urls?.normal ?? artCrop ?? null
+        if (frontUrl) setPreviewFrontUrl(frontUrl)
+        const backUrl = printing.image_urls?.back_normal ?? printing.image_urls?.back_art_crop ?? null
+        if (backUrl) setPreviewBackUrl(backUrl)
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [deck, cardCache])
+  }, [deck])
 
   // Memoize derived data — only recomputes when deck changes, not on hover
   const allMainCards = useMemo(
