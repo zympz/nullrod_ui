@@ -32,13 +32,10 @@ describe('CardsPage', () => {
     mockSearchCardsList.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
   })
 
-  it('auto-searches with commander format on load', async () => {
+  it('does not auto-search on load with no params', () => {
     renderPage()
-    await waitFor(() => {
-      expect(mockSearchCards).toHaveBeenCalledWith(
-        expect.objectContaining({ format: 'commander' }),
-      )
-    })
+    expect(mockSearchCards).not.toHaveBeenCalled()
+    expect(screen.getByText(/Search for any Magic/)).toBeInTheDocument()
   })
 
   it('has search input and button', () => {
@@ -81,8 +78,9 @@ describe('CardsPage', () => {
     expect(screen.getByText(/^Filters/)).toBeInTheDocument()
   })
 
-  it('shows filters panel by default (format filter active)', async () => {
+  it('shows filters panel when toggled', async () => {
     renderPage()
+    fireEvent.click(screen.getByText(/^Filters/))
     expect(await screen.findByText('Apply Filters')).toBeInTheDocument()
   })
 

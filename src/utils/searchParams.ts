@@ -52,5 +52,8 @@ export function hasFilters(p: SearchParams): boolean {
 }
 
 export function hasSearchCriteria(p: SearchParams): boolean {
-  return !!(p.name || hasFilters(p))
+  return !!(
+    p.name || p.oracle_text || p.color?.length || p.color_identity?.length ||
+    p.type || p.cmc_min != null || p.cmc_max != null || p.keywords?.length
+  )
 }
