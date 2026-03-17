@@ -31,9 +31,11 @@ export function DeckPage() {
   const [pricesMap, setPricesMap] = useState<Map<string, DeckCardPrices>>(new Map())
   const cardCache = useRef(new Map<string, OracleCard>()).current
   const imageCache = useRef(new Map<string, { front?: string; back?: string }>()).current
+  const hoveredIdRef = useRef<string | null>(null)
 
   const onCardHover = useCallback((card: DeckCard | null) => {
     if (!card) return
+    hoveredIdRef.current = card.scryfall_id
     setHoveredCard(card)
     setPreviewFace(0)
 
@@ -59,13 +61,10 @@ export function DeckPage() {
         const front = printing.image_urls?.normal ?? printing.image_urls?.art_crop
         const back = printing.image_urls?.back_normal ?? printing.image_urls?.back_art_crop
         imageCache.set(card.scryfall_id, { front, back })
-        setHoveredCard((h) => {
-          if (h?.scryfall_id === card.scryfall_id) {
-            setPreviewFrontUrl(front ?? null)
-            setPreviewBackUrl(back ?? null)
-          }
-          return h
-        })
+        if (hoveredIdRef.current === card.scryfall_id) {
+          setPreviewFrontUrl(front ?? null)
+          setPreviewBackUrl(back ?? null)
+        }
       })
       .catch(() => {})
   }, [imageCache])
