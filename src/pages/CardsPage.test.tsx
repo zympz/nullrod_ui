@@ -6,12 +6,10 @@ import { mockBolt, mockGoyf } from '../test/fixtures'
 
 const mockSearchCards = vi.fn()
 const mockSearchCardsList = vi.fn()
-const mockGetCardPrintings = vi.fn()
 
 vi.mock('../api/client', () => ({
   searchCards: (...args: unknown[]) => mockSearchCards(...args),
   searchCardsList: (...args: unknown[]) => mockSearchCardsList(...args),
-  getCardPrintings: (...args: unknown[]) => mockGetCardPrintings(...args),
 }))
 
 vi.mock('../api/symbology', () => ({
@@ -30,10 +28,8 @@ describe('CardsPage', () => {
   beforeEach(() => {
     mockSearchCards.mockReset()
     mockSearchCardsList.mockReset()
-    mockGetCardPrintings.mockReset()
     mockSearchCards.mockResolvedValue({ results: [mockBolt, mockGoyf], total: 2, page: 1, page_size: 20 })
     mockSearchCardsList.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 20 })
-    mockGetCardPrintings.mockResolvedValue({ results: [], total: 0, page: 1, page_size: 1 })
   })
 
   it('auto-searches with commander format on load', async () => {
