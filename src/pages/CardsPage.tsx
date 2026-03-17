@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type { OracleCard, CardListItem, SearchParams } from '../types/card'
-import { searchCards, searchCardsList } from '../api/client'
+import { searchCards, searchCardsList, getCardPrintings } from '../api/client'
 import { SearchFilters } from '../components/SearchFilters'
 import { CardGrid } from '../components/CardGrid'
 import { CardList } from '../components/CardList'
@@ -36,9 +36,23 @@ export function CardsPage() {
         setTotal(res.total)
       } else {
         const res = await searchCards(p)
-        setResults(res.results)
-        setListItems([])
         setTotal(res.total)
+        setListItems([])
+        // Enrich cards with image URLs from printings (search endpoint returns empty image_urls)
+        const enriched = await Promise.all(
+          res.results.map(async (card) => {
+            if (card.image_urls.normal ?? card.image_urls.art_crop) return card
+            try {
+              const printings = await getCardPrintings(card.oracle_id, { page_size: 1 })
+              const p = printings.results[0]
+              if (!p) return card
+              return { ...card, image_urls: { ...card.image_urls, normal: p.image_urls.normal, art_crop: p.image_urls.art_crop } }
+            } catch {
+              return card
+            }
+          })
+        )
+        setResults(enriched)
       }
       setSearched(true)
     } catch (e) {
