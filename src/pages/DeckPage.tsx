@@ -73,8 +73,11 @@ export function DeckPage() {
         if (cancelled) return
         setDeck(d)
         const featured = d.commanders[0] ?? d.mainboard[0]
-        if (featured?.image_urls.front) setPreviewFrontUrl(featured.image_urls.front)
-        if (featured?.image_urls.back) setPreviewBackUrl(featured.image_urls.back)
+        if (featured) {
+          setHoveredCard(featured)
+          setPreviewFrontUrl(featured.image_urls.front ?? null)
+          setPreviewBackUrl(featured.image_urls.back ?? null)
+        }
       })
       .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load deck') })
     return () => { cancelled = true }
