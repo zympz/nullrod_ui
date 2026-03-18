@@ -44,7 +44,7 @@
 }
 
 .filterSelect {
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
@@ -52,6 +52,7 @@
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s;
+  min-width: 200px;
 }
 
 .filterSelect:focus {

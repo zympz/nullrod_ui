@@ -10,6 +10,24 @@ const PAGE_SIZE = 20
 
 const IDENTITY_OPTIONS = ['', 'W', 'U', 'B', 'R', 'G', 'WU', 'UB', 'BR', 'RG', 'GW', 'WB', 'UR', 'BG', 'RW', 'GU'] as const
 
+const IDENTITY_LABELS: Record<string, string> = {
+  W: 'White',
+  U: 'Blue',
+  B: 'Black',
+  R: 'Red',
+  G: 'Green',
+  WU: 'Azorius (W/U)',
+  UB: 'Dimir (U/B)',
+  BR: 'Rakdos (B/R)',
+  RG: 'Gruul (R/G)',
+  GW: 'Selesnya (G/W)',
+  WB: 'Orzhov (W/B)',
+  UR: 'Izzet (U/R)',
+  BG: 'Golgari (B/G)',
+  RW: 'Boros (R/W)',
+  GU: 'Simic (G/U)',
+}
+
 export function CombosPage() {
   const [combos, setCombos] = useState<ComboSummary[]>([])
   const [total, setTotal] = useState(0)
@@ -60,7 +78,7 @@ export function CombosPage() {
           >
             <option value="">All</option>
             {IDENTITY_OPTIONS.filter(Boolean).map((id) => (
-              <option key={id} value={id}>{id}</option>
+              <option key={id} value={id}>{IDENTITY_LABELS[id] ?? id}</option>
             ))}
           </select>
         </label>
