@@ -35,7 +35,7 @@ describe('CardsPage', () => {
   it('does not auto-search on load with no params', () => {
     renderPage()
     expect(mockSearchCards).not.toHaveBeenCalled()
-    expect(screen.getByText(/Search for any Magic/)).toBeInTheDocument()
+    expect(screen.getByText(/Search the card database/)).toBeInTheDocument()
   })
 
   it('has search input and button', () => {
