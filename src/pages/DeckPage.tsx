@@ -27,7 +27,12 @@ export function DeckPage() {
   const [hoveredCard, setHoveredCard] = useState<DeckCard | null>(null)
   const [previewFace, setPreviewFace] = useState(0)
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
-  const [sortMode, setSortMode] = useState<SortMode>('cmc')
+  const [sortMode, setSortMode] = useState<SortMode>(() => (localStorage.getItem('deck:sortMode') as SortMode) ?? 'cmc')
+
+  function handleSortMode(val: SortMode) {
+    setSortMode(val)
+    localStorage.setItem('deck:sortMode', val)
+  }
   const [showPrices, setShowPrices] = useState(() => localStorage.getItem('deck:showPrices') === 'true')
 
   function handleShowPrices(val: boolean) {
@@ -191,7 +196,7 @@ export function DeckPage() {
           <div className={styles.deckControls}>
             <label className={styles.sortLabel}>
               Sort By
-              <select className={styles.sortSelect} value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
+              <select className={styles.sortSelect} value={sortMode} onChange={(e) => handleSortMode(e.target.value as SortMode)}>
                 <option value="cmc">Mana Value</option>
                 <option value="name">Name</option>
                 <option value="price">Price</option>
