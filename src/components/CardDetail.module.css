@@ -91,7 +91,7 @@
 }
 
 .artFrame {
-  border-radius: var(--radius);
+  border-radius: 12px;
   overflow: hidden;
   background: var(--surface-2);
   aspect-ratio: 488 / 680;
@@ -105,7 +105,7 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .artEmpty {
