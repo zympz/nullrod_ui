@@ -68,6 +68,7 @@
   border-radius: 99px;
   padding: 2px 10px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .bracket_E {
@@ -103,9 +104,9 @@
 }
 
 .sectionLabel {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
