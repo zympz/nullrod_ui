@@ -45,7 +45,9 @@ export function CombosPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>Combos</h1>
-        <span className={styles.totalCount}>{total} combos</span>
+        <p className={styles.subtitle}>
+          {loading ? 'Loading…' : `${total.toLocaleString()} combos in the database`}
+        </p>
       </div>
 
       <div className={styles.filters}>
