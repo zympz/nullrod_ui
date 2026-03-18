@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import type { Deck, DeckCard, DeckCardPrices } from '../types/deck'
 import type { OracleCard } from '../types/card'
-import { getDeck, getCardById, getCardByScryfall, fetchBatchPrices } from '../api/client'
+import { getDeck, getCardById, getCardByScryfall, searchCardByName, fetchBatchPrices } from '../api/client'
 import { CardDetail } from '../components/CardDetail'
 import { PreviewPanel } from '../components/deck/PreviewPanel'
 import { MainboardGrid } from '../components/deck/MainboardGrid'
@@ -14,6 +14,7 @@ import {
   getColorDistribution, getManaProduction, getManaCurve, getDeckAnalysis,
 } from '../utils/deckUtils'
 import type { SortMode } from '../utils/deckUtils'
+import { frontFace } from '../utils/cardName'
 import styles from './DeckPage.module.css'
 
 export function DeckPage() {
@@ -45,10 +46,16 @@ export function DeckPage() {
         ? { ...oracle, image_urls: { normal: deckCard.image_urls.front, back_normal: deckCard.image_urls.back, art_crop: deckCard.image_urls.front, back_art_crop: deckCard.image_urls.back } }
         : oracle
 
-    const cached = cardCache.get(deckCard.oracle_id)
+    const cacheKey = deckCard.oracle_id ?? deckCard.name
+    const cached = cardCache.get(cacheKey)
     if (cached) { setSelectedCard(withDeckArt(cached)); return }
-    getCardById(deckCard.oracle_id)
-      .then((oracle) => { cardCache.set(deckCard.oracle_id, oracle); setSelectedCard(withDeckArt(oracle)) })
+
+    const fetch = deckCard.oracle_id
+      ? getCardById(deckCard.oracle_id)
+      : searchCardByName(frontFace(deckCard.name)).then((res) => res.results[0])
+
+    fetch
+      .then((oracle) => { if (oracle) { cardCache.set(cacheKey, oracle); setSelectedCard(withDeckArt(oracle)) } })
       .catch(() => {})
   }, [cardCache])
 
