@@ -17,7 +17,7 @@ interface TypeGroupBlockProps {
 
 export function TypeGroupBlock({ group, sortMode, showPrices, pricesMap, onCardClick, onCardHover, onCardFlip }: TypeGroupBlockProps) {
   const total = group.cards.reduce((s, c) => s + c.quantity, 0)
-  const sorted = sortCards(group.cards, sortMode)
+  const sorted = sortCards(group.cards, sortMode, pricesMap)
   return (
     <div className={styles.typeGroup}>
       <div className={styles.typeGroupHeader}>

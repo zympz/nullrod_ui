@@ -67,12 +67,12 @@ export function groupByType(cards: DeckCard[]): { label: string; cards: DeckCard
   return groupMainboard([], cards)
 }
 
-export function sortCards(cards: DeckCard[], mode: SortMode): DeckCard[] {
+export function sortCards(cards: DeckCard[], mode: SortMode, pricesMap?: Map<string, DeckCardPrices>): DeckCard[] {
   return [...cards].sort((a, b) => {
     if (mode === 'name') return frontFace(a.name).localeCompare(frontFace(b.name))
     if (mode === 'price') {
-      const pa = parseFloat(cardPrice(a) ?? '-1')
-      const pb = parseFloat(cardPrice(b) ?? '-1')
+      const pa = parseFloat(cardPrice(a, pricesMap) ?? '-1')
+      const pb = parseFloat(cardPrice(b, pricesMap) ?? '-1')
       return pb - pa
     }
     return a.cmc - b.cmc
