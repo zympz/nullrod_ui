@@ -185,7 +185,7 @@ export function DeckPage() {
         <div className={styles.deckContent}>
           <div className={styles.deckControls}>
             <label className={styles.sortLabel}>
-              Sort
+              Sort By
               <select className={styles.sortSelect} value={sortMode} onChange={(e) => setSortMode(e.target.value as SortMode)}>
                 <option value="cmc">Mana Value</option>
                 <option value="name">Name</option>
