@@ -31,14 +31,15 @@
 .brandName {
   font-size: 17px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--accent);
   letter-spacing: -0.02em;
 }
 
 .nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  height: 100%;
 }
 
 .link {
@@ -49,14 +50,35 @@
   padding: 6px 12px;
   border-radius: var(--radius);
   transition: color 0.15s, background 0.15s;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+  opacity: 0;
+  transition: opacity 0.15s;
 }
 
 .link:hover {
   color: var(--text);
-  background: var(--surface-2);
+  background: var(--accent-dim);
 }
 
 .active {
   color: var(--text) !important;
-  background: var(--surface-2);
+  background: transparent !important;
+}
+
+.active::after {
+  opacity: 1;
 }
