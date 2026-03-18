@@ -294,13 +294,13 @@
   text-transform: capitalize;
 }
 
-.leg_legal { background: rgba(34, 197, 94, 0.08); }
+.leg_legal { background: rgba(34, 197, 94, 0.10); border-left: 2px solid rgba(34, 197, 94, 0.5); }
 .leg_legal .legalityStatus { color: #22c55e; }
-.leg_not_legal { background: rgba(255, 255, 255, 0.03); }
+.leg_not_legal { background: transparent; opacity: 0.5; }
 .leg_not_legal .legalityStatus { color: var(--text-dim); }
-.leg_restricted { background: rgba(234, 179, 8, 0.08); }
+.leg_restricted { background: rgba(234, 179, 8, 0.10); border-left: 2px solid rgba(234, 179, 8, 0.5); }
 .leg_restricted .legalityStatus { color: #eab308; }
-.leg_banned { background: rgba(239, 68, 68, 0.08); }
+.leg_banned { background: rgba(239, 68, 68, 0.10); border-left: 2px solid rgba(239, 68, 68, 0.5); }
 .leg_banned .legalityStatus { color: #ef4444; }
 
 .rulings {
