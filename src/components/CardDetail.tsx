@@ -193,7 +193,7 @@ function CardFaceBlock({ face, separator }: { face: CardFace; separator: boolean
       <div className={styles.face}>
         <div className={styles.faceHeader}>
           <span className={styles.faceName}>{face.name}</span>
-          {face.mana_cost && <ManaCost cost={face.mana_cost} size={14} />}
+          {face.mana_cost && <ManaCost cost={face.mana_cost} size={16} />}
         </div>
         <div className={styles.faceType}>{face.type_line}</div>
         {face.oracle_text && (

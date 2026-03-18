@@ -26,7 +26,7 @@ export function ManaSymbol({ symbol, size = 18 }: ManaSymbolProps) {
         height={size}
         style={{
           display: 'inline-block',
-          verticalAlign: 'middle',
+          verticalAlign: '-0.15em',
           flexShrink: 0,
           borderRadius: '50%',
         }}
@@ -102,7 +102,7 @@ function InlineMana({ text }: { text: string }) {
     <>
       {parts.map((part, i) => {
         if (part.startsWith('{') && part.endsWith('}')) {
-          return <ManaSymbol key={i} symbol={part.slice(1, -1)} size={14} />
+          return <ManaSymbol key={i} symbol={part.slice(1, -1)} size={13} />
         }
         return <span key={i}>{part}</span>
       })}
