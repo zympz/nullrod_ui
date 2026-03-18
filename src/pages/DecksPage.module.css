@@ -113,7 +113,7 @@
   display: grid;
   grid-template-columns: 1fr 120px 1fr 80px;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 8px 16px;
   background: var(--surface-2);
   font-size: 11px;
   font-weight: 600;
@@ -126,9 +126,9 @@
   display: grid;
   grid-template-columns: 1fr 120px 1fr 80px;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 12px 16px;
   border-top: 1px solid var(--border);
-  transition: background 0.1s;
+  transition: background 0.12s;
   font-size: 13px;
   color: var(--text);
   align-items: center;
@@ -148,6 +148,8 @@
 .nameLink {
   color: var(--text);
   text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .nameLink:hover {
