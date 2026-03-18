@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest'
+import { vi } from 'vitest'
 
 const store: Record<string, string> = {}
 vi.stubGlobal('localStorage', {
