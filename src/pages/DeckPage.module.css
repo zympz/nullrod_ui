@@ -93,56 +93,136 @@
 .deckControls {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   justify-content: flex-end;
 }
 
-.sortLabel {
+.deckControls::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  margin-right: 4px;
+}
+
+.controlGroup {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-muted);
 }
 
-.sortSelect {
+.controlLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.segmented {
+  display: flex;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: var(--text);
-  font-size: 13px;
+  padding: 2px;
+  gap: 1px;
+}
+
+.segmentBtn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
   font-weight: 500;
-  padding: 4px 8px;
-  cursor: pointer;
-  outline: none;
   font-family: inherit;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
-.sortSelect:focus {
-  border-color: var(--accent);
+.segmentBtn:hover {
+  color: var(--text);
+  background: var(--surface-3);
 }
 
-.checkboxLabel {
+.segmentBtnActive {
+  background: var(--accent-dim);
+  color: var(--accent-hover);
+}
+
+.segmentBtnActive:hover {
+  background: var(--accent-dim);
+  color: var(--accent-hover);
+}
+
+.priceToggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 4px 8px 4px 10px;
   cursor: pointer;
-  user-select: none;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
-.checkbox {
-  accent-color: var(--accent);
-  width: 14px;
+.priceToggle:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.priceToggleOn {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+.priceToggleOn:hover {
+  border-color: var(--accent-hover);
+  color: var(--accent-hover);
+}
+
+.priceToggleDollar {
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.priceToggleTrack {
+  display: inline-flex;
+  width: 26px;
   height: 14px;
-  cursor: pointer;
+  background: var(--surface-3);
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  padding: 1px;
+  transition: background 0.2s, border-color 0.2s;
+  margin-left: 2px;
+}
+
+.priceToggleOn .priceToggleTrack {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+.priceToggleThumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.priceToggleOn .priceToggleThumb {
+  transform: translateX(12px);
+  background: var(--accent);
 }
 
 @media (max-width: 900px) {

@@ -194,18 +194,32 @@ export function DeckPage() {
 
         <div className={styles.deckContent}>
           <div className={styles.deckControls}>
-            <label className={styles.sortLabel}>
-              Sort By
-              <select className={styles.sortSelect} value={sortMode} onChange={(e) => handleSortMode(e.target.value as SortMode)}>
-                <option value="cmc">Mana Value</option>
-                <option value="name">Name</option>
-                <option value="price">Price</option>
-              </select>
-            </label>
-            <label className={styles.checkboxLabel}>
-              <input type="checkbox" checked={showPrices} onChange={(e) => handleShowPrices(e.target.checked)} className={styles.checkbox} />
+            <div className={styles.controlGroup}>
+              <span className={styles.controlLabel}>Sort By</span>
+              <div className={styles.segmented}>
+                {([['cmc', 'Mana Value'], ['name', 'Name'], ['price', 'Price']] as const).map(([val, label]) => (
+                  <button
+                    key={val}
+                    type="button"
+                    className={`${styles.segmentBtn} ${sortMode === val ? styles.segmentBtnActive : ''}`}
+                    onClick={() => handleSortMode(val)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              className={`${styles.priceToggle} ${showPrices ? styles.priceToggleOn : ''}`}
+              onClick={() => handleShowPrices(!showPrices)}
+            >
+              <span className={styles.priceToggleDollar}>$</span>
               Prices
-            </label>
+              <span className={styles.priceToggleTrack}>
+                <span className={styles.priceToggleThumb} />
+              </span>
+            </button>
           </div>
 
           {(deck.commanders.length > 0 || deck.mainboard.length > 0) && (
