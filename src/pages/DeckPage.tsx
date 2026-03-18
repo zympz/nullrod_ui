@@ -28,7 +28,12 @@ export function DeckPage() {
   const [previewFace, setPreviewFace] = useState(0)
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const [sortMode, setSortMode] = useState<SortMode>('cmc')
-  const [showPrices, setShowPrices] = useState(false)
+  const [showPrices, setShowPrices] = useState(() => localStorage.getItem('deck:showPrices') === 'true')
+
+  function handleShowPrices(val: boolean) {
+    setShowPrices(val)
+    localStorage.setItem('deck:showPrices', String(val))
+  }
   const [pricesMap, setPricesMap] = useState<Map<string, DeckCardPrices>>(new Map())
   const cardCache = useRef(new Map<string, OracleCard>()).current
 
@@ -193,7 +198,7 @@ export function DeckPage() {
               </select>
             </label>
             <label className={styles.checkboxLabel}>
-              <input type="checkbox" checked={showPrices} onChange={(e) => setShowPrices(e.target.checked)} className={styles.checkbox} />
+              <input type="checkbox" checked={showPrices} onChange={(e) => handleShowPrices(e.target.checked)} className={styles.checkbox} />
               Prices
             </label>
           </div>
