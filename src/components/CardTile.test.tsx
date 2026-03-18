@@ -30,7 +30,7 @@ describe('CardTile', () => {
   it('shows placeholder when no images', () => {
     const card = { ...mockBolt, image_urls: {} }
     renderTile(card)
-    expect(screen.getByText('No image')).toBeInTheDocument()
+    expect(screen.getByText('Lightning Bolt')).toBeInTheDocument()
   })
 
   it('calls onClick when clicked', async () => {

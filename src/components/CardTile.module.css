@@ -2,11 +2,11 @@
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border: none;
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
   text-align: left;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   cursor: pointer;
   width: 100%;
 }
@@ -14,6 +14,7 @@
 .tile:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border-color: var(--accent);
   z-index: 1;
 }
 
@@ -30,20 +31,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--surface-2);
   border-radius: 8px;
   color: var(--text-dim);
+  padding: 16px;
 }
 
 .artMissingIcon {
   width: 32px;
   height: 32px;
-  opacity: 0.4;
+  opacity: 0.3;
+  flex-shrink: 0;
 }
 
-.artMissing span {
-  font-size: 11px;
-  opacity: 0.5;
-  letter-spacing: 0.04em;
+.artMissingName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.4;
+  word-break: break-word;
 }

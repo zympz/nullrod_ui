@@ -20,7 +20,7 @@ export function CardTile({ card, onClick }: CardTileProps) {
             <circle cx="8.5" cy="8.5" r="1.5" />
             <path d="M21 15l-5-5L5 21" />
           </svg>
-          <span>No image</span>
+          <span className={styles.artMissingName}>{card.name}</span>
         </div>
       )}
     </button>
