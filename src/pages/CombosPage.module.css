@@ -38,7 +38,7 @@
   gap: 8px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -101,16 +101,23 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   text-decoration: none;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
 .comboCard:hover {
   border-color: var(--accent);
   border-left-color: var(--accent);
   background: var(--surface-2);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
+
+/* Left border tinted to bracket level for at-a-glance scanning */
+.comboCard:has(.bracket_E) { border-left-color: rgba(239, 68, 68, 0.5); }
+.comboCard:has(.bracket_S) { border-left-color: rgba(234, 179, 8, 0.5); }
+.comboCard:has(.bracket_R) { border-left-color: rgba(34, 197, 94, 0.5); }
+.comboCard:has(.bracket_P) { border-left-color: rgba(96, 165, 250, 0.5); }
 
 .comboHeader {
   display: flex;
