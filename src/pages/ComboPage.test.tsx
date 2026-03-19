@@ -9,6 +9,10 @@ vi.mock('../api/client', () => ({
   getCombo: (...args: unknown[]) => mockGetCombo(...args),
 }))
 
+vi.mock('../api/symbology', () => ({
+  loadSymbolMap: vi.fn(() => Promise.resolve(new Map())),
+}))
+
 const mockCombo = {
   id: 'combo-1',
   spellbook_id: '513-5034--46',

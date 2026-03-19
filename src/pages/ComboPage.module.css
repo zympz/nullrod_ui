@@ -66,6 +66,12 @@
   gap: 12px;
 }
 
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .bracketBadge {
   font-size: 10px;
   font-weight: 700;

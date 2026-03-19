@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ComboSummary } from '../types/combo'
 import { listCombos } from '../api/client'
-import { ColorPips } from '../components/ColorPips'
+import { ManaSymbol } from '../components/ManaSymbol'
 import { BRACKET_LABELS, identityColors } from '../constants'
 import styles from './CombosPage.module.css'
 
@@ -107,7 +107,11 @@ export function CombosPage() {
                   ))}
                 </div>
                 <div className={styles.comboMeta}>
-                  <ColorPips colors={identityColors(combo.identity)} size={14} />
+                  <span className={styles.identity}>
+                    {identityColors(combo.identity).map((c) => (
+                      <ManaSymbol key={c} symbol={c} size={14} />
+                    ))}
+                  </span>
                   <span className={styles.cardCount}>{combo.card_names.length} cards</span>
                 </div>
               </Link>

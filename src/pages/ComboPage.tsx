@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { Combo } from '../types/combo'
 import { getCombo } from '../api/client'
-import { ColorPips } from '../components/ColorPips'
-import { ManaCost, OracleText } from '../components/ManaSymbol'
+import { ManaCost, ManaSymbol, OracleText } from '../components/ManaSymbol'
 import { BRACKET_LABELS, identityColors } from '../constants'
 import styles from './ComboPage.module.css'
 
@@ -53,7 +52,11 @@ export function ComboPage() {
       <div className={styles.header}>
         <h1 className={styles.title}>{combo.card_names.join(' + ')}</h1>
         <div className={styles.headerMeta}>
-          <ColorPips colors={identityColors(combo.identity)} size={18} />
+          <span className={styles.identity}>
+            {identityColors(combo.identity).map((c) => (
+              <ManaSymbol key={c} symbol={c} size={18} />
+            ))}
+          </span>
           <span className={`${styles.bracketBadge} ${styles[`bracket_${combo.bracket_tag}`]}`}>
             {BRACKET_LABELS[combo.bracket_tag] ?? combo.bracket_tag}
           </span>

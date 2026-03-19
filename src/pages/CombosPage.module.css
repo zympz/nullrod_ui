@@ -190,6 +190,12 @@
   color: var(--text-dim);
 }
 
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .cardCount {
   color: var(--text-dim);
 }
