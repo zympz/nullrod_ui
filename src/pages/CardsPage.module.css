@@ -56,6 +56,10 @@
   color: var(--text-dim);
 }
 
+.searchInput:hover {
+  border-color: var(--text-dim);
+}
+
 .searchInput:focus {
   border-color: var(--accent);
   background: var(--surface-2);
