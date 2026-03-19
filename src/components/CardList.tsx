@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { CardListItem } from '../types/card'
 import { ManaCost } from './ManaSymbol'
-import { ColorPips } from './ColorPips'
 import styles from './CardList.module.css'
 
 interface CardListProps {
@@ -39,9 +38,6 @@ export function CardList({ cards, total, page, pageSize, onPageChange }: CardLis
               >
                 {card.name}
               </Link>
-              {card.color_identity && (
-                <ColorPips colors={card.color_identity} size={8} />
-              )}
             </span>
             <span className={styles.colType}>{card.type_line}</span>
             <span className={styles.colMana}>
