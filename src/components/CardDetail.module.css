@@ -255,6 +255,23 @@
   padding: 2px 10px;
 }
 
+.games {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.game {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px 10px;
+}
+
 .section {
   display: flex;
   flex-direction: column;

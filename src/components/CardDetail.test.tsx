@@ -72,8 +72,8 @@ describe('CardDetail', () => {
 
   it('renders games section', async () => {
     await renderDetail()
-    expect(screen.getByText('Games')).toBeInTheDocument()
-    expect(screen.getByText('paper')).toBeInTheDocument()
+    expect(screen.getByText('Available On')).toBeInTheDocument()
+    expect(screen.getByText('Paper')).toBeInTheDocument()
   })
 
   it('calls onClose when close button clicked', async () => {

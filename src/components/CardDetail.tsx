@@ -6,6 +6,14 @@ import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
 import { FORMAT_ORDER } from '../constants'
 import styles from './CardDetail.module.css'
 
+const GAME_LABEL: Record<string, string> = {
+  paper: 'Paper',
+  mtgo: 'MTGO',
+  arena: 'Arena',
+  astral: 'Astral',
+  shandalar: 'Shandalar',
+}
+
 interface CardDetailProps {
   card: OracleCard
   onClose: () => void
@@ -117,10 +125,10 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
             {/* Games */}
             {card.games.length > 0 && (
               <div className={styles.section}>
-                <div className={styles.sectionLabel}>Games</div>
-                <div className={styles.keywords}>
+                <div className={styles.sectionLabel}>Available On</div>
+                <div className={styles.games}>
                   {card.games.map((g) => (
-                    <span key={g} className={styles.keyword}>{g}</span>
+                    <span key={g} className={styles.game}>{GAME_LABEL[g] ?? g}</span>
                   ))}
                 </div>
               </div>
