@@ -6,6 +6,11 @@ import { ManaSymbol, ManaCost, OracleText } from './ManaSymbol'
 import { FORMAT_ORDER } from '../constants'
 import styles from './CardDetail.module.css'
 
+function formatRulingDate(iso: string): string {
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
 const GAME_LABEL: Record<string, string> = {
   paper: 'Paper',
   mtgo: 'MTGO',
@@ -157,7 +162,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
                 <div className={styles.rulings}>
                   {card.rulings.map((r, i) => (
                     <div key={i} className={styles.ruling}>
-                      <div className={styles.rulingDate}>{r.published_at}</div>
+                      <div className={styles.rulingDate}>{formatRulingDate(r.published_at)}</div>
                       <div className={styles.rulingText}>{r.comment}</div>
                     </div>
                   ))}
