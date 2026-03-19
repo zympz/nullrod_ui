@@ -949,7 +949,7 @@
   flex: 0 0 auto;
   width: calc((100% - 72px) / 7);
   min-width: 90px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   transition: transform 0.15s, box-shadow 0.15s;
 }
@@ -963,14 +963,14 @@
 .sampleCardImg {
   width: 100%;
   display: block;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .sampleCardPlaceholder {
   aspect-ratio: 488 / 680;
   background: var(--surface-2);
   border: 1px dashed var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;

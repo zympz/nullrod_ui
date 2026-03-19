@@ -146,7 +146,7 @@
 
 .cardImg {
   width: 100%;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   display: block;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
@@ -156,7 +156,7 @@
   aspect-ratio: 488 / 680;
   background: var(--surface-2);
   border: 1px dashed var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -129,6 +129,10 @@
   background: var(--surface-2);
 }
 
+.viewBtnActive:hover {
+  color: var(--accent-hover);
+}
+
 .loading {
   color: var(--text-muted);
   padding: 32px;

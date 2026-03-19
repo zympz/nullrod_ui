@@ -3,7 +3,7 @@
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   text-align: left;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
@@ -21,7 +21,7 @@
 .img {
   width: 100%;
   display: block;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .artMissing {
@@ -33,7 +33,7 @@
   justify-content: center;
   gap: 8px;
   background: var(--surface-2);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   color: var(--text-dim);
   padding: 16px;
 }
