@@ -6,6 +6,14 @@ import { ManaSymbol, ManaCost, OracleText } from '../components/ManaSymbol'
 import { FORMAT_ORDER } from '../constants'
 import styles from './CardPage.module.css'
 
+const GAME_LABEL: Record<string, string> = {
+  paper: 'Paper',
+  mtgo: 'MTGO',
+  arena: 'Arena',
+  astral: 'Astral',
+  shandalar: 'Shandalar',
+}
+
 const RARITY_COLORS: Record<string, string> = {
   common: 'var(--text-dim)',
   uncommon: '#94a3b8',
@@ -142,10 +150,10 @@ export function CardPage() {
 
             {card.games.length > 0 && (
               <div className={styles.section}>
-                <div className={styles.sectionLabel}>Games</div>
+                <div className={styles.sectionLabel}>Available On</div>
                 <div className={styles.pills}>
                   {card.games.map((g) => (
-                    <span key={g} className={styles.pill}>{g}</span>
+                    <span key={g} className={styles.gamePill}>{GAME_LABEL[g] ?? g}</span>
                   ))}
                 </div>
               </div>
