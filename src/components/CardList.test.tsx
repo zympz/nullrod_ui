@@ -33,11 +33,11 @@ describe('CardList', () => {
     expect(screen.getByText('Creature — Lhurgoyf')).toBeInTheDocument()
   })
 
-  it('renders CMC values', () => {
+  it('renders column headers', () => {
     renderList()
-    // CMC values appear in the list rows — use getAllByText since '1' may appear elsewhere
-    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Name')).toBeInTheDocument()
+    expect(screen.getByText('Type')).toBeInTheDocument()
+    expect(screen.getByText('Mana')).toBeInTheDocument()
   })
 
   it('shows empty state when no cards', () => {
