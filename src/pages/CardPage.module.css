@@ -462,11 +462,11 @@
 }
 
 .printingActive {
-  background: rgba(99, 179, 237, 0.06);
+  background: var(--accent-dim);
 }
 
 .printingActive:hover {
-  background: rgba(99, 179, 237, 0.1);
+  background: rgba(124, 109, 250, 0.2);
 }
 
 .printingSet {

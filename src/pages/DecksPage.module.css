@@ -66,6 +66,10 @@
   min-width: 0;
 }
 
+.importInput:hover {
+  border-color: var(--text-dim);
+}
+
 .importInput:focus {
   border-color: var(--accent);
 }

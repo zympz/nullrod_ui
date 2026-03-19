@@ -55,6 +55,10 @@
   min-width: 200px;
 }
 
+.filterSelect:hover {
+  border-color: var(--text-dim);
+}
+
 .filterSelect:focus {
   border-color: var(--accent);
 }

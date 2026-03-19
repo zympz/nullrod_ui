@@ -46,6 +46,11 @@
   transition: border-color 0.15s;
 }
 
+.input:hover,
+.select:hover {
+  border-color: var(--text-dim);
+}
+
 .input:focus,
 .select:focus {
   border-color: var(--accent);
