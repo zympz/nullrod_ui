@@ -19,7 +19,7 @@
 
 .header {
   display: grid;
-  grid-template-columns: 2fr 3fr auto;
+  grid-template-columns: 2fr 3fr 120px;
   gap: 16px;
   padding: 8px 16px;
   background: var(--surface-2);
@@ -32,12 +32,12 @@
 
 .row {
   display: grid;
-  grid-template-columns: 2fr 3fr auto;
+  grid-template-columns: 2fr 3fr 120px;
   gap: 16px;
   padding: 12px 16px;
   text-align: left;
   border-top: 1px solid var(--border);
-  transition: background 0.15s;
+  transition: background 0.15s, box-shadow 0.15s;
   font-size: 13px;
   color: var(--text);
   align-items: center;
@@ -45,12 +45,15 @@
 
 .row:hover {
   background: var(--surface-2);
+  box-shadow: -2px 0 0 var(--accent);
 }
 
 .colName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
 }
 
 .nameLink {
@@ -58,6 +61,11 @@
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .nameLink:hover {
@@ -69,6 +77,7 @@
   align-items: center;
   justify-content: flex-end;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 .colType {
@@ -82,7 +91,7 @@
 @media (max-width: 640px) {
   .header,
   .row {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 120px;
   }
 
   .colType {
