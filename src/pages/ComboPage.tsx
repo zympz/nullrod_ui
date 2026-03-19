@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import type { Combo } from '../types/combo'
 import { getCombo } from '../api/client'
 import { ManaCost, ManaSymbol, OracleText } from '../components/ManaSymbol'
@@ -69,7 +69,7 @@ export function ComboPage() {
           <div className={styles.sectionLabel}>Cards</div>
           <div className={styles.cardGrid}>
             {combo.uses.map((use) => (
-              <div key={use.card.oracle_id} className={styles.comboCardTile}>
+              <Link key={use.card.oracle_id} to={`/cards/${use.card.oracle_id}`} className={styles.comboCardTile}>
                 {use.card.image_url ? (
                   <img src={use.card.image_url} alt={use.card.name} className={styles.cardImg} />
                 ) : (
@@ -79,7 +79,7 @@ export function ComboPage() {
                   {use.zone_locations.join(', ')}
                   {use.must_be_commander && ' (Commander)'}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
